@@ -22,7 +22,7 @@
     "scripts": {
         "prepare": "husky install",
         "precommit": "lint-staged",
-        "type-check": "tsc -p tsconfig.lib.json",
+        "type-check": "tsc -p tsconfig.lib.json --noEmit && tsc -p tsconfig.spec.json",
         "format-check": "prettier --check .",
         "format": "prettier --write --list-different .",
         "lint": "eslint --ext .ts,.js .",

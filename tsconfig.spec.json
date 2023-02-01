@@ -3,7 +3,8 @@
     "compilerOptions": {
         "module": "commonjs",
         "types": ["jest", "node"],
-        "noImplicitAny": false
+        "noImplicitAny": false,
+        "noEmit": true
     },
-    "include": ["jest.config.ts", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"]
+    "include": ["**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"]
 }

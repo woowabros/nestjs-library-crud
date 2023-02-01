@@ -1,0 +1,200 @@
+import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
+import { plainToClass } from 'class-transformer';
+import { validate } from 'class-validator';
+import { Request } from 'express';
+import _ from 'lodash';
+import { Observable } from 'rxjs';
+import { BaseEntity } from 'typeorm';
+
+import { CustomSearchRequestOptions } from './custom-request.interceptor';
+import { RequestAbstractInterceptor } from '../abstract';
+import { Constants } from '../constants';
+import { CRUD_POLICY } from '../crud.policy';
+import { CreateParamsDto } from '../dto/params.dto';
+import { RequestSearchDto } from '../dto/request-search.dto';
+import { CrudOptions, FactoryOption, GROUP, Method, Sort } from '../interface';
+import { operatorBetween, operatorIn, operatorNull, operatorList, OperatorUnion } from '../interface/query-operation.interface';
+
+const method = Method.SEARCH;
+export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
+    class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
+            const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
+
+            const customSearchRequestOptions: CustomSearchRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+
+            const requestSearchDto = await this.validateBody(req.body);
+            req[Constants.CRUD_ROUTE_ARGS] = { requestSearchDto, relations: customSearchRequestOptions?.relations };
+
+            return next.handle();
+        }
+
+        async validateBody(body: unknown): Promise<RequestSearchDto<typeof crudOptions.entity>> {
+            const isObject = body !== null && typeof body === 'object';
+            if (!isObject) {
+                throw new UnprocessableEntityException('body should be object');
+            }
+
+            const requestSearchDto = plainToClass(RequestSearchDto<typeof crudOptions.entity>, body);
+            const searchOptions = crudOptions.routes?.[method] ?? {};
+
+            if ('select' in requestSearchDto) {
+                this.validateSelect(requestSearchDto.select);
+            }
+
+            if ('where' in requestSearchDto) {
+                await this.validateWhere(requestSearchDto.where);
+            }
+
+            if ('order' in requestSearchDto) {
+                this.validateOrder(requestSearchDto.order);
+            }
+
+            if ('withDeleted' in requestSearchDto) {
+                this.validateWithDeleted(requestSearchDto.withDeleted);
+            } else {
+                requestSearchDto.withDeleted = searchOptions.softDelete ?? (CRUD_POLICY[method].default?.softDeleted as boolean);
+            }
+
+            requestSearchDto.take =
+                'take' in requestSearchDto
+                    ? this.validateTake(requestSearchDto.take)
+                    : searchOptions.numberOfTake ?? (CRUD_POLICY[method].default?.numberOfTake as number);
+
+            return requestSearchDto;
+        }
+
+        validateSelect(select: RequestSearchDto<typeof crudOptions.entity>['select']): void {
+            if (!Array.isArray(select)) {
+                throw new UnprocessableEntityException('select must be array type');
+            }
+            const differenceKeys = _.difference(select, factoryOption.columns?.map((column) => column.name) ?? []);
+            if (differenceKeys.length > 0) {
+                throw new UnprocessableEntityException(`${differenceKeys.toLocaleString()} is unknown`);
+            }
+        }
+
+        async validateWhere(where: RequestSearchDto<typeof crudOptions.entity>['where']) {
+            const allowedKeys = new Set(['$and', '$or', '$not']);
+            const hasAllowedKeysInQuery =
+                where !== null && typeof where === 'object' && Object.keys(where).some((key) => allowedKeys.has(key));
+            if (!hasAllowedKeysInQuery) {
+                throw new UnprocessableEntityException('allows only $and, $or and $not as query key');
+            }
+
+            for (const [, queryFilter] of Object.entries(where)) {
+                await this.validateQueryFilter(queryFilter);
+            }
+        }
+
+        async validateQueryFilter(value: unknown): Promise<void> {
+            if (!Array.isArray(value) || value.length === 0) {
+                throw new UnprocessableEntityException('incorrect query format');
+            }
+            for (const queryFilter of value) {
+                const query: Record<string, unknown> = {};
+                if (typeof queryFilter !== 'object' || queryFilter == null) {
+                    throw new UnprocessableEntityException('incorrect queryFilter format');
+                }
+                for (const [key, operation] of Object.entries(queryFilter)) {
+                    if (typeof operation !== 'object' || operation == null || !('operator' in operation)) {
+                        throw new UnprocessableEntityException('operator is required');
+                    }
+                    if (!factoryOption.columns?.some((column) => column.name === key)) {
+                        throw new UnprocessableEntityException(`${key} is unknown key`);
+                    }
+                    switch (operation.operator) {
+                        case operatorBetween:
+                            if (
+                                !(
+                                    'operand' in operation &&
+                                    Array.isArray(operation.operand) &&
+                                    operation.operand.length === 2 &&
+                                    typeof operation.operand[0] === typeof operation.operand[1]
+                                )
+                            ) {
+                                throw new UnprocessableEntityException(`${operation.operator} allows only array length of 2`);
+                            }
+                            query[key] = operation.operand[0];
+                            break;
+                        case operatorIn:
+                            if (
+                                !(
+                                    'operand' in operation &&
+                                    Array.isArray(operation.operand) &&
+                                    operation.operand.length > 0 &&
+                                    operation.operand.every((operand) => typeof operand === typeof (operation.operand as any)[0])
+                                )
+                            ) {
+                                throw new UnprocessableEntityException(
+                                    `${operation.operator} allows only array contains item in identical type`,
+                                );
+                            }
+                            query[key] = operation.operand[0];
+                            break;
+                        case operatorNull:
+                            if ('operand' in operation) {
+                                throw new UnprocessableEntityException();
+                            }
+                            break;
+                        default:
+                            if (!('operand' in operation && operatorList.includes(operation.operator as OperatorUnion))) {
+                                throw new UnprocessableEntityException(`${operation.operator} is not support operation type`);
+                            }
+                            query[key] = operation.operand;
+                    }
+                }
+
+                const transformed = plainToClass(
+                    CreateParamsDto(crudOptions.entity, Object.keys(query) as unknown as Array<keyof BaseEntity>),
+                    query,
+                );
+                const errorList = await validate(transformed, {
+                    groups: [GROUP.SEARCH],
+                    whitelist: true,
+                    forbidNonWhitelisted: true,
+                    stopAtFirstError: true,
+                });
+
+                if (errorList.length > 0) {
+                    throw new UnprocessableEntityException(errorList);
+                }
+            }
+        }
+
+        validateOrder(order: RequestSearchDto<typeof crudOptions.entity>['order']): void {
+            if (typeof order !== 'object') {
+                throw new UnprocessableEntityException('order must be object type');
+            }
+
+            const sortOptions = Object.values(Sort);
+            for (const [key, sort] of Object.entries(order)) {
+                if (!factoryOption.columns?.some((column) => column.name === key)) {
+                    throw new UnprocessableEntityException(`${key} is unknown key`);
+                }
+                if (!sortOptions.includes(sort)) {
+                    throw new UnprocessableEntityException(`${sort} is unknown Order Type`);
+                }
+            }
+        }
+
+        validateWithDeleted(withDeleted: RequestSearchDto<typeof crudOptions.entity>['withDeleted']): void {
+            if (typeof withDeleted !== 'boolean') {
+                throw new UnprocessableEntityException('withDeleted must be boolean type');
+            }
+        }
+
+        validateTake(take: RequestSearchDto<typeof crudOptions.entity>['take']): number | undefined {
+            if (take == null) {
+                throw new UnprocessableEntityException('take must be positive number type');
+            }
+            const takeNumber = +take;
+            if (!Number.isInteger(takeNumber) || takeNumber < 1) {
+                throw new UnprocessableEntityException('take must be positive number type');
+            }
+            return takeNumber;
+        }
+    }
+
+    return mixin(MixinInterceptor);
+}

@@ -1,0 +1,122 @@
+import { HttpStatus, INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import _ from 'lodash';
+import request from 'supertest';
+
+import { CustomEntity } from './custom-entity.entity';
+import { CustomEntityModule } from './custom-entity.module';
+import { CustomEntityService } from './custom-entity.service';
+
+describe('CustomEntity - Search', () => {
+    let app: INestApplication;
+    let service: CustomEntityService;
+
+    beforeEach(async () => {
+        const moduleFixture: TestingModule = await Test.createTestingModule({
+            imports: [
+                CustomEntityModule,
+                TypeOrmModule.forRoot({
+                    type: 'sqlite',
+                    database: ':memory:',
+                    entities: [CustomEntity],
+                    synchronize: true,
+                    logging: true,
+                    logger: 'file',
+                }),
+            ],
+        }).compile();
+        app = moduleFixture.createNestApplication();
+
+        service = moduleFixture.get<CustomEntityService>(CustomEntityService);
+        await Promise.all(
+            _.range(100).map((number) =>
+                service.getRepository.save(service.getRepository.create({ uuid: `${number}`, name: `name-${number}` })),
+            ),
+        );
+
+        await service.getRepository.save(service.getRepository.create({ uuid: 'test' }));
+        await app.init();
+    });
+
+    afterAll(async () => {
+        if (app) {
+            await app.close();
+        }
+    });
+
+    it('should be provided /search', async () => {
+        const routerPathList = app
+            .getHttpServer()
+            // eslint-disable-next-line @typescript-eslint/ban-types
+            ._events.request._router.stack.reduce((list: Record<string, string[]>, r: { route: { path: string; methods: {} } }) => {
+                if (r.route?.path) {
+                    for (const method of Object.keys(r.route.methods)) {
+                        list[method] = list[method] ?? [];
+                        list[method].push(r.route.path);
+                    }
+                }
+                return list;
+            }, {});
+        expect(routerPathList.post).toEqual(expect.arrayContaining(['/base/search']));
+    });
+
+    describe('SEARCH', () => {
+        it('should return only one entity', async () => {
+            const uuid = '12';
+            const response = await request(app.getHttpServer())
+                .post('/base/search')
+                .send({ where: { $and: [{ uuid: { operator: '=', operand: uuid } }] } });
+            expect(response.statusCode).toEqual(HttpStatus.OK);
+            expect(response.body.data).toHaveLength(1);
+            expect(response.body.data[0]).toEqual({
+                uuid,
+                name: 'name-12',
+                descriptions: null,
+                deletedAt: null,
+            });
+
+            const responseSelectedName = await request(app.getHttpServer())
+                .post('/base/search')
+                .send({ select: ['uuid', 'name'], where: { $and: [{ uuid: { operator: '=', operand: uuid } }] } });
+            expect(responseSelectedName.statusCode).toEqual(HttpStatus.OK);
+            expect(responseSelectedName.body.data).toHaveLength(1);
+            expect(responseSelectedName.body.data[0]).toEqual({
+                uuid,
+                name: 'name-12',
+            });
+        });
+        it('should return multiple entities', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/base/search')
+                .send({ where: { $or: [{ uuid: { operator: '=', operand: '1' } }, { uuid: { operator: '=', operand: '10' } }] } });
+            expect(response.statusCode).toEqual(HttpStatus.OK);
+            expect(response.body.data).toHaveLength(2);
+            expect(response.body.data.map((d: { uuid: string }) => d.uuid)).toEqual(['1', '10']);
+        });
+
+        it('should return entities filtered by null', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/base/search')
+                .send({
+                    where: {
+                        $and: [{ name: { operator: 'NULL' } }],
+                    },
+                });
+            expect(response.statusCode).toEqual(HttpStatus.OK);
+            expect(response.body.data).toHaveLength(1);
+            expect(response.body.data[0].name).toBeNull();
+
+            const responseNotNull = await request(app.getHttpServer())
+                .post('/base/search')
+                .send({
+                    where: {
+                        $not: [{ name: { operator: 'NULL' } }],
+                    },
+                });
+            expect(responseNotNull.statusCode).toEqual(HttpStatus.OK);
+            expect(responseNotNull.body.data[0].name).not.toBeNull();
+            expect(responseNotNull.body.data.length).toBeGreaterThan(10);
+        });
+    });
+});

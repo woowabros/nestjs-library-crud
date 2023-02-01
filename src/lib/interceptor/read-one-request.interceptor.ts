@@ -6,7 +6,7 @@ import _ from 'lodash';
 import QueryString from 'qs';
 import { Observable } from 'rxjs';
 
-import { CustomRequestOptions } from './custom-request.interceptor';
+import { CustomReadOneRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
@@ -20,24 +20,24 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const readOneOptions = crudOptions.routes?.[method] ?? {};
 
-            const customRequestOption: CustomRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+            const customReadOneRequestOptions: CustomReadOneRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
 
             const fieldsByRequest = this.checkFields(req.query?.fields);
 
-            const softDeleted = _.isBoolean(customRequestOption?.softDeleted)
-                ? customRequestOption.softDeleted
+            const softDeleted = _.isBoolean(customReadOneRequestOptions?.softDeleted)
+                ? customReadOneRequestOptions.softDeleted
                 : crudOptions.routes?.[method]?.softDelete ?? (CRUD_POLICY[method].default?.softDelete as boolean);
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);
 
             const crudReadOneRequest: CrudReadOneRequest<typeof crudOptions.entity> = {
                 params,
-                fields: this.getFields(customRequestOption?.fields, fieldsByRequest),
+                fields: this.getFields(customReadOneRequestOptions?.fields, fieldsByRequest),
                 softDeleted,
                 options: {
                     response: readOneOptions.response ?? CRUD_POLICY[method].response,
                 },
-                relations: this.getRelations(customRequestOption),
+                relations: this.getRelations(customReadOneRequestOptions),
             };
             req[Constants.CRUD_ROUTE_ARGS] = crudReadOneRequest;
 
@@ -72,9 +72,9 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             return requestFields.fields;
         }
 
-        getRelations(customRequestOption: CustomRequestOptions): string[] | undefined {
-            if (Array.isArray(customRequestOption?.relations)) {
-                return customRequestOption.relations;
+        getRelations(customReadOneRequestOptions: CustomReadOneRequestOptions): string[] | undefined {
+            if (Array.isArray(customReadOneRequestOptions?.relations)) {
+                return customReadOneRequestOptions.relations;
             }
             if (crudOptions.routes?.[method]?.relations === false) {
                 return [];

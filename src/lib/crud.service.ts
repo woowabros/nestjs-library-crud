@@ -1,15 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
-import {
-    BaseEntity,
-    Brackets,
-    DeepPartial,
-    FindOptionsSelect,
-    FindOptionsWhere,
-    Repository,
-    SelectQueryBuilder,
-    WhereExpressionBuilder,
-} from 'typeorm';
+import { BaseEntity, DeepPartial, FindOptionsSelect, FindOptionsWhere, LessThan, MoreThan, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CrudAbstractService, CrudResponseType } from './abstract/crud.abstract.service';
 import { CRUD_POLICY } from './crud.policy';
@@ -234,18 +225,18 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
         const pagination: PaginationCursorDto = crudReadManyRequest.pagination;
         const limit = crudReadManyRequest.numberOfTake;
 
-        const entities = pagination.token
-            ? await this.getEntitiesByToken(crudReadManyRequest)
-            : await this.repository.find({
-                  where: crudReadManyRequest.query as FindOptionsWhere<T>,
-                  withDeleted: crudReadManyRequest.softDeleted,
-                  take: limit,
-                  order: crudReadManyRequest.primaryKeys.reduce(
-                      (sort, primaryKey) => ({ ...sort, [primaryKey.name]: crudReadManyRequest.sort }),
-                      {},
-                  ),
-                  relations: this.getRelation(crudReadManyRequest.relations),
-              });
+        const entities = await this.repository.find({
+            where: pagination.token
+                ? this.paginateCursorWhereByToken(pagination, crudReadManyRequest.sort)
+                : (crudReadManyRequest.query as FindOptionsWhere<T>),
+            withDeleted: crudReadManyRequest.softDeleted,
+            take: limit,
+            order: crudReadManyRequest.primaryKeys.reduce(
+                (sort, primaryKey) => ({ ...sort, [primaryKey.name]: crudReadManyRequest.sort }),
+                {},
+            ),
+            relations: this.getRelation(crudReadManyRequest.relations),
+        });
         const lastEntity = entities[entities.length - 1];
         const nextCursor = PaginationHelper.serialize(
             _.pick(
@@ -260,46 +251,15 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
         };
     }
 
-    private getEntitiesByToken(crudReadManyRequest: CrudReadManyRequest<T>): Promise<T[]> {
-        if (crudReadManyRequest.pagination.type !== PaginationType.CURSOR) {
-            throw new TypeError('use only cursor pagination');
-        }
-        const pagination: PaginationCursorDto = crudReadManyRequest.pagination;
-        const queryBuilder = new SelectQueryBuilder<T>(this.repository.createQueryBuilder());
-        const relations = this.getRelation(crudReadManyRequest.relations);
-        // FIXME: queryBuilder needs to build query including JOIN
-        for (const relation of relations) {
-            queryBuilder.relation(relation);
-        }
-        queryBuilder.andWhere(
-            new Brackets((qb: WhereExpressionBuilder) => {
-                const query = PaginationHelper.deserialize(pagination.query);
-                const lastObject = PaginationHelper.deserialize(pagination.token);
+    private paginateCursorWhereByToken(pagination: PaginationCursorDto, sort: Sort): FindOptionsWhere<T> {
+        const query = PaginationHelper.deserialize(pagination.query);
+        const lastObject = PaginationHelper.deserialize(pagination.token);
 
-                for (const key of Object.keys(query)) {
-                    qb.andWhere(`${key} = :${key}`, query);
-                }
-
-                let preWhere: string | undefined;
-                for (const primaryKey of crudReadManyRequest.primaryKeys) {
-                    const operator = crudReadManyRequest.sort === Sort.DESC ? '<' : '>';
-                    qb.andWhere(`${primaryKey.name} ${operator} :${primaryKey.name}`, lastObject);
-                    if (preWhere) {
-                        qb.orWhere(preWhere, lastObject);
-                    }
-                    preWhere = `${primaryKey.name} = :${primaryKey.name}`;
-                }
-            }),
-        );
-        if (crudReadManyRequest.softDeleted) {
-            queryBuilder.softDelete();
+        const operator = sort === Sort.DESC ? LessThan : MoreThan;
+        for (const [key, value] of Object.entries(lastObject)) {
+            query[key] = operator(value);
         }
-        queryBuilder.take(crudReadManyRequest.numberOfTake);
-        queryBuilder.orderBy(
-            crudReadManyRequest.primaryKeys.reduce((sort, primaryKey) => ({ ...sort, [primaryKey.name]: crudReadManyRequest.sort }), {}),
-        );
-
-        return queryBuilder.getMany();
+        return query as FindOptionsWhere<T>;
     }
 
     private async paginateOffset(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {

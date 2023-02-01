@@ -193,26 +193,25 @@ describe('Relation Entities Read', () => {
             .query({ nextCursor: commentListBody.metadata.nextCursor })
             .expect(HttpStatus.OK);
 
-        // TODO: read-many에서 queryBuilder를 사용하는 경우에도 relation이 제공되어야 한다.
         expect(commentListBodyNext.data).toHaveLength(1);
-        // for (const comment of commentListBodyNext.data) {
-        //     expect(comment).toEqual({
-        //         id: expect.any(Number),
-        //         deletedAt: null,
-        //         createdAt: expect.any(String),
-        //         lastModifiedAt: expect.any(String),
-        //         questionId: questionBody.id,
-        //         message: expect.any(String),
-        //         writerId: expect.any(Number),
-        //         writer: {
-        //             name: comment.writerId === writer1Body.id ? writer1Body.name : writer2Body.name,
-        //             deletedAt: null,
-        //             id: comment.writerId,
-        //             createdAt: comment.writerId === writer1Body.id ? writer1Body.createdAt : writer2Body.createdAt,
-        //             lastModifiedAt: comment.writerId === writer1Body.id ? writer1Body.lastModifiedAt : writer2Body.lastModifiedAt,
-        //         },
-        //     });
-        // }
+        for (const comment of commentListBodyNext.data) {
+            expect(comment).toEqual({
+                id: expect.any(Number),
+                deletedAt: null,
+                createdAt: expect.any(String),
+                lastModifiedAt: expect.any(String),
+                questionId: questionBody.id,
+                message: expect.any(String),
+                writerId: expect.any(Number),
+                writer: {
+                    name: comment.writerId === writer1Body.id ? writer1Body.name : writer2Body.name,
+                    deletedAt: null,
+                    id: comment.writerId,
+                    createdAt: comment.writerId === writer1Body.id ? writer1Body.createdAt : writer2Body.createdAt,
+                    lastModifiedAt: comment.writerId === writer1Body.id ? writer1Body.lastModifiedAt : writer2Body.lastModifiedAt,
+                },
+            });
+        }
 
         const { body: commentBody } = await request(app.getHttpServer())
             .get(`/comment/${commentListBody.data[0].id}`)

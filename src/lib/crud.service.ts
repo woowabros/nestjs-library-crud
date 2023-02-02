@@ -44,7 +44,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
         const { requestSearchDto, relations } = crudSearchRequest;
         const where =
             Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
-                ? requestSearchDto.where?.map((queryFilter) => TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter))
+                ? requestSearchDto.where.map((queryFilter) => TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter))
                 : undefined;
 
         const data = await this.repository.find({

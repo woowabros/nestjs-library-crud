@@ -19,6 +19,10 @@
         "Swagger",
         "Decorator"
     ],
+    "files": [
+        "dist",
+        "README.md"
+    ],
     "scripts": {
         "prepare": "husky install",
         "precommit": "lint-staged",
@@ -27,7 +31,8 @@
         "format": "prettier --write --list-different .",
         "lint": "eslint --ext .ts,.js .",
         "test": "jest --config=./jest.config.ts",
-        "build": "tsc -p tsconfig.lib.json"
+        "build": "tsc -p tsconfig.lib.json",
+        "release": "release-it"
     },
     "config": {
         "commitizen": {
@@ -35,9 +40,9 @@
         }
     },
     "dependencies": {
-        "@nestjs/platform-express": "^9.0.0",
         "@nestjs/common": "^9.2.1",
         "@nestjs/core": "^9.2.1",
+        "@nestjs/platform-express": "^9.0.0",
         "@nestjs/swagger": "^6.1.4",
         "@nestjs/typeorm": "^9.0.1",
         "class-transformer": "^0.5.1",
@@ -77,6 +82,7 @@
         "jsonc-eslint-parser": "^2.1.0",
         "lint-staged": "^13.0.3",
         "prettier": "^2.6.2",
+        "release-it": "^15.6.0",
         "sqlite3": "^5.1.2",
         "supertest": "^6.3.1",
         "ts-jest": "28.0.5",

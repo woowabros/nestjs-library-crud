@@ -4,7 +4,7 @@ export class PaginationHelper {
         return Buffer.from(JSON.stringify(entity)).toString(encoding);
     }
 
-    static deserialize(token?: string): Record<string, string> {
+    static deserialize(token?: string): Record<string, unknown> {
         if (!token) {
             return {};
         }

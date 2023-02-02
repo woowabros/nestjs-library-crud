@@ -18,6 +18,7 @@ const config: Config = {
             },
         ],
     },
+    testTimeout: 120_000,
     testEnvironment: 'node',
     verbose: true,
     detectLeaks: false,

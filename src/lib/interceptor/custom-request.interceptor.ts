@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { Constants } from '../constants';
 
-export interface CustomRequestOptions {
+export interface CustomReadOneRequestOptions {
     fields?: string[];
     softDeleted?: boolean;
     relations?: string[];
@@ -29,8 +29,8 @@ export class CustomRequestInterceptor implements NestInterceptor {
 
     /**
      * @description
-     * [KR] 이 메소드를 오버라이드 하여, Request를 수정할 수 있습니다. 각 메소드에서 제공하는 Options을 통해 제어할 수 있습니다.
-     * [EN] override this method.
+     * [KR] 이 메소드를 오버라이드 하여, Request를 수정할 수 있습니다. 각 메소드에서 제공하는 Options을 통해 추가로 제어할 수 있습니다.
+     * [EN] modify request by override this method. If exists requestOption interface by method, Additional control.
      * @example
      * class MyAuthInterceptor extends CrudCustomRequestInterceptor {
      *   constructor(authService: AuthServer) {}
@@ -41,8 +41,11 @@ export class CustomRequestInterceptor implements NestInterceptor {
      *   }
      * }
      */
-    // TODO: 메소드 마다 CustomRequestOptions 인터페이스 분리하기
-    protected async overrideOptions(_req: Request): Promise<CustomRequestOptions | undefined> {
+    protected async overrideOptions(
+        _req: Request,
+    ): Promise<
+        CustomReadOneRequestOptions | CustomReadManyRequestOptions | CustomDeleteRequestOptions | CustomSearchRequestOptions | undefined
+    > {
         return;
     }
 }

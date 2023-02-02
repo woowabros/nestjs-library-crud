@@ -5,7 +5,7 @@ import { Request } from 'express';
 import _ from 'lodash';
 import { Observable } from 'rxjs';
 
-import { CustomRequestOptions } from './custom-request.interceptor';
+import { CustomReadManyRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
@@ -20,7 +20,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const readManyOptions = crudOptions.routes?.[method] ?? {};
 
-            const customRequestOption: CustomRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+            const customReadManyRequestOptions: CustomReadManyRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
             const paginationType = (readManyOptions.paginationType ?? CRUD_POLICY[method].default?.paginationType) as PaginationType;
 
             const pagination = this.getPaginationRequest(paginationType, req.query);
@@ -35,8 +35,8 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 return this.validateQuery(req.query);
             })();
 
-            const softDeleted = _.isBoolean(customRequestOption?.softDeleted)
-                ? customRequestOption.softDeleted
+            const softDeleted = _.isBoolean(customReadManyRequestOptions?.softDeleted)
+                ? customReadManyRequestOptions.softDeleted
                 : crudOptions.routes?.[method]?.softDelete ?? (CRUD_POLICY[method].default?.softDelete as boolean);
 
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = {
@@ -45,7 +45,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 numberOfTake: readManyOptions.numberOfTake ?? (CRUD_POLICY[method].default?.numberOfTake as number),
                 query,
                 primaryKeys: factoryOption.primaryKeys ?? [],
-                relations: this.getRelations(customRequestOption),
+                relations: this.getRelations(customReadManyRequestOptions),
                 softDeleted,
             };
 
@@ -86,9 +86,9 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             return transformed;
         }
 
-        getRelations(customRequestOption: CustomRequestOptions): string[] | undefined {
-            if (Array.isArray(customRequestOption?.relations)) {
-                return customRequestOption.relations;
+        getRelations(customReadManyRequestOptions: CustomReadManyRequestOptions): string[] | undefined {
+            if (Array.isArray(customReadManyRequestOptions?.relations)) {
+                return customReadManyRequestOptions.relations;
             }
             if (crudOptions.routes?.[method]?.relations === false) {
                 return [];

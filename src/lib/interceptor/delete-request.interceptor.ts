@@ -2,7 +2,7 @@ import { CallHandler, ExecutionContext, mixin, NestInterceptor } from '@nestjs/c
 import _ from 'lodash';
 import { Observable } from 'rxjs';
 
-import { CustomRequestOptions } from './custom-request.interceptor';
+import { CustomDeleteRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
@@ -14,10 +14,10 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest();
             const deleteOptions = crudOptions.routes?.[method] ?? {};
-            const customRequestOption: CustomRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+            const customDeleteRequestOptions: CustomDeleteRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
 
-            const softDeleted = _.isBoolean(customRequestOption?.softDeleted)
-                ? customRequestOption.softDeleted
+            const softDeleted = _.isBoolean(customDeleteRequestOptions?.softDeleted)
+                ? customDeleteRequestOptions.softDeleted
                 : deleteOptions.softDelete ?? (CRUD_POLICY[method].default?.softDeleted as boolean);
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);

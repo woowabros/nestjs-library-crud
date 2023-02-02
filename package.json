@@ -23,6 +23,10 @@
         "dist",
         "README.md"
     ],
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org"
+    },
     "scripts": {
         "prepare": "husky install",
         "precommit": "lint-staged",

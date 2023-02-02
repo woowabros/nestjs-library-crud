@@ -62,21 +62,38 @@ describe('Relation Entities Search', () => {
             .expect(HttpStatus.CREATED);
 
         // Assert response of Search
-        const searchQuestionResponse = await request(app.getHttpServer())
+        const { body: searchQuestionResponseBody } = await request(app.getHttpServer())
             .post('/question/search')
             .send({
-                where: { $and: [{ title: { operator: 'LIKE', operand: 'Question Title' } }] },
-            });
+                where: [{ title: { operator: 'LIKE', operand: 'Question Title' } }],
+            })
+            .expect(HttpStatus.OK);
 
-        expect(searchQuestionResponse.status).toEqual(HttpStatus.OK);
-        expect(searchQuestionResponse.body.data).toHaveLength(1);
+        expect(searchQuestionResponseBody.data).toHaveLength(1);
 
-        // TODO: search에서 queryBuilder를 사용하는 경우에도 relation이 제공되어야 한다.
-        // expect(searchQuestionResponse.body.data[0]).toEqual(
-        //     expect.objectContaining({
-        //         writer: { name: 'writer#1' },
-        //         category: { name: 'Category#1' },
-        //     }),
-        // );
+        expect(searchQuestionResponseBody.data[0]).toEqual({
+            id: questionBody.id,
+            deletedAt: null,
+            createdAt: questionBody.createdAt,
+            lastModifiedAt: questionBody.lastModifiedAt,
+            categoryId: questionBody.categoryId,
+            writerId: questionBody.writerId,
+            title: questionBody.title,
+            content: questionBody.content,
+            category: {
+                id: categoryBody.id,
+                deletedAt: null,
+                createdAt: categoryBody.createdAt,
+                lastModifiedAt: categoryBody.lastModifiedAt,
+                name: categoryBody.name,
+            },
+            writer: {
+                id: writer1Body.id,
+                deletedAt: null,
+                createdAt: writer1Body.createdAt,
+                lastModifiedAt: writer1Body.lastModifiedAt,
+                name: writer1Body.name,
+            },
+        });
     });
 });

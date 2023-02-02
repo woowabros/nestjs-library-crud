@@ -43,7 +43,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             }
 
             if ('where' in requestSearchDto) {
-                await this.validateWhere(requestSearchDto.where);
+                await this.validateQueryFilterList(requestSearchDto.where);
             }
 
             if ('order' in requestSearchDto) {
@@ -74,20 +74,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             }
         }
 
-        async validateWhere(where: RequestSearchDto<typeof crudOptions.entity>['where']) {
-            const allowedKeys = new Set(['$and', '$or', '$not']);
-            const hasAllowedKeysInQuery =
-                where !== null && typeof where === 'object' && Object.keys(where).some((key) => allowedKeys.has(key));
-            if (!hasAllowedKeysInQuery) {
-                throw new UnprocessableEntityException('allows only $and, $or and $not as query key');
-            }
-
-            for (const [, queryFilter] of Object.entries(where)) {
-                await this.validateQueryFilter(queryFilter);
-            }
-        }
-
-        async validateQueryFilter(value: unknown): Promise<void> {
+        async validateQueryFilterList(value: unknown): Promise<void> {
             if (!Array.isArray(value) || value.length === 0) {
                 throw new UnprocessableEntityException('incorrect query format');
             }
@@ -102,6 +89,10 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     }
                     if (!factoryOption.columns?.some((column) => column.name === key)) {
                         throw new UnprocessableEntityException(`${key} is unknown key`);
+                    }
+
+                    if ('not' in operation && typeof operation.not !== 'boolean') {
+                        throw new UnprocessableEntityException('Type `not` should be Boolean type');
                     }
                     switch (operation.operator) {
                         case operatorBetween:

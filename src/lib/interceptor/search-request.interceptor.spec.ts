@@ -64,27 +64,57 @@ describe('SearchRequestInterceptor', () => {
         it('should validate entity column name', async () => {
             await expect(
                 interceptor.validateBody({
-                    where: { $and: [{ unknown: { operator: '=', operand: 7 }, col3: { operator: '>', operand: 3 } }] },
+                    where: [{ unknown: { operator: '=', operand: 7 }, col3: { operator: '>', operand: 3 } }],
                 }),
             ).rejects.toThrow(UnprocessableEntityException);
         });
 
+        it('should validate not option', async () => {
+            expect(
+                await interceptor.validateBody({
+                    where: [{ col2: { operator: '=', operand: 7 }, col3: { operator: '>', operand: 3 } }],
+                }),
+            ).toEqual({
+                where: [{ col2: { operator: '=', operand: 7 }, col3: { operator: '>', operand: 3 } }],
+                take: 20,
+                withDeleted: false,
+            });
+
+            await expect(
+                interceptor.validateBody({
+                    where: [{ col2: { operator: '=', operand: 7, not: 1 }, col3: { operator: '>', operand: 3 } }],
+                }),
+            ).rejects.toThrow(UnprocessableEntityException);
+
+            await expect(
+                interceptor.validateBody({
+                    where: [{ col2: { operator: '=', operand: 7 }, col3: { operator: '>', operand: 3, not: 'true' } }],
+                }),
+            ).rejects.toThrow(UnprocessableEntityException);
+
+            expect(
+                await interceptor.validateBody({
+                    where: [{ col2: { operator: '=', operand: 7, not: false }, col3: { operator: '>', operand: 3, not: true } }],
+                }),
+            ).toEqual({
+                take: 20,
+                where: [{ col2: { not: false, operand: 7, operator: '=' }, col3: { not: true, operand: 3, operator: '>' } }],
+                withDeleted: false,
+            });
+        });
+
         it('should throw when query filter is not an array or empty', async () => {
-            await expect(interceptor.validateBody({ where: { $or: [] } })).rejects.toThrow(UnprocessableEntityException);
-            await expect(interceptor.validateBody({ where: { $and: null } })).rejects.toThrow(UnprocessableEntityException);
+            await expect(interceptor.validateBody({ where: [] })).rejects.toThrow(UnprocessableEntityException);
+            await expect(interceptor.validateBody({ where: [null] })).rejects.toThrow(UnprocessableEntityException);
         });
 
         it('should throw when invalid query filter is given', async () => {
-            await expect(interceptor.validateBody({ where: { $or: [null] } })).rejects.toThrow(UnprocessableEntityException);
-            await expect(interceptor.validateBody({ where: { $and: ['unknown'] } })).rejects.toThrow(UnprocessableEntityException);
+            await expect(interceptor.validateBody({ where: [null] })).rejects.toThrow(UnprocessableEntityException);
+            await expect(interceptor.validateBody({ where: ['unknown'] })).rejects.toThrow(UnprocessableEntityException);
         });
 
         it('should validate Union Operators("=", "!=", ">", ">=", "<", "<=", "LIKE", "ILIKE")', async () => {
-            const invalidWhereList = [
-                { where: { col1: 1 } },
-                { where: { $and: [{ abc: 1 }] } },
-                { where: { $and: [{ col1: 1, col3: 3 }] } },
-            ];
+            const invalidWhereList = [{ where: [{ col1: 1 }] }, { where: [{ abc: 1 }] }, { where: [{ col1: 1, col3: 3 }] }];
 
             for (const where of invalidWhereList) {
                 await expect(interceptor.validateBody(where)).rejects.toThrow(UnprocessableEntityException);
@@ -92,10 +122,10 @@ describe('SearchRequestInterceptor', () => {
 
             expect(
                 await interceptor.validateBody({
-                    where: { $and: [{ col2: { operator: '=', operand: 7 }, col3: { operator: '>', operand: 3 } }] },
+                    where: [{ col2: { operator: '=', operand: 7 }, col3: { operator: '>', operand: 3 } }],
                 }),
             ).toEqual({
-                where: { $and: [{ col2: { operator: '=', operand: 7 }, col3: { operator: '>', operand: 3 } }] },
+                where: [{ col2: { operator: '=', operand: 7 }, col3: { operator: '>', operand: 3 } }],
                 take: 20,
                 withDeleted: false,
             });
@@ -103,10 +133,10 @@ describe('SearchRequestInterceptor', () => {
 
         it('should validate BETWEEN operation', async () => {
             const invalidWhereList = [
-                { where: { $or: [{ col3: { operator: 'BETWEEN' } }] } },
-                { where: { $or: [{ col3: { operator: 'BETWEEN', operand: 0 } }] } },
-                { where: { $or: [{ col3: { operator: 'BETWEEN', operand: [1, '2'] } }] } },
-                { where: { $or: [{ col3: { operator: 'BETWEEN', operand: [1, 2, 3] } }] } },
+                { where: [{ col3: { operator: 'BETWEEN' } }] },
+                { where: [{ col3: { operator: 'BETWEEN', operand: 0 } }] },
+                { where: [{ col3: { operator: 'BETWEEN', operand: [1, '2'] } }] },
+                { where: [{ col3: { operator: 'BETWEEN', operand: [1, 2, 3] } }] },
             ];
 
             for (const where of invalidWhereList) {
@@ -115,10 +145,10 @@ describe('SearchRequestInterceptor', () => {
 
             expect(
                 await interceptor.validateBody({
-                    where: { $or: [{ col3: { operator: 'BETWEEN', operand: [0, 5] } }] },
+                    where: [{ col3: { operator: 'BETWEEN', operand: [0, 5] } }],
                 }),
             ).toEqual({
-                where: { $or: [{ col3: { operator: 'BETWEEN', operand: [0, 5] } }] },
+                where: [{ col3: { operator: 'BETWEEN', operand: [0, 5] } }],
                 take: 20,
                 withDeleted: false,
             });
@@ -126,10 +156,10 @@ describe('SearchRequestInterceptor', () => {
 
         it('should validate IN operation', async () => {
             const invalidWhereList = [
-                { where: { $or: [{ col3: { operator: 'IN' } }] } },
-                { where: { $or: [{ col3: { operator: 'IN', operand: 0 } }] } },
-                { where: { $or: [{ col3: { operator: 'IN', operand: [0, '1', 2] } }] } },
-                { where: { $or: [{ col3: { operator: 'IN', operand: [0, 1, null] } }] } },
+                { where: [{ col3: { operator: 'IN' } }] },
+                { where: [{ col3: { operator: 'IN', operand: 0 } }] },
+                { where: [{ col3: { operator: 'IN', operand: [0, '1', 2] } }] },
+                { where: [{ col3: { operator: 'IN', operand: [0, 1, null] } }] },
             ];
 
             for (const where of invalidWhereList) {
@@ -138,10 +168,10 @@ describe('SearchRequestInterceptor', () => {
 
             expect(
                 await interceptor.validateBody({
-                    where: { $or: [{ col3: { operator: 'IN', operand: [0, 1, 2] } }] },
+                    where: [{ col3: { operator: 'IN', operand: [0, 1, 2] } }],
                 }),
             ).toEqual({
-                where: { $or: [{ col3: { operator: 'IN', operand: [0, 1, 2] } }] },
+                where: [{ col3: { operator: 'IN', operand: [0, 1, 2] } }],
                 take: 20,
                 withDeleted: false,
             });
@@ -150,24 +180,24 @@ describe('SearchRequestInterceptor', () => {
         it('should support defined type only', async () => {
             await expect(
                 interceptor.validateBody({
-                    where: { $or: [{ col3: { operator: 'NOT IN', operand: [0, 1, 2] } }] },
+                    where: [{ col3: { operator: 'NOT IN', operand: [0, 1, 2] } }],
                 }),
             ).rejects.toThrow(UnprocessableEntityException);
         });
 
         it('should validate NULL operation', async () => {
             const invalidWhereList = [
-                { where: { $or: [{ col3: { operator: 'NULL', operand: 0 } }] } },
-                { where: { $or: [{ col3: { operator: 'NULL', operand: null } }] } },
-                { where: { $or: [{ col3: { operator: 'NULL', operand: '123' } }] } },
+                { where: [{ col3: { operator: 'NULL', operand: 0 } }] },
+                { where: [{ col3: { operator: 'NULL', operand: null } }] },
+                { where: [{ col3: { operator: 'NULL', operand: '123' } }] },
             ];
 
             for (const where of invalidWhereList) {
                 await expect(interceptor.validateBody(where)).rejects.toThrow(UnprocessableEntityException);
             }
 
-            expect(await interceptor.validateBody({ where: { $or: [{ col3: { operator: 'NULL' } }] } })).toEqual({
-                where: { $or: [{ col3: { operator: 'NULL' } }] },
+            expect(await interceptor.validateBody({ where: [{ col3: { operator: 'NULL' } }] })).toEqual({
+                where: [{ col3: { operator: 'NULL' } }],
                 take: 20,
                 withDeleted: false,
             });

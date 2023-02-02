@@ -66,7 +66,7 @@ describe('CustomEntity - Search', () => {
             const uuid = '12';
             const response = await request(app.getHttpServer())
                 .post('/base/search')
-                .send({ where: { $and: [{ uuid: { operator: '=', operand: uuid } }] } });
+                .send({ where: [{ uuid: { operator: '=', operand: uuid } }] });
             expect(response.statusCode).toEqual(HttpStatus.OK);
             expect(response.body.data).toHaveLength(1);
             expect(response.body.data[0]).toEqual({
@@ -78,7 +78,7 @@ describe('CustomEntity - Search', () => {
 
             const responseSelectedName = await request(app.getHttpServer())
                 .post('/base/search')
-                .send({ select: ['uuid', 'name'], where: { $and: [{ uuid: { operator: '=', operand: uuid } }] } });
+                .send({ select: ['uuid', 'name'], where: [{ uuid: { operator: '=', operand: uuid } }] });
             expect(responseSelectedName.statusCode).toEqual(HttpStatus.OK);
             expect(responseSelectedName.body.data).toHaveLength(1);
             expect(responseSelectedName.body.data[0]).toEqual({
@@ -89,7 +89,7 @@ describe('CustomEntity - Search', () => {
         it('should return multiple entities', async () => {
             const response = await request(app.getHttpServer())
                 .post('/base/search')
-                .send({ where: { $or: [{ uuid: { operator: '=', operand: '1' } }, { uuid: { operator: '=', operand: '10' } }] } });
+                .send({ where: [{ uuid: { operator: '=', operand: '1' } }, { uuid: { operator: '=', operand: '10' } }] });
             expect(response.statusCode).toEqual(HttpStatus.OK);
             expect(response.body.data).toHaveLength(2);
             expect(response.body.data.map((d: { uuid: string }) => d.uuid)).toEqual(['1', '10']);
@@ -99,9 +99,7 @@ describe('CustomEntity - Search', () => {
             const response = await request(app.getHttpServer())
                 .post('/base/search')
                 .send({
-                    where: {
-                        $and: [{ name: { operator: 'NULL' } }],
-                    },
+                    where: [{ name: { operator: 'NULL' } }],
                 });
             expect(response.statusCode).toEqual(HttpStatus.OK);
             expect(response.body.data).toHaveLength(1);
@@ -110,9 +108,7 @@ describe('CustomEntity - Search', () => {
             const responseNotNull = await request(app.getHttpServer())
                 .post('/base/search')
                 .send({
-                    where: {
-                        $not: [{ name: { operator: 'NULL' } }],
-                    },
+                    where: [{ name: { operator: 'NULL', not: true } }],
                 });
             expect(responseNotNull.statusCode).toEqual(HttpStatus.OK);
             expect(responseNotNull.body.data[0].name).not.toBeNull();

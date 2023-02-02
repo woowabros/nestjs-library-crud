@@ -1,5 +1,4 @@
 import {
-    Brackets,
     Not,
     MoreThan,
     MoreThanOrEqual,
@@ -10,64 +9,61 @@ import {
     Between,
     In,
     IsNull,
-    NotBrackets,
-    WhereExpressionBuilder,
     BaseEntity,
+    FindOptionsWhere,
 } from 'typeorm';
 
 import { QueryFilter, operatorBetween, operatorIn, operatorNull } from '../interface/query-operation.interface';
 
 export class TypeOrmQueryBuilderHelper {
-    static brackets<T extends BaseEntity>(filter: QueryFilter<T>): Brackets {
-        return new Brackets(this.whereFactory<T>(filter));
-    }
-
-    static notBrackets<T extends BaseEntity>(filter: QueryFilter<T>): NotBrackets {
-        return new NotBrackets(this.whereFactory<T>(filter));
-    }
-
-    static whereFactory<T extends BaseEntity>(filter: QueryFilter<T>) {
-        return (qb: WhereExpressionBuilder) => {
-            const func = qb.andWhere.bind(qb);
-            for (const [field, term] of Object.entries(filter)) {
-                if (typeof term === 'object' && term !== null && 'operator' in term) {
+    static queryFilterToFindOptionsWhere<T extends BaseEntity>(filter: QueryFilter<T>): FindOptionsWhere<T> {
+        const query: Record<string, unknown> = {};
+        for (const [field, term] of Object.entries(filter)) {
+            if (typeof term === 'object' && term !== null) {
+                if ('operator' in term) {
                     switch (term.operator) {
                         case '=':
-                            func({ [field]: term.operand });
+                            query[field] = term.operand;
                             break;
                         case '!=':
-                            func({ [field]: Not(term.operand) });
+                            query[field] = Not(term.operand);
                             break;
                         case '>':
-                            func({ [field]: MoreThan(term.operand) });
+                            query[field] = MoreThan(term.operand);
                             break;
                         case '>=':
-                            func({ [field]: MoreThanOrEqual(term.operand) });
+                            query[field] = MoreThanOrEqual(term.operand);
                             break;
                         case '<':
-                            func({ [field]: LessThan(term.operand) });
+                            query[field] = LessThan(term.operand);
                             break;
                         case '<=':
-                            func({ [field]: LessThanOrEqual(term.operand) });
+                            query[field] = LessThanOrEqual(term.operand);
                             break;
                         case 'LIKE':
-                            func({ [field]: Like(term.operand) });
+                            query[field] = Like(term.operand);
                             break;
                         case 'ILIKE':
-                            func({ [field]: ILike(term.operand) });
+                            query[field] = ILike(term.operand);
                             break;
                         case operatorBetween:
-                            func({ [field]: Between(...term.operand) });
+                            query[field] = Between(...term.operand);
                             break;
                         case operatorIn:
-                            func({ [field]: In(term.operand) });
+                            query[field] = In(term.operand);
                             break;
                         case operatorNull:
-                            func({ [field]: IsNull() });
+                            query[field] = IsNull();
                             break;
                     }
                 }
+
+                if (query[field] && 'not' in term && term.not) {
+                    query[field] = Not(query[field]);
+                }
             }
-        };
+        }
+
+        return query as FindOptionsWhere<T>;
     }
 }

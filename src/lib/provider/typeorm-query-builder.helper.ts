@@ -17,53 +17,53 @@ import { QueryFilter, operatorBetween, operatorIn, operatorNull } from '../inter
 
 export class TypeOrmQueryBuilderHelper {
     static queryFilterToFindOptionsWhere<T extends BaseEntity>(filter: QueryFilter<T>): FindOptionsWhere<T> {
-        const query: Record<string, unknown> = {};
-        for (const [field, term] of Object.entries(filter)) {
-            if (typeof term === 'object' && term !== null) {
-                if ('operator' in term) {
-                    switch (term.operator) {
+        const findOptionsWhere: Record<string, unknown> = {};
+        for (const [field, operation] of Object.entries(filter)) {
+            if (typeof operation === 'object' && operation !== null) {
+                if ('operator' in operation) {
+                    switch (operation.operator) {
                         case '=':
-                            query[field] = term.operand;
+                            findOptionsWhere[field] = operation.operand;
                             break;
                         case '!=':
-                            query[field] = Not(term.operand);
+                            findOptionsWhere[field] = Not(operation.operand);
                             break;
                         case '>':
-                            query[field] = MoreThan(term.operand);
+                            findOptionsWhere[field] = MoreThan(operation.operand);
                             break;
                         case '>=':
-                            query[field] = MoreThanOrEqual(term.operand);
+                            findOptionsWhere[field] = MoreThanOrEqual(operation.operand);
                             break;
                         case '<':
-                            query[field] = LessThan(term.operand);
+                            findOptionsWhere[field] = LessThan(operation.operand);
                             break;
                         case '<=':
-                            query[field] = LessThanOrEqual(term.operand);
+                            findOptionsWhere[field] = LessThanOrEqual(operation.operand);
                             break;
                         case 'LIKE':
-                            query[field] = Like(term.operand);
+                            findOptionsWhere[field] = Like(operation.operand);
                             break;
                         case 'ILIKE':
-                            query[field] = ILike(term.operand);
+                            findOptionsWhere[field] = ILike(operation.operand);
                             break;
                         case operatorBetween:
-                            query[field] = Between(...term.operand);
+                            findOptionsWhere[field] = Between(...operation.operand);
                             break;
                         case operatorIn:
-                            query[field] = In(term.operand);
+                            findOptionsWhere[field] = In(operation.operand);
                             break;
                         case operatorNull:
-                            query[field] = IsNull();
+                            findOptionsWhere[field] = IsNull();
                             break;
                     }
                 }
 
-                if (query[field] && 'not' in term && term.not) {
-                    query[field] = Not(query[field]);
+                if (findOptionsWhere[field] && 'not' in operation && operation.not) {
+                    findOptionsWhere[field] = Not(findOptionsWhere[field]);
                 }
             }
         }
 
-        return query as FindOptionsWhere<T>;
+        return findOptionsWhere as FindOptionsWhere<T>;
     }
 }

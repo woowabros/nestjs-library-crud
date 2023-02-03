@@ -10,7 +10,7 @@ const config: Config = {
     },
     moduleFileExtensions: ['js', 'json', 'ts'],
     transform: {
-        '^.+\\.(ts|tsx|js|jsx)$': [
+        '^.+\\.(t|j)s$': [
             'ts-jest',
             {
                 tsconfig: 'tsconfig.json',

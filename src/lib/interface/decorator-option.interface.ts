@@ -33,7 +33,6 @@ export interface CrudOptions {
         [Method.SEARCH]?: {
             numberOfTake?: number;
             softDelete?: boolean;
-            // TODO: search 에서 relation을 처리할 수 있다
             relations?: false | string[];
         } & RouteBaseOption;
         [Method.CREATE]?: RouteBaseOption;

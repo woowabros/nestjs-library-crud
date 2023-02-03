@@ -39,7 +39,24 @@ $ yarn add @nestjs-library/crud
 
 ---
 
-다음과 같이 Decorator를 정의함으로서 Entity의 CRUD를 제공합니다.
+Controller에 Decorator를 정의함으로서 Entity의 CRUD를 제공합니다.
+
+```
+import { Controller } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { Crud, CrudController } from '@nestjs-library/crud';
+
+import { CatService } from './cat.service';
+import { CatEntity } from './entities/cat.entity';
+
+@Crud({ entity: CatEntity })
+@Controller('cat')
+@ApiTags('Cat')
+export class CatController implements CrudController<CatEntity> {
+    constructor(public readonly crudService: CatService) {}
+}
+
+```
 
 1. Entity를 정의합니다.
 
@@ -65,8 +82,6 @@ $ yarn add @nestjs-library/crud
 
 ---
 
-Decorator가 제공하는 CRUD로 Entity의 정보를 관리할 수 있습니다.
-
 #### ReadOne
 
 -   `Get {path}/{:id}`
@@ -90,11 +105,15 @@ Decorator가 제공하는 CRUD로 Entity의 정보를 관리할 수 있습니다
 -   Body를 통해 조건을 직접 정의하여 조건에 일치하는 Entities를 전달 받습니다.
 -   <a href="./src/spec/custom-entity/custom-entity.controller.search.spec.ts">custom-entity.controller.search.spec.ts</a>을 참고할 수 있습니다.
 
+---
+
 ### Create
 
 -   `Post {path}`
 -   하나 또는 다수의 Entity를 생성합니다.
 -   <a href="./src/spec/base/base.controller.create.spec.ts">base.controller.create.spec.ts</a> 을 참고할 수 있습니다.
+
+---
 
 ### Update
 
@@ -124,66 +143,221 @@ Decorator가 제공하는 CRUD로 Entity의 정보를 관리할 수 있습니다
 
 -   `Post {path}/{:id}/recover`
 -   Soft-delete로 삭제된 하나의 Entity를 복구합니다.
+-   Delete Method의 softDeleted 옵션이 활성화 된 경우 사용됩니다.
 -   <a href="./src/spec/base/base.controller.recover.spec.ts">base.controller.recover.spec.ts</a> 을 참고할 수 있습니다.
 
 ---
 
-### Use Case
+## Use Case
 
-// TODO 사용 시나리오 정의 및 관련 Spec 파일 링크
+### Response로 전달되는 값을 설정할 수 있습니다.
 
-#### 사용자 권한에 따라 Endpoint를 제공해야 합니다.
+---
 
-1. Guard Decorator를 생성합니다.
-2. Crud Decorator에 옵션으로 추가합니다.
-    > test case `auth-guard`를 참고할 수 있습니다.
+Decorator Option으로 route 마다 `response`를 변경 할 수 있습니다.
 
-#### 사용자의 권한에 따라 전달할 수 있는 정보를 관리할 수 있어야 합니다.
+entity(default), id, none 3가지 옵션을 제공합니다.
 
-1. `CrudCustomRequestInterceptor를 상속`받아 Request Interceptor를 생성합니다.
-2. `overrideOptions` method를 override하여 Request Option을 수정해서 전달합니다.
-3. Crud Decorator에 옵션으로 추가합니다.
-    > test case `request-interceptor`를 참고할 수 있습니다.
+```
+@Crud({ entity: BaseEntity, routes: { recover: { response: 'id' } } })
+```
 
-#### Response 결과를 변경해야 합니다.
+---
 
-1. Request Interceptor를 만들고 Response 결과를 가공합니다.
-2. Crud Decorator에 옵션으로 추가합니다.
-    > test case `response-interceptor`를 참고할 수 있습니다.
+### 전달되는 Response를 제어할 수 있습니다.
 
-#### 기본으로 제공되는 Swagger Decorator를 변경해야 합니다.
+---
 
-1. 변경하려는 Swagger Decorator를 Crud Decorator에 옵션으로 추가합니다.
+Decorator Option으로 route 마다 `interceptor`를 추가할 수 있습니다.
 
-### Contribution
+```
+@Crud({
+    entity: BaseEntity,
+    routes: {
+        readOne: {
+            interceptors: [ResponseCustomInterceptor],
+        },
+```
 
-#### Adding new Method
+`Response Interceptor`를 추가하고 전달되는 Response를 제어할 수 있습니다.
 
-1. Add new Method to enum `Method`
+---
 
-2. Policy for new Method need to be added to `CRUD_POLICY`.
+### Swagger를 비 활성화 할 수 있습니다.
 
-    - This policy will be used as default when no custom options provided.
+---
 
-3. Add an option to `CrudOptions.routes`.
+Decorator Option으로 route 마다 `swagger`를 비 활성화 할 수 있습니다.
 
-    - This is an option user will provide through `@Crud()` decorator
+<a href="./spe/exclude-swagger/exclude-swagger.spec.ts">exclude-swagger.spec.ts</a>와 같이 method 별로 Swagger를 비활성화 할 수 있습니다.
 
-4. Create Request Interface which extends `CrudRequestBase`
+```
+@Crud({ entity: BaseEntity, routes: { recover: { swagger: false } } })
+```
 
-    - It will be provided to `CrudService` so that you can use it for implementation.
+---
 
-5. Create Interceptor via mixin
+### Decorator를 추가 할 수 있습니다.
 
-    - Recommend to validate request and process it to meet the interface of request you created step before. (for example, `read-one-request.interceptor.ts`)
+---
 
-6. Add new Method to `CrudAbstractService`
+Decorator Option으로 route 마다 `decorators`를 정의할 수 있습니다.
 
-7. Implement feature of new Method in `CrudService`
+<a href="./spec/auth-guard/auth-guard.spec.ts">auth-guard.spec.ts</a>, <a href="./spec/custom-swagger-decorator/apply-api-extra-model.spec.ts">apply-api-extra-model.spec.ts</a>와 같이 method 별로 Decorator를 추가할 수 있습니다.
+
+Decorator의 기능이 CRUD에서 제공하는 기능일 경우 추가된 Decorator로 override 됩니다.
+
+```
+@Crud({
+    entity: BaseEntity,
+    routes: {
+        readOne: {
+            decorators: [UseGuards(AuthGuard)],
+        },
+        readMany: {
+            decorators: [UseGuards(AuthGuard)],
+        },
+        ...
+    },
+})
+```
+
+---
+
+### method를 Override 할 수 있습니다.
+
+---
+
+`Override` 데코레이터를 통해 Controller에서 Method의 기능을 변경 할 수 있습니다.
+
+<a href="./spec/override-decorator/override-decorator.controller.spec.ts">override-decorator.controller.spec.ts</a> 를 참고할 수 있습니다.
+
+```
+@Crud({
+    entity: BaseEntity,
+})
+@Controller('test')
+export class DuplicatedOverrideController implements CrudController<BaseEntity> {
+    constructor(public readonly crudService: BaseService) {}
+
+    @Override('READ_ONE')
+    overrideReadOne1() {
+        return 'readOne1';
+    }
+}
+```
+
+---
+
+### ReadMany Method는 Cursor와 Offset Pagination을 지원합니다.
+
+---
+
+ReadMany Method는 `Cursor`(default)와 `Offset` 방식의 Pagination을 지원합니다.
+
+<a href="./spec/pagination/pagination.spec.ts">pagination.spec.ts</a>, <a href="./spec/read-many/read-many.controller.spec.ts">read-many.controller.spec.ts</a> 를 참고할 수 있습니다.
+
+```
+@Crud({ entity: BaseEntity, routes: { readMany: { paginationType: 'cursor' } })
+
+@Crud({ entity: BaseEntity, routes: { readMany: { paginationType: 'offset' } })
+```
+
+---
+
+### 단일 Entity를 확인하기 위한 Param을 변경할 수 있습니다.
+
+---
+
+Decorator Option으로 route 마다 `params`을 변경 할 수 있습니다.
+
+Primary Key 대신 Entity의 다른 Key를 Param으로 사용하거나,
+
+Custom Interceptor와 함께 Param 조건을 자유롭게 변경할 수 있습니다.
+
+<a href="./spec/param-option">param-option</a>에서 구현된 케이스를 확인할 수 있습니다.
+
+```
+@Crud({ entity: BaseEntity, routes: { readOne: { params: [param] } })
+
+```
+
+---
+
+### Entity에 정의된 Relations 을 비활성화 할 수 있습니다.
+
+---
+
+Entity에 정의된 Relation에 대해서 비활성화 할 수 있습니다.
+
+Decorator Option으로 route 마다 `relations`을 변경 할 수 있습니다.
+
+Custom Interceptor와 함께 relations 조건을 자유롭게 변경할 수 있습니다.
+
+<a href="./spec/relation-entities">relation-entities</a>에서 작성된 케이스를 확인할 수 있습니다.
+
+---
+
+### Request 단위로 제어할 수 있습니다.
+
+---
+
+Decorator Option으로 route 마다 `interceptor`를 추가할 수 있습니다.
+
+```
+@Crud({
+    entity: BaseEntity,
+    routes: {
+        readOne: {
+            interceptors: [ResponseCustomInterceptor],
+        },
+```
+
+`Custom Interceptor`를 추가하고 Request 마다 제어할 수 있습니다.
+
+Custom Interceptor로 Request를 수정하거나, 제공되는 CustomRequestOptions을 통해 설정 할 수 있습니다.
+
+<a href="./spec/request-interceptor">request-interceptor</a>에서 작성된 케이스를 확인할 수 있습니다.
+
+```
+@Injectable()
+export class ReadOneRequestInterceptor extends CustomRequestInterceptor {
+    async overrideOptions(req: Request): Promise<CustomReadOneRequestOptions> {
+        return new Promise((resolve, _reject) => {
+            resolve({
+                fields: req.params.id === '1' ? ['name', 'createdAt'] : undefined,
+                softDeleted: +req.params.id % 2 === 0,
+            });
+        });
+    }
+}
+```
+
+<a href="./spec/response-interceptor">response-interceptor</a>에서 작성된 케이스를 확인할 수 있습니다.
+
+---
+
+### Soft-Delete 여부를 설정할 수 있습니다.
+
+---
+
+Decorator Option으로 route 마다 `softDelete` 여부를 설정할 수 있습니다.
+
+`recover`는 Delete Method에 softDelete가 활성화된 경우에만 사용할 수 있습니다..
+
+<a href="./spec/soft-delete-and-recover">soft-delete-and-recover</a>에서 작성된 케이스를 확인할 수 있습니다.
+
+```
+@Crud({ entity: BaseEntity, routes: { readOne: { softDelete: true } })
+```
+
+---
 
 ### [Contributors](https://github.com/type-challenges/type-challenges/graphs/contributors)
 
 ![Contributors](https://contrib.rocks/image?repo=woowabros/nestjs-library-crud)
+
+---
 
 ## License
 

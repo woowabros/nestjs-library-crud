@@ -10,8 +10,15 @@ const config: Config = {
     },
     moduleFileExtensions: ['js', 'json', 'ts'],
     transform: {
-        '^.+\\.(t|j)s$': 'ts-jest',
+        '^.+\\.(t|j)s$': [
+            'ts-jest',
+            {
+                tsconfig: 'tsconfig.json',
+                isolatedModules: true,
+            },
+        ],
     },
+    testTimeout: 120_000,
     testEnvironment: 'node',
     verbose: true,
     detectLeaks: false,

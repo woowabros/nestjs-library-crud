@@ -1,5 +1,4 @@
 import {
-    Brackets,
     Not,
     MoreThan,
     MoreThanOrEqual,
@@ -10,64 +9,61 @@ import {
     Between,
     In,
     IsNull,
-    NotBrackets,
-    WhereExpressionBuilder,
     BaseEntity,
+    FindOptionsWhere,
 } from 'typeorm';
 
 import { QueryFilter, operatorBetween, operatorIn, operatorNull } from '../interface/query-operation.interface';
 
 export class TypeOrmQueryBuilderHelper {
-    static brackets<T extends BaseEntity>(filter: QueryFilter<T>): Brackets {
-        return new Brackets(this.whereFactory<T>(filter));
-    }
-
-    static notBrackets<T extends BaseEntity>(filter: QueryFilter<T>): NotBrackets {
-        return new NotBrackets(this.whereFactory<T>(filter));
-    }
-
-    static whereFactory<T extends BaseEntity>(filter: QueryFilter<T>) {
-        return (qb: WhereExpressionBuilder) => {
-            const func = qb.andWhere.bind(qb);
-            for (const [field, term] of Object.entries(filter)) {
-                if (typeof term === 'object' && term !== null && 'operator' in term) {
-                    switch (term.operator) {
+    static queryFilterToFindOptionsWhere<T extends BaseEntity>(filter: QueryFilter<T>): FindOptionsWhere<T> {
+        const findOptionsWhere: Record<string, unknown> = {};
+        for (const [field, operation] of Object.entries(filter)) {
+            if (typeof operation === 'object' && operation !== null) {
+                if ('operator' in operation) {
+                    switch (operation.operator) {
                         case '=':
-                            func({ [field]: term.operand });
+                            findOptionsWhere[field] = operation.operand;
                             break;
                         case '!=':
-                            func({ [field]: Not(term.operand) });
+                            findOptionsWhere[field] = Not(operation.operand);
                             break;
                         case '>':
-                            func({ [field]: MoreThan(term.operand) });
+                            findOptionsWhere[field] = MoreThan(operation.operand);
                             break;
                         case '>=':
-                            func({ [field]: MoreThanOrEqual(term.operand) });
+                            findOptionsWhere[field] = MoreThanOrEqual(operation.operand);
                             break;
                         case '<':
-                            func({ [field]: LessThan(term.operand) });
+                            findOptionsWhere[field] = LessThan(operation.operand);
                             break;
                         case '<=':
-                            func({ [field]: LessThanOrEqual(term.operand) });
+                            findOptionsWhere[field] = LessThanOrEqual(operation.operand);
                             break;
                         case 'LIKE':
-                            func({ [field]: Like(term.operand) });
+                            findOptionsWhere[field] = Like(operation.operand);
                             break;
                         case 'ILIKE':
-                            func({ [field]: ILike(term.operand) });
+                            findOptionsWhere[field] = ILike(operation.operand);
                             break;
                         case operatorBetween:
-                            func({ [field]: Between(...term.operand) });
+                            findOptionsWhere[field] = Between(...operation.operand);
                             break;
                         case operatorIn:
-                            func({ [field]: In(term.operand) });
+                            findOptionsWhere[field] = In(operation.operand);
                             break;
                         case operatorNull:
-                            func({ [field]: IsNull() });
+                            findOptionsWhere[field] = IsNull();
                             break;
                     }
                 }
+
+                if (findOptionsWhere[field] && 'not' in operation && operation.not) {
+                    findOptionsWhere[field] = Not(findOptionsWhere[field]);
+                }
             }
-        };
+        }
+
+        return findOptionsWhere as FindOptionsWhere<T>;
     }
 }

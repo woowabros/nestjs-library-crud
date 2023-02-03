@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
-import { BaseEntity, DeepPartial, FindOptionsSelect, FindOptionsWhere, LessThan, MoreThan, Repository, SelectQueryBuilder } from 'typeorm';
+import { BaseEntity, DeepPartial, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
 
 import { CrudAbstractService, CrudResponseType } from './abstract/crud.abstract.service';
 import { CRUD_POLICY } from './crud.policy';
@@ -26,14 +26,12 @@ import { PaginationHelper } from './provider/pagination.helper';
 import { TypeOrmQueryBuilderHelper } from './provider/typeorm-query-builder.helper';
 
 export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
-    private tableName: string;
     private primaryKey: string[];
     private relations: string[];
 
     constructor(protected repository: Repository<T>) {
         super();
 
-        this.tableName = this.repository.metadata.name;
         this.primaryKey = this.repository.metadata.primaryColumns?.map((columnMetadata) => columnMetadata.propertyName) ?? [];
         this.relations = this.repository.metadata.relations?.map((relation) => relation.propertyName);
     }
@@ -43,8 +41,22 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
     }
 
     async reservedSearch(crudSearchRequest: CrudSearchRequest<T>) {
-        const selectQueryBuilder = this.getQueryBuilderFromSearchDto(crudSearchRequest);
-        return { data: await selectQueryBuilder.getMany() };
+        const { requestSearchDto, relations } = crudSearchRequest;
+        const where =
+            Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
+                ? requestSearchDto.where.map((queryFilter) => TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter))
+                : undefined;
+
+        const data = await this.repository.find({
+            select: requestSearchDto.select,
+            where,
+            withDeleted: requestSearchDto.withDeleted,
+            take: requestSearchDto.take,
+            order: requestSearchDto.order as FindOptionsOrder<T>,
+            relations: this.getRelation(relations),
+        });
+
+        return { data };
     }
 
     async reservedReadMany(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {
@@ -172,50 +184,6 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 await this.repository.recover(entity);
                 return this.toResponse(entity, responseOption);
             });
-    }
-
-    getQueryBuilderFromSearchDto(crudSearchRequest: CrudSearchRequest<T>): SelectQueryBuilder<T> {
-        const qb = new SelectQueryBuilder<T>(this.repository.createQueryBuilder(this.tableName));
-        const { requestSearchDto, relations } = crudSearchRequest;
-
-        if (requestSearchDto.select) {
-            qb.select((requestSearchDto.select as string[]).map((colName) => `${this.tableName}.${colName}`));
-        }
-        if (requestSearchDto.where?.$and) {
-            for (const andQuery of requestSearchDto.where.$and) {
-                qb.andWhere(TypeOrmQueryBuilderHelper.brackets<T>(andQuery));
-            }
-        }
-        if (requestSearchDto.where?.$or) {
-            for (const orQuery of requestSearchDto.where.$or) {
-                qb.orWhere(TypeOrmQueryBuilderHelper.brackets<T>(orQuery));
-            }
-        }
-
-        if (requestSearchDto.where?.$not) {
-            for (const notQuery of requestSearchDto.where.$not) {
-                qb.andWhere(TypeOrmQueryBuilderHelper.notBrackets<T>(notQuery));
-            }
-        }
-
-        if (requestSearchDto.withDeleted) {
-            qb.withDeleted();
-        }
-
-        if (requestSearchDto.take) {
-            qb.take(requestSearchDto.take);
-        }
-
-        if (requestSearchDto.order) {
-            qb.orderBy(requestSearchDto.order);
-        }
-
-        // FIXME: queryBuilder needs to build query including JOIN
-        for (const relation of this.getRelation(relations)) {
-            qb.relation(relation);
-        }
-
-        return qb;
     }
 
     private async paginateCursor(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {

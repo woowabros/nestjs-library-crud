@@ -15,7 +15,7 @@ export class TestEntity extends BaseEntity {
     @Column()
     col2: number;
 
-    @Column()
+    @Column({ nullable: true })
     col3: number;
 }
 

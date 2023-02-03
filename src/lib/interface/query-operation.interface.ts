@@ -4,18 +4,20 @@ export const operatorIn = 'IN' as const;
 export const operatorNull = 'NULL' as const;
 export type OperatorUnion = (typeof operatorList)[number];
 
-export type QueryFilterOperator =
-    | { operator: OperatorUnion; operand: unknown }
+export type QueryFilterOperation =
+    | { operator: OperatorUnion; operand: unknown; not?: boolean }
     | {
           operator: typeof operatorBetween;
           operand: [unknown, unknown];
+          not?: boolean;
       }
     | {
           operator: typeof operatorIn;
           operand: unknown[];
+          not?: boolean;
       }
-    | { operator: typeof operatorNull };
+    | { operator: typeof operatorNull; not?: boolean };
 
 export type QueryFilter<T> = {
-    [key in keyof Partial<T>]: QueryFilterOperator;
+    [key in keyof Partial<T>]: QueryFilterOperation;
 };

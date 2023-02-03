@@ -29,6 +29,21 @@ describe('Search Query Operator', () => {
         app = moduleFixture.createNestApplication();
         service = moduleFixture.get<TestService>(TestService);
 
+        /**
+         * 10 entities are created for the test.
+         *
+         * col1
+         * - An even number starts with col0.
+         * - Odd numbers start with col1
+         *
+         * col2
+         * - Same as the index number [0-9]
+         * - main information for testing.
+         *
+         * col3
+         * - when index is [0-4], it has [10-6]
+         * - when index is [5-9], is has null
+         */
         await Promise.all(
             _.range(5).map((no: number) =>
                 service.getRepository.save(

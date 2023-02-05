@@ -4,7 +4,8 @@
         "module": "commonjs",
         "types": ["jest", "node"],
         "noImplicitAny": false,
-        "noEmit": true
+        "noEmit": true,
+        "isolatedModules": true
     },
     "include": ["**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"]
 }

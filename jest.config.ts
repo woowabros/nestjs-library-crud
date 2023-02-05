@@ -14,7 +14,6 @@ const config: Config = {
             'ts-jest',
             {
                 tsconfig: 'tsconfig.json',
-                isolatedModules: true,
             },
         ],
     },
@@ -24,7 +23,7 @@ const config: Config = {
     detectLeaks: false,
     detectOpenHandles: true,
     collectCoverage: true,
-    collectCoverageFrom: ['**/*.(t|j)s'],
+    collectCoverageFrom: ['**/*.ts', '!**/*.d.ts'],
     coverageReporters: ['text'],
     coverageDirectory: 'coverage',
     coverageThreshold: {

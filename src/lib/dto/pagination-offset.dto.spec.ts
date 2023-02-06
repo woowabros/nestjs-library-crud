@@ -74,4 +74,19 @@ describe('PaginationOffsetDto', () => {
             },
         ]);
     });
+
+    it('should be allowed zero', () => {
+        const validate = (obj: unknown) => {
+            const paginationOffsetDto = plainToClass(PaginationOffsetDto, obj);
+            const error = validateSync(paginationOffsetDto);
+            if (error.length > 0) {
+                throw error;
+            }
+            return paginationOffsetDto;
+        };
+        expect(validate({ limit: 1 })).toEqual({ limit: 1, type: 'offset' });
+        expect(validate({ limit: 0 })).toEqual({ limit: 0, type: 'offset' });
+        expect(validate({ limit: -1 })).toEqual({ limit: 0, type: 'offset' });
+        expect(validate({})).toEqual({ type: 'offset' });
+    });
 });

@@ -24,8 +24,8 @@ export interface CrudOptions {
             relations?: false | string[];
         } & RouteBaseOption;
         [Method.READ_MANY]?: {
-            sort?: `${Sort}`;
-            paginationType?: `${PaginationType}`;
+            sort?: Sort | `${Sort}`;
+            paginationType?: PaginationType | `${PaginationType}`;
             numberOfTake?: number;
             relations?: false | string[];
             softDelete?: boolean;

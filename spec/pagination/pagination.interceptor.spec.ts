@@ -25,7 +25,7 @@ describe('Pagination with interceptor', () => {
                         },
                         offset: {
                             readMany: {
-                                paginationType: 'offset',
+                                paginationType: PaginationType.OFFSET,
                                 interceptors: [ReadManyRequestInterceptor],
                             },
                         },

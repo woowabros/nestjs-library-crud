@@ -4,6 +4,14 @@ import { validateSync } from 'class-validator';
 
 import { PaginationOffsetDto } from './pagination-offset.dto';
 
+function validateByPaginationOffsetDto(obj: unknown) {
+    const paginationOffsetDto = plainToClass(PaginationOffsetDto, obj);
+    const error = validateSync(paginationOffsetDto);
+    if (error.length > 0) {
+        throw error;
+    }
+    return paginationOffsetDto;
+}
 describe('PaginationOffsetDto', () => {
     it('should be optional all values', () => {
         expect(validateSync(plainToClass(PaginationOffsetDto, {}))).toEqual([]);
@@ -35,11 +43,12 @@ describe('PaginationOffsetDto', () => {
                 property: 'limit',
                 children: [],
                 constraints: {
-                    isPositive: 'limit must be a positive number',
+                    isNumber: 'limit must be a number conforming to the specified constraints',
                     max: 'limit must not be greater than 100',
                 },
             },
         ]);
+
         expect(validateSync(plainToClass(PaginationOffsetDto, { offset: 'b' }))).toEqual([
             {
                 target: { offset: Number.NaN, type: 'offset' },
@@ -64,29 +73,13 @@ describe('PaginationOffsetDto', () => {
                 constraints: { max: 'limit must not be greater than 100' },
             },
         ]);
-        expect(validateSync(plainToClass(PaginationOffsetDto, { limit: -1 }))).toEqual([
-            {
-                target: { limit: -1, type: 'offset' },
-                value: -1,
-                property: 'limit',
-                children: [],
-                constraints: { isPositive: 'limit must be a positive number' },
-            },
-        ]);
+        expect(validateSync(plainToClass(PaginationOffsetDto, { limit: -1 }))).toEqual([]);
     });
 
     it('should be allowed zero', () => {
-        const validate = (obj: unknown) => {
-            const paginationOffsetDto = plainToClass(PaginationOffsetDto, obj);
-            const error = validateSync(paginationOffsetDto);
-            if (error.length > 0) {
-                throw error;
-            }
-            return paginationOffsetDto;
-        };
-        expect(validate({ limit: 1 })).toEqual({ limit: 1, type: 'offset' });
-        expect(validate({ limit: 0 })).toEqual({ limit: 0, type: 'offset' });
-        expect(validate({ limit: -1 })).toEqual({ limit: 0, type: 'offset' });
-        expect(validate({})).toEqual({ type: 'offset' });
+        expect(validateByPaginationOffsetDto({ limit: 1 })).toEqual({ limit: 1, type: 'offset' });
+        expect(validateByPaginationOffsetDto({ limit: 0 })).toEqual({ limit: 0, type: 'offset' });
+        expect(validateByPaginationOffsetDto({ limit: -1 })).toEqual({ limit: 0, type: 'offset' });
+        expect(validateByPaginationOffsetDto({})).toEqual({ type: 'offset' });
     });
 });

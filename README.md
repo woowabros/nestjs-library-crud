@@ -203,9 +203,9 @@ Decorator Option으로 route 마다 `swagger`를 비 활성화 할 수 있습니
 
 Decorator Option으로 route 마다 `decorators`를 정의할 수 있습니다.
 
-<a href="./spec/auth-guard/auth-guard.spec.ts">auth-guard.spec.ts</a>, <a href="./spec/custom-swagger-decorator/apply-api-extra-model.spec.ts">apply-api-extra-model.spec.ts</a>와 같이 method 별로 Decorator를 추가할 수 있습니다.
+<a href="./spec/auth-guard/auth-guard.spec.ts">auth-guard.spec.ts</a>, <a href="./spec/custom-swagger-decorator/apply-api-extra-model.spec.ts">apply-api-extra-model.spec.ts</a>, <a href="./spec/swagger-decorator">swagger-decorator</a>와 같이 method 별로 Decorator를 추가할 수 있습니다.
 
-Decorator의 기능이 CRUD에서 제공하는 기능일 경우 추가된 Decorator로 override 됩니다.
+Decorator의 기능이 CRUD에서 제공하는 기능과 중복될 경우 입력된 Decorator로 override 됩니다.
 
 ```
 @Crud({

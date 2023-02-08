@@ -187,16 +187,17 @@ export class CrudRouteFactory {
             Reflect.defineMetadata(HTTP_CODE_METADATA, HttpStatus.OK, targetMethod);
         }
 
-        const customDecorator = this.crudOptions.routes?.[crudMethod]?.decorators ?? [];
+        const customDecorators = this.crudOptions.routes?.[crudMethod]?.decorators ?? [];
 
-        if (customDecorator.length > 0) {
-            const decoratorDescriptor = Reflect.decorate(
-                customDecorator,
-                targetMethod,
-                methodNameOnController,
-                Reflect.getOwnPropertyDescriptor(targetMethod, methodNameOnController),
-            );
-            Reflect.defineProperty(targetMethod, methodNameOnController, decoratorDescriptor);
+        if (customDecorators.length > 0) {
+            for (const decorator of customDecorators) {
+                const descriptor = Reflect.getOwnPropertyDescriptor(targetMethod, methodNameOnController);
+                (decorator as MethodDecorator | PropertyDecorator)(
+                    targetMethod,
+                    methodNameOnController,
+                    descriptor ?? { value: targetMethod },
+                );
+            }
         }
 
         Reflect.defineMetadata(PATH_METADATA, path, targetMethod);

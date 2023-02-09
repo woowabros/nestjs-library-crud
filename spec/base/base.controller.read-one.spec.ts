@@ -42,15 +42,20 @@ describe('BaseController', () => {
     describe('READ_ONE', () => {
         const id = 1;
         it('should be provided /:id', async () => {
-            const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-                if (r.route?.path) {
-                    for (const method of Object.keys(r.route.methods)) {
-                        list[method] = list[method] ?? [];
-                        list[method].push(r.route.path);
-                    }
-                }
-                return list;
-            }, {});
+            const routerPathList = app
+                .getHttpServer()
+                ._events.request._router.stack.reduce(
+                    (list: Record<string, string[]>, r: { route: { path: string; methods: { methods: unknown } } }) => {
+                        if (r.route?.path) {
+                            for (const method of Object.keys(r.route.methods)) {
+                                list[method] = list[method] ?? [];
+                                list[method].push(r.route.path);
+                            }
+                        }
+                        return list;
+                    },
+                    {},
+                );
             expect(routerPathList.get).toEqual(expect.arrayContaining(['/base/:id']));
         });
 

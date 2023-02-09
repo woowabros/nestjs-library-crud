@@ -18,7 +18,7 @@ export function CreateRequestDto(parentClass: typeof BaseEntity, group: Method) 
     const propertyNamesAppliedValidation = [
         ...new Set(
             targetMetadata
-                .filter(({ groups, always }) => always === true || groups.includes(group))
+                .filter(({ groups, always }) => always === true || (groups ?? []).includes(group))
                 .map(({ propertyName }) => propertyName),
         ),
     ];

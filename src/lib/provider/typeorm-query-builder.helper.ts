@@ -9,6 +9,7 @@ import {
     Between,
     In,
     IsNull,
+    Raw,
     BaseEntity,
     FindOptionsWhere,
 } from 'typeorm';
@@ -45,6 +46,9 @@ export class TypeOrmQueryBuilderHelper {
                             break;
                         case 'ILIKE':
                             findOptionsWhere[field] = ILike(operation.operand);
+                            break;
+                        case '?':
+                            findOptionsWhere[field] = Raw((alias) => `${alias} ? :operand`, { operand: operation.operand });
                             break;
                         case operatorBetween:
                             findOptionsWhere[field] = Between(...operation.operand);

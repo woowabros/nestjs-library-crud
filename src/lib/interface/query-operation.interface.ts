@@ -1,4 +1,4 @@
-export const operatorList = ['=', '!=', '>', '>=', '<', '<=', 'LIKE', 'ILIKE'] as const;
+export const operatorList = ['=', '!=', '>', '>=', '<', '<=', 'LIKE', 'ILIKE', '?'] as const;
 export const operatorBetween = 'BETWEEN' as const;
 export const operatorIn = 'IN' as const;
 export const operatorNull = 'NULL' as const;

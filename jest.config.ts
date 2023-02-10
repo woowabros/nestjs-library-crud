@@ -35,6 +35,7 @@ const config: Config = {
         },
     },
     coveragePathIgnorePatterns: ['<rootDir>/jest.config.ts', '.mock.ts'],
+    setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 };
 
 export default config;

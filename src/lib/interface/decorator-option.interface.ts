@@ -35,9 +35,12 @@ export interface CrudOptions {
             softDelete?: boolean;
             relations?: false | string[];
         } & RouteBaseOption;
-        [Method.CREATE]?: RouteBaseOption;
+        [Method.CREATE]?: {
+            body?: Type<unknown>;
+        } & RouteBaseOption;
         [Method.UPDATE]?: {
             params?: string[];
+            body?: Type<unknown>;
         } & RouteBaseOption;
         [Method.DELETE]?: {
             params?: string[];
@@ -45,6 +48,7 @@ export interface CrudOptions {
         } & RouteBaseOption;
         [Method.UPSERT]?: {
             params?: string[];
+            body?: Type<unknown>;
         } & RouteBaseOption;
         [Method.RECOVER]?: {
             params?: string[];

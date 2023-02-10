@@ -15,6 +15,7 @@ import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 
 import { Constants } from './constants';
 import { CRUD_POLICY } from './crud.policy';
+import { RequestSearchDto } from './dto/request-search.dto';
 import { CreateRequestDto } from './dto/request.dto';
 import {
     CrudOptions,
@@ -263,7 +264,17 @@ export class CrudRouteFactory {
                 description: [capitalizeFirstLetter(method), capitalizeFirstLetter(this.tableName), 'Dto'].join(''),
                 required: true,
                 in: 'body',
-                type: CreateRequestDto(this.crudOptions.entity, method),
+                type: (() => {
+                    if (method === Method.SEARCH) {
+                        return RequestSearchDto;
+                    }
+                    const routeConfig = this.crudOptions.routes?.[method];
+                    if (routeConfig && 'body' in routeConfig) {
+                        return routeConfig['body'];
+                    }
+
+                    return CreateRequestDto(this.crudOptions.entity, method);
+                })(),
                 isArray: false,
             });
         }

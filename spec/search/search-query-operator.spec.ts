@@ -60,6 +60,12 @@ describe('Search Query Operator', () => {
         await app.init();
     });
 
+    afterAll(async () => {
+        if (app) {
+            await app.close();
+        }
+    });
+
     it('should build `select` clause with RequestSearchDto when `select` is provided', async () => {
         const requestSearchDtoList: Array<RequestSearchDto<TestEntity>> = [
             { select: ['col1'], withDeleted: false, take: 5 },

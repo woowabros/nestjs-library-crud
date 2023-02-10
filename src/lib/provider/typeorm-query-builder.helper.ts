@@ -53,6 +53,9 @@ export class TypeOrmQueryBuilderHelper {
                         case '@>':
                             findOptionsWhere[field] = Raw((alias) => `${alias} @> :operand`, { operand: operation.operand });
                             break;
+                        case 'JSON_CONTAINS':
+                            findOptionsWhere[field] = Raw((alias) => `JSON_CONTAINS (${alias}, :operand)`, { operand: operation.operand });
+                            break;
                         case operatorBetween:
                             findOptionsWhere[field] = Between(...operation.operand);
                             break;

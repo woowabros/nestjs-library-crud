@@ -4,22 +4,22 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { JsonColumnEntity, JsonColumnModule, JsonColumnService, Person } from './module';
+import { JsonbColumnEntity, JsonbColumnModule, JsonbColumnService, Person } from './jsonb.module';
 
-describe('Search JSON column - PostgreSQL', () => {
+describe('Search JSONB column - PostgreSQL', () => {
     let app: INestApplication;
-    let service: JsonColumnService;
+    let service: JsonbColumnService;
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [
-                JsonColumnModule,
+                JsonbColumnModule,
                 TypeOrmModule.forRoot({
                     type: 'postgres',
                     database: process.env.POSTGRESQL_DATABASE_NAME,
                     username: process.env.POSTGRESQL_DATABASE_USERNAME,
                     password: process.env.POSTGRESQL_DATABASE_PASSWORD,
-                    entities: [JsonColumnEntity],
+                    entities: [JsonbColumnEntity],
                     synchronize: true,
                     logging: true,
                     logger: 'file',
@@ -27,9 +27,9 @@ describe('Search JSON column - PostgreSQL', () => {
             ],
         }).compile();
         app = moduleFixture.createNestApplication();
-        service = moduleFixture.get<JsonColumnService>(JsonColumnService);
+        service = moduleFixture.get<JsonbColumnService>(JsonbColumnService);
 
-        await service.getRepository.query('DELETE FROM "json_column_entity"');
+        await service.getRepository.query('DELETE FROM "jsonb_column_entity"');
 
         await service.getRepository.save([
             service.getRepository.create({ colors: ['Red', 'Violet', 'Black'], friends: [] }),

@@ -15,8 +15,8 @@ export interface Person {
     gender: string;
 }
 
-@Entity('json_column_entity')
-export class JsonColumnEntity extends BaseEntity {
+@Entity('jsonb_column_entity')
+export class JsonbColumnEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -28,21 +28,21 @@ export class JsonColumnEntity extends BaseEntity {
 }
 
 @Injectable()
-export class JsonColumnService extends CrudService<JsonColumnEntity> {
-    constructor(@InjectRepository(JsonColumnEntity) repository: Repository<JsonColumnEntity>) {
+export class JsonbColumnService extends CrudService<JsonbColumnEntity> {
+    constructor(@InjectRepository(JsonbColumnEntity) repository: Repository<JsonbColumnEntity>) {
         super(repository);
     }
 }
 
-@Crud({ entity: JsonColumnEntity })
+@Crud({ entity: JsonbColumnEntity })
 @Controller('json')
-export class JsonColumnController implements CrudController<JsonColumnEntity> {
-    constructor(public readonly crudService: JsonColumnService) {}
+export class JsonbColumnController implements CrudController<JsonbColumnEntity> {
+    constructor(public readonly crudService: JsonbColumnService) {}
 }
 
 @Module({
-    imports: [TypeOrmModule.forFeature([JsonColumnEntity])],
-    controllers: [JsonColumnController],
-    providers: [JsonColumnService],
+    imports: [TypeOrmModule.forFeature([JsonbColumnEntity])],
+    controllers: [JsonbColumnController],
+    providers: [JsonbColumnService],
 })
-export class JsonColumnModule {}
+export class JsonbColumnModule {}

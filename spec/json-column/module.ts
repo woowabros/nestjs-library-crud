@@ -7,8 +7,8 @@ import { Crud } from '../../src/lib/crud.decorator';
 import { CrudService } from '../../src/lib/crud.service';
 import { CrudController } from '../../src/lib/interface';
 
-interface Person {
-    id: string;
+export interface Person {
+    id: number;
     firstName: string;
     lastName: string;
     email: string;

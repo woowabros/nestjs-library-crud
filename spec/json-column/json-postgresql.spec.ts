@@ -4,7 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { JsonColumnEntity, JsonColumnModule, JsonColumnService } from './module';
+import { JsonColumnEntity, JsonColumnModule, JsonColumnService, Person } from './module';
 
 describe('Search JSON column - PostgreSQL', () => {
     let app: INestApplication;
@@ -32,9 +32,22 @@ describe('Search JSON column - PostgreSQL', () => {
         await service.getRepository.query('DELETE FROM "json_column_entity"');
 
         await service.getRepository.save([
-            service.getRepository.create({ colors: ['Red', 'Violet', 'Black'] }),
-            service.getRepository.create({ colors: ['Orange', 'Blue', 'Yellow'] }),
-            service.getRepository.create({ colors: ['Orange', 'Green', 'Black'] }),
+            service.getRepository.create({ colors: ['Red', 'Violet', 'Black'], friends: [] }),
+            service.getRepository.create({
+                colors: ['Orange', 'Blue', 'Yellow'],
+                friends: [
+                    { id: 7, firstName: 'Katharyn', lastName: 'Davidovsky', email: 'kdavidovsky6@tmall.com', gender: 'Female' },
+                    { id: 6, firstName: 'Valeria', lastName: 'Loidl', email: 'vloidl5@nasa.gov', gender: 'Female' },
+                    { id: 9, firstName: 'Antone', lastName: 'Hartzogs', email: 'ahartzogs8@cdc.gov', gender: 'Male' },
+                ] as Person[],
+            }),
+            service.getRepository.create({
+                colors: ['Orange', 'Green', 'Black'],
+                friends: [
+                    { id: 2, firstName: 'Taylor', lastName: 'Ruffles', email: 'truffles1@google.pl', gender: 'Male' },
+                    { id: 3, firstName: 'Maggi', lastName: 'Bon', email: 'mbon2@pagesperso-orange.fr', gender: 'Female' },
+                ] as Person[],
+            }),
         ]);
 
         await app.init();
@@ -51,6 +64,34 @@ describe('Search JSON column - PostgreSQL', () => {
         it('should return empty array when no record matches', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ colors: { operator: '?', operand: 'Gold' } }] },
+            });
+            expect(data).toHaveLength(0);
+        });
+    });
+
+    describe('[@> operator] Does the left JSON value contain the right JSON path/value entries at the top level?', () => {
+        it('should search entites that meets operation', async () => {
+            const { data } = await service.reservedSearch({
+                requestSearchDto: { where: [{ friends: { operator: '@>', operand: '[{ "firstName": "Taylor" }]' } }] },
+            });
+            expect(data).toHaveLength(1);
+
+            const { data: data2 } = await service.reservedSearch({
+                requestSearchDto: { where: [{ friends: { operator: '@>', operand: '[{ "gender": "Male" }]' } }] },
+            });
+            expect(data2).toHaveLength(2);
+
+            const { data: data3 } = await service.reservedSearch({
+                requestSearchDto: {
+                    where: [{ friends: { operator: '@>', operand: '[{ "lastName": "Bon", "email": "mbon2@pagesperso-orange.fr"}]' } }],
+                },
+            });
+            expect(data3).toHaveLength(1);
+        });
+
+        it('should return empty array when no record matches', async () => {
+            const { data } = await service.reservedSearch({
+                requestSearchDto: { where: [{ friends: { operator: '@>', operand: '[{ "firstName": "Donghyuk" }]' } }] },
             });
             expect(data).toHaveLength(0);
         });

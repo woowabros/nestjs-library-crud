@@ -218,5 +218,16 @@ describe('BaseController Swagger Decorator', () => {
         expect(routeSet[search].root?.method).toEqual('post');
         expect(routeSet[search].root?.summary).toEqual("Search from 'Base' Table");
         expect(routeSet[search].root?.description).toEqual("Fetch multiple entities in 'Base' Table via custom query in body");
+        expect(routeSet[search].root?.requestBody).toEqual({
+            description: 'SearchBaseDto',
+            required: true,
+            content: {
+                'application/json': {
+                    schema: {
+                        $ref: '#/components/schemas/RequestSearchDto',
+                    },
+                },
+            },
+        });
     });
 });

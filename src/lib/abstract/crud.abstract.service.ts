@@ -1,15 +1,16 @@
 import { BaseEntity } from 'typeorm';
 
 import {
-    PaginationResponse,
+    CrudCreateManyRequest,
+    CrudCreateOneRequest,
+    CrudDeleteOneRequest,
     CrudReadManyRequest,
     CrudReadOneRequest,
-    CrudSearchRequest,
-    CrudCreateRequest,
-    CrudUpsertRequest,
-    CrudUpdateOneRequest,
-    CrudDeleteOneRequest,
     CrudRecoverRequest,
+    CrudSearchRequest,
+    CrudUpdateOneRequest,
+    CrudUpsertRequest,
+    PaginationResponse,
 } from '../interface';
 
 /**
@@ -24,7 +25,8 @@ export abstract class CrudAbstractService<T extends BaseEntity> {
 
     abstract reservedSearch(req: CrudSearchRequest<T>): Promise<{ data: Array<CrudResponseType<T>> }>;
 
-    abstract reservedCreate(req: CrudCreateRequest<T>): Promise<CrudResponseType<T> | Array<CrudResponseType<T>>>;
+    abstract reservedCreate(req: CrudCreateOneRequest<T>): Promise<CrudResponseType<T>>;
+    abstract reservedCreate(req: CrudCreateManyRequest<T>): Promise<Array<CrudResponseType<T>>>;
 
     abstract reservedUpsert(req: CrudUpsertRequest<T>): Promise<CrudResponseType<T>>;
 

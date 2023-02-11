@@ -9,7 +9,6 @@ import { PaginationOffsetDto } from './dto/pagination-offset.dto';
 import {
     CrudReadManyRequest,
     CrudReadOneRequest,
-    CrudCreateRequest,
     CrudResponseOptions,
     CrudResponseOption,
     CrudDeleteOneRequest,
@@ -21,6 +20,9 @@ import {
     PaginationResponse,
     PaginationType,
     CrudSearchRequest,
+    isCrudCreateManyRequest,
+    CrudCreateOneRequest,
+    CrudCreateManyRequest,
 } from './interface';
 import { PaginationHelper } from './provider/pagination.helper';
 import { TypeOrmQueryBuilderHelper } from './provider/typeorm-query-builder.helper';
@@ -81,23 +83,23 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             });
     }
 
-    async reservedCreate(crudCreateRequest: CrudCreateRequest<T>): Promise<CrudResponseType<T> | Array<CrudResponseType<T>>> {
+    reservedCreate(req: CrudCreateOneRequest<T>): Promise<CrudResponseType<T>>;
+    reservedCreate(req: CrudCreateManyRequest<T>): Promise<Array<CrudResponseType<T>>>;
+    async reservedCreate(
+        crudCreateRequest: CrudCreateOneRequest<T> | CrudCreateManyRequest<T>,
+    ): Promise<CrudResponseType<T> | Array<CrudResponseType<T>>> {
         const responseOption = crudCreateRequest.options?.response;
 
-        if (Array.isArray(crudCreateRequest.body)) {
-            const entities = crudCreateRequest.body.map((b) => this.repository.create(b));
-            return this.repository
-                .save(entities)
-                .then((result) => result.map((r) => this.toResponse(r, responseOption)))
-                .catch((error) => {
-                    throw new ConflictException(error);
-                });
-        }
+        const entities = this.repository.create(
+            isCrudCreateManyRequest<T>(crudCreateRequest) ? crudCreateRequest.body : [crudCreateRequest.body],
+        );
 
-        const entity = this.repository.create(crudCreateRequest.body);
         return this.repository
-            .save(entity)
-            .then((result) => this.toResponse(result, responseOption))
+            .save(entities)
+            .then((result) => result.map((r) => this.toResponse(r, responseOption)))
+            .then((result) => {
+                return isCrudCreateManyRequest<T>(crudCreateRequest) ? result : result[0];
+            })
             .catch((error) => {
                 throw new ConflictException(error);
             });

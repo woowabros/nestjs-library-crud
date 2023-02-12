@@ -23,6 +23,15 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             const customSearchRequestOptions: CustomSearchRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
 
+            if (req.params && req.body?.where && Array.isArray(req.body.where)) {
+                const paramsCondition = Object.entries(req.params).reduce(
+                    (queryFilter, [key, operand]) => ({ ...queryFilter, [key]: { operator: '=', operand } }),
+                    {},
+                );
+                for (const queryFilter of req.body.where) {
+                    Object.assign(queryFilter, paramsCondition);
+                }
+            }
             const requestSearchDto = await this.validateBody(req.body);
             req[Constants.CRUD_ROUTE_ARGS] = { requestSearchDto, relations: customSearchRequestOptions?.relations };
 

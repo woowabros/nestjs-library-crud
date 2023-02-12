@@ -4,6 +4,7 @@ import _ from 'lodash';
 import request from 'supertest';
 
 import { DynamicCrudModule } from '../dynamic-crud.module';
+import { TestHelper } from '../test.helper';
 
 describe('Params Option - entity의 key를 params으로 사용하는 경우', () => {
     let app: INestApplication;
@@ -32,15 +33,7 @@ describe('Params Option - entity의 key를 params으로 사용하는 경우', ()
     });
 
     it(`should be provided /base/:${param}`, () => {
-        const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-            if (r.route?.path) {
-                for (const method of Object.keys(r.route.methods)) {
-                    list[method] = list[method] ?? [];
-                    list[method].push(r.route.path);
-                }
-            }
-            return list;
-        }, {});
+        const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
 
         expect(routerPathList.get).toEqual(expect.arrayContaining([`/base/:${param}`])); // readOne
         expect(routerPathList.delete).toEqual(expect.arrayContaining([`/base/:${param}`])); // delete
@@ -58,46 +51,56 @@ describe('Params Option - entity의 key를 params으로 사용하는 경우', ()
             ),
         );
 
-        const readManyResponse = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
-        expect(readManyResponse.body.data).toHaveLength(names.length);
+        const { body: readManyResponse } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
+        expect(readManyResponse.data).toHaveLength(names.length);
 
-        const readManyResponseFilteredByName = await request(app.getHttpServer())
+        const { body: readManyResponseFilteredByName } = await request(app.getHttpServer())
             .get('/base')
             .query({ name: 'name1' })
             .expect(HttpStatus.OK);
-        expect(readManyResponseFilteredByName.body.data).toHaveLength(3);
+        expect(readManyResponseFilteredByName.data).toHaveLength(3);
 
-        const readOneResponse = await request(app.getHttpServer()).get('/base/name1').expect(HttpStatus.OK);
-        expect(readOneResponse.body.name).toEqual('name1');
+        const { body: readOneResponse } = await request(app.getHttpServer()).get('/base/name1').expect(HttpStatus.OK);
+        expect(readOneResponse.name).toEqual('name1');
 
         await request(app.getHttpServer()).patch('/base/name1').send({ name: 'noname' }).expect(HttpStatus.OK);
 
-        const readOneNonameResponse = await request(app.getHttpServer()).get('/base/noname').expect(HttpStatus.OK);
-        expect(readOneNonameResponse.body.name).toEqual('noname');
+        const { body: readOneNonameResponse } = await request(app.getHttpServer()).get('/base/noname').expect(HttpStatus.OK);
+        expect(readOneNonameResponse.name).toEqual('noname');
 
-        const readManyResponseAfterChange = await request(app.getHttpServer()).get('/base').query({ name: 'name1' }).expect(HttpStatus.OK);
-        expect(readManyResponseAfterChange.body.data).toHaveLength(2);
+        const { body: readManyResponseAfterChange } = await request(app.getHttpServer())
+            .get('/base')
+            .query({ name: 'name1' })
+            .expect(HttpStatus.OK);
+        expect(readManyResponseAfterChange.data).toHaveLength(2);
 
         await request(app.getHttpServer()).delete('/base/name1').expect(HttpStatus.OK);
 
-        const readManyResponseAfterDelete = await request(app.getHttpServer()).get('/base').query({ name: 'name1' }).expect(HttpStatus.OK);
-        expect(readManyResponseAfterDelete.body.data).toHaveLength(1);
+        const { body: readManyResponseAfterDelete } = await request(app.getHttpServer())
+            .get('/base')
+            .query({ name: 'name1' })
+            .expect(HttpStatus.OK);
+        expect(readManyResponseAfterDelete.data).toHaveLength(1);
 
         await request(app.getHttpServer()).post('/base/name1/recover').expect(HttpStatus.CREATED);
 
-        const readManyResponseAfterRecover = await request(app.getHttpServer()).get('/base').query({ name: 'name1' }).expect(HttpStatus.OK);
-        expect(readManyResponseAfterRecover.body.data).toHaveLength(2);
+        const { body: readManyResponseAfterRecover } = await request(app.getHttpServer())
+            .get('/base')
+            .query({ name: 'name1' })
+            .expect(HttpStatus.OK);
+        expect(readManyResponseAfterRecover.data).toHaveLength(2);
 
-        await request(app.getHttpServer()).put('/base/name3').send({ name: 'newName' }).expect(HttpStatus.OK);
-        const readOneResponseAfterUpsert = await request(app.getHttpServer()).get('/base/newName').expect(HttpStatus.OK);
-        expect(readOneResponseAfterUpsert.body.name).toEqual('newName');
+        await request(app.getHttpServer()).put('/base/name3').send({ type: 3 }).expect(HttpStatus.OK);
+        const { body: readOneResponseAfterUpsert } = await request(app.getHttpServer()).get('/base/name3').expect(HttpStatus.OK);
+        expect(readOneResponseAfterUpsert.name).toEqual('name3');
+        expect(readOneResponseAfterUpsert.type).toEqual(3);
 
         await request(app.getHttpServer()).put('/base/newName').send({ name: 'newName' }).expect(HttpStatus.OK);
 
-        const readManyResponseAfterUpsert = await request(app.getHttpServer())
+        const { body: readManyResponseAfterUpsert } = await request(app.getHttpServer())
             .get('/base')
             .query({ name: 'newName' })
             .expect(HttpStatus.OK);
-        expect(readManyResponseAfterUpsert.body.data).toHaveLength(1);
+        expect(readManyResponseAfterUpsert.data).toHaveLength(1);
     });
 });

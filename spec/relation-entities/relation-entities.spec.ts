@@ -2,6 +2,8 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { RelationEntitiesModule } from './relation-entities.module';
+import { TestHelper } from '../test.helper';
+
 describe('Relation Entities Routes', () => {
     let app: INestApplication;
 
@@ -27,15 +29,7 @@ describe('Relation Entities Routes', () => {
     });
 
     it('should be provided route path for each', async () => {
-        const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-            if (r.route?.path) {
-                for (const method of Object.keys(r.route.methods)) {
-                    list[method] = list[method] ?? [];
-                    list[method].push(r.route.path);
-                }
-            }
-            return list;
-        }, {});
+        const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
         expect(routerPathList.get).toHaveLength(8);
         expect(routerPathList.get).toEqual(
             expect.arrayContaining([

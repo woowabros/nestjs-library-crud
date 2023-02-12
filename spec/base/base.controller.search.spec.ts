@@ -5,6 +5,7 @@ import _ from 'lodash';
 
 import { BaseEntity } from './base.entity';
 import { BaseModule } from './base.module';
+import { TestHelper } from '../test.helper';
 
 describe('BaseController', () => {
     let app: INestApplication;
@@ -36,15 +37,7 @@ describe('BaseController', () => {
 
     describe('SEARCH', () => {
         it('should be provided /search', async () => {
-            const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-                if (r.route?.path) {
-                    for (const method of Object.keys(r.route.methods)) {
-                        list[method] = list[method] ?? [];
-                        list[method].push(r.route.path);
-                    }
-                }
-                return list;
-            }, {});
+            const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
             expect(routerPathList.post).toEqual(expect.arrayContaining(['/base/search']));
         });
     });

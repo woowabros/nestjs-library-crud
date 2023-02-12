@@ -6,6 +6,7 @@ import request from 'supertest';
 import { CustomEntity } from './custom-entity.entity';
 import { CustomEntityModule } from './custom-entity.module';
 import { CustomEntityService } from './custom-entity.service';
+import { TestHelper } from '../test.helper';
 
 describe('CustomEntity - Delete', () => {
     let app: INestApplication;
@@ -44,15 +45,7 @@ describe('CustomEntity - Delete', () => {
 
     describe('RECOVER', () => {
         it('should be provided /:uuid/recover', async () => {
-            const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-                if (r.route?.path) {
-                    for (const method of Object.keys(r.route.methods)) {
-                        list[method] = list[method] ?? [];
-                        list[method].push(r.route.path);
-                    }
-                }
-                return list;
-            }, {});
+            const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
             expect(routerPathList.post).toEqual(expect.arrayContaining(['/base/:uuid/recover']));
         });
 
@@ -68,7 +61,7 @@ describe('CustomEntity - Delete', () => {
 
             // getMany -> id가 없다.
             const { body } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
-            expect(body.data.some((entity) => entity.uuid === uuid)).toBeFalsy();
+            expect(body.data.some((entity: any) => entity.uuid === uuid)).toBeFalsy();
 
             // Recover
             await request(app.getHttpServer()).post(`/base/${uuid}/recover`).expect(HttpStatus.CREATED);

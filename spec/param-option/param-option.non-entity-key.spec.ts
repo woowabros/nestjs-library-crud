@@ -4,6 +4,7 @@ import _ from 'lodash';
 import request from 'supertest';
 
 import { DynamicCrudModule } from '../dynamic-crud.module';
+import { TestHelper } from '../test.helper';
 
 describe('Params Option - entity의 key가 아닌 params으로 사용하는 경우', () => {
     let app: INestApplication;
@@ -32,15 +33,7 @@ describe('Params Option - entity의 key가 아닌 params으로 사용하는 경�
     });
 
     it(`should be provided /base/:${param}`, () => {
-        const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-            if (r.route?.path) {
-                for (const method of Object.keys(r.route.methods)) {
-                    list[method] = list[method] ?? [];
-                    list[method].push(r.route.path);
-                }
-            }
-            return list;
-        }, {});
+        const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
 
         expect(routerPathList.get).toEqual(expect.arrayContaining([`/base/:${param}`])); // readOne
         expect(routerPathList.delete).toEqual(expect.arrayContaining([`/base/:${param}`])); // delete

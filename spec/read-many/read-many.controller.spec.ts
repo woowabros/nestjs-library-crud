@@ -30,9 +30,7 @@ describe('ReadMany - Options', () => {
         app = moduleFixture.createNestApplication();
 
         service = moduleFixture.get<BaseService>(BaseService);
-        await Promise.all(
-            _.range(100).map((number) => service.getRepository.save(service.getRepository.create({ name: `name-${number}` }))),
-        );
+        await Promise.all(_.range(100).map((number) => service.repository.save(service.repository.create({ name: `name-${number}` }))));
 
         await app.init();
     });

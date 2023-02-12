@@ -46,14 +46,14 @@ describe('Search Query Operator', () => {
          */
         await Promise.all(
             _.range(5).map((no: number) =>
-                service.getRepository.save(
-                    service.getRepository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no, col3: 10 - no }),
+                service.repository.save(
+                    service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no, col3: 10 - no }),
                 ),
             ),
         );
         await Promise.all(
             _.range(5, 10).map((no: number) =>
-                service.getRepository.save(service.getRepository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no })),
+                service.repository.save(service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no })),
             ),
         );
 

@@ -30,9 +30,7 @@ describe('CustomEntity - ReadMany', () => {
 
         service = moduleFixture.get<CustomEntityService>(CustomEntityService);
         await Promise.all(
-            _.range(100).map((number) =>
-                service.getRepository.save(service.getRepository.create({ uuid: `${number}`, name: `name-${number}` })),
-            ),
+            _.range(100).map((number) => service.repository.save(service.repository.create({ uuid: `${number}`, name: `name-${number}` }))),
         );
 
         await app.init();

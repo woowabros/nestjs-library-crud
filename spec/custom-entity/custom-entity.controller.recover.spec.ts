@@ -30,7 +30,7 @@ describe('CustomEntity - Delete', () => {
 
         service = moduleFixture.get<CustomEntityService>(CustomEntityService);
         entities = await Promise.all(
-            ['name1', 'name2'].map((name: string) => service.getRepository.save(service.getRepository.create({ name }))),
+            ['name1', 'name2'].map((name: string) => service.repository.save(service.repository.create({ name }))),
         );
 
         await app.init();

@@ -29,15 +29,11 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
     private primaryKey: string[];
     private relations: string[];
 
-    constructor(protected repository: Repository<T>) {
+    constructor(public readonly repository: Repository<T>) {
         super();
 
         this.primaryKey = this.repository.metadata.primaryColumns?.map((columnMetadata) => columnMetadata.propertyName) ?? [];
         this.relations = this.repository.metadata.relations?.map((relation) => relation.propertyName);
-    }
-
-    get getRepository(): Repository<T> {
-        return this.repository;
     }
 
     async reservedSearch(crudSearchRequest: CrudSearchRequest<T>) {

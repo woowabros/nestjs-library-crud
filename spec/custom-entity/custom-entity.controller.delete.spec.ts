@@ -28,7 +28,7 @@ describe('CustomEntity - Delete', () => {
         app = moduleFixture.createNestApplication();
 
         service = moduleFixture.get<CustomEntityService>(CustomEntityService);
-        await Promise.all(['name1', 'name2'].map((name: string) => service.getRepository.save(service.getRepository.create({ name }))));
+        await Promise.all(['name1', 'name2'].map((name: string) => service.repository.save(service.repository.create({ name }))));
 
         await app.init();
     });

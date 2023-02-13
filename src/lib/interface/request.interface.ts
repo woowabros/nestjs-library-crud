@@ -1,6 +1,6 @@
 import { DeepPartial } from 'typeorm';
 
-import { PrimaryKey, Sort, PaginationRequest, CrudResponseOptions } from '.';
+import { CrudResponseOptions, PaginationRequest, PrimaryKey, Sort } from '.';
 import { RequestSearchDto } from '../dto/request-search.dto';
 
 export type CrudRequestId<T> = keyof T | Array<keyof T>;
@@ -34,15 +34,25 @@ export interface CrudSearchRequest<T> extends CrudRequestBase {
     relations?: string[];
 }
 
-export interface CrudCreateRequest<T> extends CrudRequestBase {
-    body: DeepPartial<T> | Array<DeepPartial<T>>;
+export interface CrudCreateOneRequest<T> extends CrudRequestBase {
+    body: DeepPartial<T>;
 }
 
-export interface CrudUpsertRequest<T> extends CrudCreateRequest<T> {
+export interface CrudCreateManyRequest<T> extends CrudRequestBase {
+    body: Array<DeepPartial<T>>;
+}
+
+export function isCrudCreateManyRequest<T>(x: CrudCreateOneRequest<T> | CrudCreateManyRequest<T>): x is CrudCreateManyRequest<T> {
+    return Array.isArray(x.body);
+}
+
+export type CrudCreateRequest<T> = CrudCreateOneRequest<T> | CrudCreateManyRequest<T>;
+
+export interface CrudUpsertRequest<T> extends CrudCreateOneRequest<T> {
     params: Partial<Record<keyof T, unknown>>;
 }
 
-export interface CrudUpdateOneRequest<T> extends CrudCreateRequest<T> {
+export interface CrudUpdateOneRequest<T> extends CrudCreateOneRequest<T> {
     params: Partial<Record<keyof T, unknown>>;
 }
 

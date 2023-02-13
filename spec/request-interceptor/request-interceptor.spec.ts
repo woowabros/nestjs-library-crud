@@ -60,6 +60,8 @@ describe('Request Interceptor', () => {
                     deletedAt: null,
                     createdAt: expect.any(String),
                     lastModifiedAt: expect.any(String),
+                    type: null,
+                    description: null,
                 });
             });
     });

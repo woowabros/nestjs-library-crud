@@ -49,6 +49,8 @@ describe('Response Interceptor', () => {
                     name: expect.any(String),
                     createdAt: expect.any(Number),
                     custom: expect.any(Number),
+                    type: null,
+                    description: null,
                 });
             });
 
@@ -62,6 +64,8 @@ describe('Response Interceptor', () => {
                     deletedAt: null,
                     createdAt: expect.any(String),
                     lastModifiedAt: expect.any(String),
+                    type: null,
+                    description: null,
                 });
             });
     });
@@ -77,6 +81,8 @@ describe('Response Interceptor', () => {
             name,
             createdAt: expect.any(Number),
             custom: expect.any(Number),
+            description: null,
+            type: null,
         });
 
         const { body: updatedResponse } = await request(app.getHttpServer())
@@ -109,6 +115,8 @@ describe('Response Interceptor', () => {
             createdAt: createdResponse.createdAt,
             name: 'update',
             custom: expect.any(Number),
+            type: null,
+            description: null,
         });
         await request(app.getHttpServer()).get(`/base/${createdResponse.id}`).expect(HttpStatus.OK);
 

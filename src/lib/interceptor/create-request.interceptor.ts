@@ -21,6 +21,10 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, _factoryOptio
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const createOptions = crudOptions.routes?.[method] ?? {};
             const req = context.switchToHttp().getRequest<Request>();
+
+            if (req.params) {
+                Object.assign(req.body, req.params);
+            }
             const body = await this.validateBody(req.body);
 
             const crudCreateRequest: CrudCreateRequest<typeof crudOptions.entity> = {

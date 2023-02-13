@@ -42,6 +42,8 @@ describe('Response Option - entity', () => {
             id: 1,
             createdAt: expect.any(String),
             lastModifiedAt: expect.any(String),
+            type: null,
+            description: null,
         });
 
         const { body: upsertResponseBody } = await request(app.getHttpServer())
@@ -54,6 +56,8 @@ describe('Response Option - entity', () => {
             deletedAt: null,
             createdAt: expect.any(String),
             lastModifiedAt: expect.any(String),
+            type: null,
+            description: null,
         });
 
         await new Promise((res) => setTimeout(res, 1000));
@@ -67,6 +71,8 @@ describe('Response Option - entity', () => {
             id: 1,
             createdAt: createdResponseBody.createdAt,
             lastModifiedAt: expect.any(String),
+            type: null,
+            description: null,
         });
         expect(updatedResponseBody.lastModifiedAt).not.toEqual(createdResponseBody.lastModifiedAt);
 
@@ -84,6 +90,8 @@ describe('Response Option - entity', () => {
             id: 1,
             createdAt: createdResponseBody.createdAt,
             lastModifiedAt: expect.any(String),
+            type: null,
+            description: null,
         });
     });
 });

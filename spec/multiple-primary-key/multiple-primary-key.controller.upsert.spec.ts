@@ -5,6 +5,7 @@ import request from 'supertest';
 
 import { MultiplePrimaryKeyEntity } from './multiple-primary-key.entity';
 import { MultiplePrimaryKeyModule } from './multiple-primary-key.module';
+import { TestHelper } from '../test.helper';
 
 describe('MultiplePrimaryKey - Upsert', () => {
     let app: INestApplication;
@@ -36,15 +37,7 @@ describe('MultiplePrimaryKey - Upsert', () => {
 
     describe('UPSERT', () => {
         it('should be provided /:uuid1/:uuid2', async () => {
-            const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-                if (r.route?.path) {
-                    for (const method of Object.keys(r.route.methods)) {
-                        list[method] = list[method] ?? [];
-                        list[method].push(r.route.path);
-                    }
-                }
-                return list;
-            }, {});
+            const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
             expect(routerPathList.put).toEqual(expect.arrayContaining(['/base/:uuid1/:uuid2']));
         });
 

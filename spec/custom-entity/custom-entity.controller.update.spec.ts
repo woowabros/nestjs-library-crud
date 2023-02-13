@@ -6,6 +6,7 @@ import request from 'supertest';
 import { CustomEntity } from './custom-entity.entity';
 import { CustomEntityModule } from './custom-entity.module';
 import { CustomEntityService } from './custom-entity.service';
+import { TestHelper } from '../test.helper';
 
 describe('CustomEntity - Update', () => {
     let app: INestApplication;
@@ -41,15 +42,7 @@ describe('CustomEntity - Update', () => {
 
     describe('UPDATE_ONE', () => {
         it('should be provided /:uuid', async () => {
-            const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-                if (r.route?.path) {
-                    for (const method of Object.keys(r.route.methods)) {
-                        list[method] = list[method] ?? [];
-                        list[method].push(r.route.path);
-                    }
-                }
-                return list;
-            }, {});
+            const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
             expect(routerPathList.patch).toEqual(expect.arrayContaining(['/base/:uuid']));
         });
 

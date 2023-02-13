@@ -6,6 +6,7 @@ import request from 'supertest';
 import { MultiplePrimaryKeyEntity } from './multiple-primary-key.entity';
 import { MultiplePrimaryKeyModule } from './multiple-primary-key.module';
 import { MultiplePrimaryKeyService } from './multiple-primary-key.service';
+import { TestHelper } from '../test.helper';
 
 describe('MultiplePrimaryKey - Create', () => {
     let app: INestApplication;
@@ -41,15 +42,7 @@ describe('MultiplePrimaryKey - Create', () => {
 
     describe('CREATE_ONE', () => {
         it('should be provided /', async () => {
-            const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-                if (r.route?.path) {
-                    for (const method of Object.keys(r.route.methods)) {
-                        list[method] = list[method] ?? [];
-                        list[method].push(r.route.path);
-                    }
-                }
-                return list;
-            }, {});
+            const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
             expect(routerPathList.post).toEqual(expect.arrayContaining(['/base']));
         });
 

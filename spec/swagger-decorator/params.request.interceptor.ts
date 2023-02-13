@@ -4,10 +4,12 @@ import { Request } from 'express';
 import { CustomRequestInterceptor } from '../../src';
 
 @Injectable()
-export class ParamsInterceptor extends CustomRequestInterceptor {
+export class ParamsRequestInterceptor extends CustomRequestInterceptor {
     async overrideOptions(req: Request): Promise<void> {
         return new Promise((resolve, _reject) => {
-            req.params = { name: req.params?.custom };
+            if (req.params?.['key']) {
+                delete req.params.key;
+            }
             resolve();
         });
     }

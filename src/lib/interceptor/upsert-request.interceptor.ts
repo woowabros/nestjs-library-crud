@@ -23,6 +23,18 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 factoryOption.columns,
                 new ConflictException('Invalid params'),
             );
+
+            const primaryKeySet = new Set((factoryOption.primaryKeys ?? []).map((primaryKey) => primaryKey.name));
+            for (const [key, value] of Object.entries(req.params)) {
+                if (primaryKeySet.has(key)) {
+                    continue;
+                }
+                if (!_.isNil(req.body[key]) && `${req.body[key]}` !== `${value}`) {
+                    throw new ConflictException(`${key}'s value of body and param do not match`);
+                }
+                req.body[key] = value;
+            }
+
             const body = await this.validateBody(req.body);
 
             const crudUpsertRequest: CrudUpsertRequest<typeof crudOptions.entity> = {

@@ -6,6 +6,7 @@ import request from 'supertest';
 import { BaseEntity } from './base.entity';
 import { BaseModule } from './base.module';
 import { BaseService } from './base.service';
+import { TestHelper } from '../test.helper';
 
 describe('BaseController', () => {
     let app: INestApplication;
@@ -44,15 +45,7 @@ describe('BaseController', () => {
 
     describe('RECOVER', () => {
         it('should be provided /:id/recover', async () => {
-            const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-                if (r.route?.path) {
-                    for (const method of Object.keys(r.route.methods)) {
-                        list[method] = list[method] ?? [];
-                        list[method].push(r.route.path);
-                    }
-                }
-                return list;
-            }, {});
+            const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
             expect(routerPathList.post).toEqual(expect.arrayContaining(['/base/:id/recover']));
         });
 
@@ -68,7 +61,7 @@ describe('BaseController', () => {
 
             // getMany -> id가 없다.
             const { body } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
-            expect(body.data.some((entity) => entity.id === id)).toBeFalsy();
+            expect(body.data.some((entity: any) => entity.id === id)).toBeFalsy();
 
             // Recover
             const recoverResponse = await request(app.getHttpServer()).post(`/base/${id}/recover`).expect(HttpStatus.CREATED);

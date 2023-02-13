@@ -29,8 +29,8 @@ export class CustomRequestInterceptor implements NestInterceptor {
 
     /**
      * @description
-     * [KR] 이 메소드를 오버라이드 하여, Request를 수정할 수 있습니다. 각 메소드에서 제공하는 Options을 통해 추가로 제어할 수 있습니다.
      * [EN] modify request by override this method. If exists requestOption interface by method, Additional control.
+     * [KR] 이 메소드를 오버라이드 하여, Request를 수정할 수 있습니다. 각 메소드에서 제공하는 Options을 통해 추가로 제어할 수 있습니다.
      * @example
      * class MyAuthInterceptor extends CrudCustomRequestInterceptor {
      *   constructor(authService: AuthServer) {}
@@ -44,7 +44,12 @@ export class CustomRequestInterceptor implements NestInterceptor {
     protected async overrideOptions(
         _req: Request,
     ): Promise<
-        CustomReadOneRequestOptions | CustomReadManyRequestOptions | CustomDeleteRequestOptions | CustomSearchRequestOptions | undefined
+        | CustomReadOneRequestOptions
+        | CustomReadManyRequestOptions
+        | CustomDeleteRequestOptions
+        | CustomSearchRequestOptions
+        | undefined
+        | void
     > {
         return;
     }

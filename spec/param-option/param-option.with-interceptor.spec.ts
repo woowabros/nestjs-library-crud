@@ -5,8 +5,9 @@ import request from 'supertest';
 
 import { ParamsInterceptor } from './params.interceptor';
 import { DynamicCrudModule } from '../dynamic-crud.module';
+import { TestHelper } from '../test.helper';
 
-describe('Params Option - Interceptor로 param을 변경하는 경우', () => {
+describe('Params Option - changing params to Interceptor', () => {
     let app: INestApplication;
     const param = 'custom';
 
@@ -33,15 +34,7 @@ describe('Params Option - Interceptor로 param을 변경하는 경우', () => {
     });
 
     it(`should be provided /base/:${param}`, () => {
-        const routerPathList = app.getHttpServer()._events.request._router.stack.reduce((list: Record<string, string[]>, r) => {
-            if (r.route?.path) {
-                for (const method of Object.keys(r.route.methods)) {
-                    list[method] = list[method] ?? [];
-                    list[method].push(r.route.path);
-                }
-            }
-            return list;
-        }, {});
+        const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
 
         expect(routerPathList.get).toEqual(expect.arrayContaining([`/base/:${param}`])); // readOne
         expect(routerPathList.delete).toEqual(expect.arrayContaining([`/base/:${param}`])); // delete
@@ -89,11 +82,14 @@ describe('Params Option - Interceptor로 param을 변경하는 경우', () => {
         const readManyResponseAfterRecover = await request(app.getHttpServer()).get('/base').query({ name: 'name1' }).expect(HttpStatus.OK);
         expect(readManyResponseAfterRecover.body.data).toHaveLength(2);
 
-        await request(app.getHttpServer()).put('/base/name3').send({ name: 'newName' }).expect(HttpStatus.OK);
-        const readOneResponseAfterUpsert = await request(app.getHttpServer()).get('/base/newName').expect(HttpStatus.OK);
-        expect(readOneResponseAfterUpsert.body.name).toEqual('newName');
+        await request(app.getHttpServer()).put('/base/newName').send({ type: 3 }).expect(HttpStatus.OK);
+        const { body: readOneResponseAfterUpsert } = await request(app.getHttpServer()).get('/base/newName').expect(HttpStatus.OK);
+        expect(readOneResponseAfterUpsert.name).toEqual('newName');
+        expect(readOneResponseAfterUpsert.type).toEqual(3);
 
-        await request(app.getHttpServer()).put('/base/newName').send({ name: 'newName' }).expect(HttpStatus.OK);
+        const { body: updateAfterUpsert } = await request(app.getHttpServer()).put('/base/newName').send({ type: 5 }).expect(HttpStatus.OK);
+        expect(updateAfterUpsert.name).toEqual('newName');
+        expect(updateAfterUpsert.type).toEqual(5);
 
         const readManyResponseAfterUpsert = await request(app.getHttpServer())
             .get('/base')

@@ -7,6 +7,7 @@ import request from 'supertest';
 import { CustomEntity } from './custom-entity.entity';
 import { CustomEntityModule } from './custom-entity.module';
 import { CustomEntityService } from './custom-entity.service';
+import { TestHelper } from '../test.helper';
 
 describe('CustomEntity - Search', () => {
     let app: INestApplication;
@@ -44,18 +45,7 @@ describe('CustomEntity - Search', () => {
     });
 
     it('should be provided /search', async () => {
-        const routerPathList = app
-            .getHttpServer()
-            // eslint-disable-next-line @typescript-eslint/ban-types
-            ._events.request._router.stack.reduce((list: Record<string, string[]>, r: { route: { path: string; methods: {} } }) => {
-                if (r.route?.path) {
-                    for (const method of Object.keys(r.route.methods)) {
-                        list[method] = list[method] ?? [];
-                        list[method].push(r.route.path);
-                    }
-                }
-                return list;
-            }, {});
+        const routerPathList = TestHelper.getRoutePath(app.getHttpServer());
         expect(routerPathList.post).toEqual(expect.arrayContaining(['/base/search']));
     });
 

@@ -2,6 +2,7 @@ export const operatorList = ['=', '!=', '>', '>=', '<', '<=', 'LIKE', 'ILIKE'] a
 export const operatorBetween = 'BETWEEN' as const;
 export const operatorIn = 'IN' as const;
 export const operatorNull = 'NULL' as const;
+export const operators = [...operatorList, operatorBetween, operatorIn, operatorNull];
 export type OperatorUnion = (typeof operatorList)[number];
 
 export type QueryFilterOperation =

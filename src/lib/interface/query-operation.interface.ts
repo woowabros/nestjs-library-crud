@@ -1,4 +1,9 @@
-export const operatorList = ['=', '!=', '>', '>=', '<', '<=', 'LIKE', 'ILIKE'] as const;
+const commonOperatorList = ['=', '!=', '>', '>=', '<', '<=', 'LIKE', 'ILIKE'] as const;
+const postgreSQLSpecificOperatorList = ['?', '@>'] as const;
+const mySQLSpecificOperatorList = ['JSON_CONTAINS'] as const;
+
+export const operatorList = [...commonOperatorList, ...postgreSQLSpecificOperatorList, ...mySQLSpecificOperatorList] as const;
+
 export const operatorBetween = 'BETWEEN' as const;
 export const operatorIn = 'IN' as const;
 export const operatorNull = 'NULL' as const;

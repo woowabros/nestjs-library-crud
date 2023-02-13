@@ -7,7 +7,9 @@ interface RouteBaseOption {
     decorators?: Array<PropertyDecorator | MethodDecorator>;
     interceptors?: Array<Type<NestInterceptor>>;
     response?: CrudResponseOptions;
-    swagger?: boolean;
+    swagger?: {
+        hide?: boolean;
+    };
 }
 
 export interface PrimaryKey {
@@ -36,11 +38,15 @@ export interface CrudOptions {
             relations?: false | string[];
         } & RouteBaseOption;
         [Method.CREATE]?: {
-            body?: Type<unknown>;
+            swagger?: {
+                body?: Type<unknown>;
+            };
         } & RouteBaseOption;
         [Method.UPDATE]?: {
             params?: string[];
-            body?: Type<unknown>;
+            swagger?: {
+                body?: Type<unknown>;
+            };
         } & RouteBaseOption;
         [Method.DELETE]?: {
             params?: string[];
@@ -48,7 +54,9 @@ export interface CrudOptions {
         } & RouteBaseOption;
         [Method.UPSERT]?: {
             params?: string[];
-            body?: Type<unknown>;
+            swagger?: {
+                body?: Type<unknown>;
+            };
         } & RouteBaseOption;
         [Method.RECOVER]?: {
             params?: string[];

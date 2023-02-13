@@ -30,8 +30,8 @@ describe('Search JSONB column - PostgreSQL', () => {
         app = moduleFixture.createNestApplication();
         service = moduleFixture.get<JsonbColumnService>(JsonbColumnService);
 
-        await service.getRepository.query('DELETE FROM "jsonb_column_entity"');
-        await service.getRepository.save(service.getRepository.create(fixtures));
+        await service.repository.query('DELETE FROM "jsonb_column_entity"');
+        await service.repository.save(service.repository.create(fixtures));
 
         await app.init();
     });

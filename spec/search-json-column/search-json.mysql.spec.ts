@@ -30,8 +30,8 @@ describe('Search JSON column - MySQL', () => {
         app = moduleFixture.createNestApplication();
         service = moduleFixture.get<JsonColumnService>(JsonColumnService);
 
-        await service.getRepository.query('DELETE FROM json_column_entity');
-        await service.getRepository.save(service.getRepository.create(fixtures));
+        await service.repository.query('DELETE FROM json_column_entity');
+        await service.repository.save(service.repository.create(fixtures));
 
         await app.init();
     });

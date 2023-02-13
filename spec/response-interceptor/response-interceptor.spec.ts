@@ -1,11 +1,11 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import request from 'supertest';
 
 import { BaseModule } from './response-interceptor.module';
 import { BaseEntity } from '../base/base.entity';
 import { BaseService } from '../base/base.service';
+import { TestHelper } from '../test.helper';
 
 describe('Response Interceptor', () => {
     let app: INestApplication;
@@ -13,17 +13,7 @@ describe('Response Interceptor', () => {
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                BaseModule,
-                TypeOrmModule.forRoot({
-                    type: 'sqlite',
-                    database: ':memory:',
-                    entities: [BaseEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [BaseModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
 
@@ -33,10 +23,9 @@ describe('Response Interceptor', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should be able to modify response body', async () => {

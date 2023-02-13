@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/quotes */
 /* eslint-disable no-useless-escape */
 import { INestApplication } from '@nestjs/common';
-import { TestingModule, Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Test, TestingModule } from '@nestjs/testing';
 import _ from 'lodash';
 
-import { TestService, TestModule, TestEntity } from './module';
+import { TestEntity, TestModule, TestService } from './module';
 import { RequestSearchDto } from '../../src/lib/dto/request-search.dto';
+import { TestHelper } from '../test.helper';
 
 describe('Search Query Operator', () => {
     let app: INestApplication;
@@ -14,17 +14,7 @@ describe('Search Query Operator', () => {
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                TestModule,
-                TypeOrmModule.forRoot({
-                    type: 'sqlite',
-                    database: ':memory:',
-                    entities: [TestEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [TestModule, TestHelper.getTypeOrmMysqlModule([TestEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
         service = moduleFixture.get<TestService>(TestService);
@@ -60,10 +50,9 @@ describe('Search Query Operator', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should build `select` clause with RequestSearchDto when `select` is provided', async () => {

@@ -1,6 +1,5 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import _ from 'lodash';
 import request from 'supertest';
 
@@ -15,17 +14,7 @@ describe('CustomEntity - Search', () => {
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                CustomEntityModule,
-                TypeOrmModule.forRoot({
-                    type: 'sqlite',
-                    database: ':memory:',
-                    entities: [CustomEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [CustomEntityModule, TestHelper.getTypeOrmMysqlModule([CustomEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
 
@@ -38,10 +27,9 @@ describe('CustomEntity - Search', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should be provided /search', async () => {

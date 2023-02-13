@@ -6,6 +6,7 @@ import request from 'supertest';
 import { PaginationModule } from './pagination.module';
 import { PaginationType } from '../../src';
 import { BaseService } from '../base/base.service';
+import { TestHelper } from '../test.helper';
 
 describe('Pagination', () => {
     let app: INestApplication;
@@ -27,10 +28,9 @@ describe('Pagination', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should return UNPROCESSABLE_ENTITY when query is invalid', async () => {

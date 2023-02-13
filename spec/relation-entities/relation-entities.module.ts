@@ -10,8 +10,8 @@ import { QuestionEntity } from './question.entity';
 import { QuestionService } from './question.service';
 import { WriterEntity } from './writer.entity';
 import { WriterService } from './writer.service';
-import { Crud } from '../../src/lib/crud.decorator';
-import { CrudController, CrudOptions } from '../../src/lib/interface';
+import { Crud, CrudController, CrudOptions } from '../../src';
+import { TestHelper } from '../test.helper';
 
 enum RelationController {
     CATEGORY = 'category',
@@ -62,16 +62,7 @@ export function RelationEntitiesModule(controllerOptions: ControllerOptions) {
     function getModule() {
         @Module({
             imports: [
-                forwardRef(() =>
-                    TypeOrmModule.forRoot({
-                        type: 'sqlite',
-                        database: ':memory:',
-                        entities: [CategoryEntity, CommentEntity, QuestionEntity, WriterEntity],
-                        synchronize: true,
-                        logging: true,
-                        logger: 'file',
-                    }),
-                ),
+                forwardRef(() => TestHelper.getTypeOrmMysqlModule([CategoryEntity, CommentEntity, QuestionEntity, WriterEntity])),
                 TypeOrmModule.forFeature([CategoryEntity, CommentEntity, QuestionEntity, WriterEntity]),
             ],
             controllers: [categoryController(), writerController(), questionController(), commentController()],

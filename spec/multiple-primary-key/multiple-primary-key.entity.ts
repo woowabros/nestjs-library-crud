@@ -17,7 +17,7 @@ export class MultiplePrimaryKeyEntity extends BaseEntity {
     @Column('varchar', { nullable: true })
     name: string;
 
-    @DeleteDateColumn({ name: 'deleted_at' })
+    @DeleteDateColumn()
     deletedAt?: Date;
 
     @BeforeInsert()

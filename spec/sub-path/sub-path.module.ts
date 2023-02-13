@@ -7,8 +7,8 @@ import { DepthOneEntity } from './depth-one.entity';
 import { DepthOneService } from './depth-one.service';
 import { DepthTwoEntity } from './depth-two.entity';
 import { DepthTwoService } from './depth-two.service';
-import { Crud } from '../../src/lib/crud.decorator';
-import { CrudController } from '../../src/lib/interface';
+import { Crud, CrudController } from '../../src';
+import { TestHelper } from '../test.helper';
 
 export function SubPathModule() {
     function depthOneController() {
@@ -32,16 +32,7 @@ export function SubPathModule() {
     function getModule() {
         @Module({
             imports: [
-                forwardRef(() =>
-                    TypeOrmModule.forRoot({
-                        type: 'sqlite',
-                        database: ':memory:',
-                        entities: [DepthOneEntity, DepthTwoEntity],
-                        synchronize: true,
-                        logging: true,
-                        logger: 'file',
-                    }),
-                ),
+                forwardRef(() => TestHelper.getTypeOrmMysqlModule([DepthOneEntity, DepthTwoEntity])),
                 TypeOrmModule.forFeature([DepthOneEntity, DepthTwoEntity]),
             ],
             controllers: [depthOneController(), depthTwoController()],

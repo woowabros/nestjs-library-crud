@@ -1,4 +1,5 @@
-import { CrudAbstractEntity } from '../../src/lib/abstract';
+import { CrudAbstractEntity } from '../crud.abstract.entity';
+
 describe('DuplicatedOverrideController', () => {
     it('should be use one decorator per method', () => {
         try {

@@ -1,37 +1,26 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import request from 'supertest';
 
 import { UniqueEntity } from './unique.entity';
 import { UniqueModule } from './unique.module';
+import { TestHelper } from '../test.helper';
 
 describe('UniqueController', () => {
     let app: INestApplication;
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                UniqueModule,
-                TypeOrmModule.forRoot({
-                    type: 'sqlite',
-                    database: ':memory:',
-                    entities: [UniqueEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [UniqueModule, TestHelper.getTypeOrmMysqlModule([UniqueEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
 
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     describe('CREATE_ONE', () => {

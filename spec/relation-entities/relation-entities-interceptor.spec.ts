@@ -4,6 +4,7 @@ import request from 'supertest';
 
 import { CommentRelationInterceptor } from './comment-relation.interceptor';
 import { RelationEntitiesModule } from './relation-entities.module';
+import { TestHelper } from '../test.helper';
 
 describe('relation interceptor', () => {
     let app: INestApplication;
@@ -27,10 +28,9 @@ describe('relation interceptor', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should be returned different relation entity, Depending on option by custom request interceptor', async () => {

@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
 import { RelationEntitiesModule } from './relation-entities.module';
+import { TestHelper } from '../test.helper';
 
 describe('Relation Entities Search', () => {
     let app: INestApplication;
@@ -22,10 +23,9 @@ describe('Relation Entities Search', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should search entity with relations', async () => {

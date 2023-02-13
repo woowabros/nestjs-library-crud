@@ -1,12 +1,12 @@
-import { INestApplication, HttpStatus } from '@nestjs/common';
-import { TestingModule, Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { HttpStatus, INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import _ from 'lodash';
 import request from 'supertest';
 
 import { ReadManyModule } from './read-many.module';
 import { BaseEntity } from '../base/base.entity';
 import { BaseService } from '../base/base.service';
+import { TestHelper } from '../test.helper';
 
 describe('ReadMany - Options', () => {
     let app: INestApplication;
@@ -15,17 +15,7 @@ describe('ReadMany - Options', () => {
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                ReadManyModule,
-                TypeOrmModule.forRoot({
-                    type: 'sqlite',
-                    database: ':memory:',
-                    entities: [BaseEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [ReadManyModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
 
@@ -35,10 +25,9 @@ describe('ReadMany - Options', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     describe('Sort ASC', () => {

@@ -5,6 +5,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { ExtraModel } from './extra-model';
 import { DynamicCrudModule } from '../dynamic-crud.module';
+import { TestHelper } from '../test.helper';
 
 describe('Apply ApiExtraModels Decorator', () => {
     let app: INestApplication;
@@ -19,10 +20,9 @@ describe('Apply ApiExtraModels Decorator', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should include extra model', () => {

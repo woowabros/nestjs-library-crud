@@ -1,9 +1,9 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
 import request from 'supertest';
 
 import { DynamicCrudModule } from '../dynamic-crud.module';
+import { TestHelper } from '../test.helper';
 
 describe('Response Option - entity', () => {
     let app: INestApplication;
@@ -25,10 +25,9 @@ describe('Response Option - entity', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should be returned entity as response result', async () => {

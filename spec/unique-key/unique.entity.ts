@@ -2,8 +2,8 @@ import { Type } from 'class-transformer';
 import { IsString } from 'class-validator';
 import { Column, Entity } from 'typeorm';
 
-import { CrudAbstractEntity } from '../../src/lib/abstract';
-import { GROUP } from '../../src/lib/interface';
+import { GROUP } from '../../src';
+import { CrudAbstractEntity } from '../crud.abstract.entity';
 
 @Entity('base')
 export class UniqueEntity extends CrudAbstractEntity {

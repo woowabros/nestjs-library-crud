@@ -17,9 +17,8 @@ describe('Subpath', () => {
     });
 
     afterEach(async () => {
-        if (app) {
-            await app.close();
-        }
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should be provided methods', async () => {

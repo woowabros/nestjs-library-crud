@@ -21,7 +21,7 @@ export class CustomEntity extends BaseEntity {
     @IsOptional({ groups: [GROUP.CREATE, GROUP.UPDATE, GROUP.UPSERT, GROUP.SEARCH] })
     descriptions?: string;
 
-    @DeleteDateColumn({ name: 'deleted_at' })
+    @DeleteDateColumn()
     deletedAt?: Date;
 
     @BeforeInsert()

@@ -206,7 +206,7 @@ export class CrudRouteFactory {
     }
 
     private applySwaggerDecorator(method: Method, params: string[], target: Object) {
-        if (this.crudOptions.routes?.[method]?.swagger === false) {
+        if (this.crudOptions.routes?.[method]?.swagger?.hide) {
             Reflect.defineMetadata(DECORATORS.API_EXCLUDE_ENDPOINT, { disable: true }, target);
             return;
         }

@@ -192,7 +192,7 @@ Decorator Option으로 route 마다 `swagger`를 비 활성화 할 수 있습니
 <a href="./spe/exclude-swagger/exclude-swagger.spec.ts">exclude-swagger.spec.ts</a>와 같이 method 별로 Swagger를 비활성화 할 수 있습니다.
 
 ```
-@Crud({ entity: BaseEntity, routes: { recover: { swagger: false } } })
+@Crud({ entity: BaseEntity, routes: { recover: { swagger: { hide: true } } } })
 ```
 
 ---

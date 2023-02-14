@@ -36,7 +36,7 @@
         "lint": "eslint --ext .ts,.js .",
         "docker-compose-up:test": "docker-compose -f docker-compose.test.yml --env-file .env.test up -d",
         "docker-compose-down:test": "docker-compose -f docker-compose.test.yml --env-file .env.test down",
-        "test": "jest --config=jest.config.ts --maxWorkers=1 --forceExit",
+        "test": "jest --config=jest.config.ts --runInBand --forceExit",
         "test:ci": "yarn docker-compose-up:test && yarn test && yarn docker-compose-down:test",
         "build": "tsc -p tsconfig.lib.json",
         "release": "release-it"

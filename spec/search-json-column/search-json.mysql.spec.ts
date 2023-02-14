@@ -2,10 +2,10 @@ import 'mysql2';
 
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { fixtures } from './fixture';
 import { JsonColumnEntity, JsonColumnModule, JsonColumnService } from './json.module';
+import { TestHelper } from '../test.helper';
 
 describe('Search JSON column - MySQL', () => {
     let app: INestApplication;
@@ -13,19 +13,7 @@ describe('Search JSON column - MySQL', () => {
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                JsonColumnModule,
-                TypeOrmModule.forRoot({
-                    type: 'mysql',
-                    database: process.env.MYSQL_DATABASE_NAME,
-                    username: process.env.MYSQL_DATABASE_USERNAME,
-                    password: process.env.MYSQL_DATABASE_PASSWORD,
-                    entities: [JsonColumnEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [JsonColumnModule, TestHelper.getTypeOrmMysqlModule([JsonColumnEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
         service = moduleFixture.get<JsonColumnService>(JsonColumnService);
@@ -36,10 +24,9 @@ describe('Search JSON column - MySQL', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     describe('[JSON_CONTAINS operator] Whether JSON document contains specific object at path', () => {

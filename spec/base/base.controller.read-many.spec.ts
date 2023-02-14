@@ -1,7 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { TestingModule, Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import _ from 'lodash';
+import { Test, TestingModule } from '@nestjs/testing';
 
 import { BaseEntity } from './base.entity';
 import { BaseModule } from './base.module';
@@ -12,27 +10,16 @@ describe('BaseController', () => {
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                BaseModule,
-                TypeOrmModule.forRoot({
-                    type: 'sqlite',
-                    database: ':memory:',
-                    entities: [BaseEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [BaseModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
 
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     describe('READ_MANY', () => {

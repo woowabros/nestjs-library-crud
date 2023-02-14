@@ -4,8 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { BaseEntity } from './base/base.entity';
 import { BaseService } from './base/base.service';
-import { Crud } from '../src/lib/crud.decorator';
-import { CrudController, CrudOptions } from '../src/lib/interface';
+import { TestHelper } from './test.helper';
+import { Crud, CrudController, CrudOptions } from '../src';
 
 export function DynamicCrudModule(routeOption: CrudOptions['routes'], prefix = 'base', entity = BaseEntity) {
     function getController() {
@@ -19,19 +19,7 @@ export function DynamicCrudModule(routeOption: CrudOptions['routes'], prefix = '
 
     function getModule() {
         @Module({
-            imports: [
-                forwardRef(() =>
-                    TypeOrmModule.forRoot({
-                        type: 'sqlite',
-                        database: ':memory:',
-                        entities: [BaseEntity],
-                        synchronize: true,
-                        logging: true,
-                        logger: 'file',
-                    }),
-                ),
-                TypeOrmModule.forFeature([BaseEntity]),
-            ],
+            imports: [forwardRef(() => TestHelper.getTypeOrmMysqlModule([BaseEntity])), TypeOrmModule.forFeature([BaseEntity])],
             controllers: [getController()],
             providers: [BaseService],
         })

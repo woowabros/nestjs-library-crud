@@ -7,13 +7,12 @@ import { ModelPropertiesAccessor } from '@nestjs/swagger/dist/services/model-pro
 import { SchemaObjectFactory } from '@nestjs/swagger/dist/services/schema-object-factory';
 import { SwaggerTypesMapper } from '@nestjs/swagger/dist/services/swagger-types-mapper';
 import { SwaggerExplorer } from '@nestjs/swagger/dist/swagger-explorer';
-import { TestingModule, Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import _ from 'lodash';
+import { Test, TestingModule } from '@nestjs/testing';
 
 import { BaseController } from './base.controller';
 import { BaseEntity } from './base.entity';
 import { BaseModule } from './base.module';
+import { TestHelper } from '../test.helper';
 
 describe('BaseController Swagger Decorator', () => {
     let app: INestApplication;
@@ -22,17 +21,7 @@ describe('BaseController Swagger Decorator', () => {
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                BaseModule,
-                TypeOrmModule.forRoot({
-                    type: 'sqlite',
-                    database: ':memory:',
-                    entities: [BaseEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [BaseModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
 
@@ -57,10 +46,9 @@ describe('BaseController Swagger Decorator', () => {
         }, {} as Record<string, DenormalizedDoc>);
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should generate api operation and response to ReadOne method', () => {

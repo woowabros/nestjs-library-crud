@@ -2,10 +2,10 @@ import 'pg';
 
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { fixtures } from './fixture';
 import { JsonbColumnEntity, JsonbColumnModule, JsonbColumnService } from './jsonb.module';
+import { TestHelper } from '../test.helper';
 
 describe('Search JSONB column - PostgreSQL', () => {
     let app: INestApplication;
@@ -13,19 +13,7 @@ describe('Search JSONB column - PostgreSQL', () => {
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                JsonbColumnModule,
-                TypeOrmModule.forRoot({
-                    type: 'postgres',
-                    database: process.env.POSTGRESQL_DATABASE_NAME,
-                    username: process.env.POSTGRESQL_DATABASE_USERNAME,
-                    password: process.env.POSTGRESQL_DATABASE_PASSWORD,
-                    entities: [JsonbColumnEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [JsonbColumnModule, TestHelper.getTypeOrmPgsqlModule([JsonbColumnEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
         service = moduleFixture.get<JsonbColumnService>(JsonbColumnService);
@@ -36,10 +24,9 @@ describe('Search JSONB column - PostgreSQL', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     describe('[? operator] Does the string exist as a top-level key within the JSON value?', () => {

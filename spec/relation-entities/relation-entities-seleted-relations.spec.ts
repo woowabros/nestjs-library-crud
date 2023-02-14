@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
 import { RelationEntitiesModule } from './relation-entities.module';
+import { TestHelper } from '../test.helper';
 
 describe('disable relation option', () => {
     let app: INestApplication;
@@ -30,10 +31,9 @@ describe('disable relation option', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should not be returned relation entity, when disabled relation option', async () => {

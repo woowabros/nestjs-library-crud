@@ -1,27 +1,17 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { TestingModule, Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
 import { AuthGuardModule } from './auth-guard.module';
 import { BaseEntity } from '../base/base.entity';
+import { TestHelper } from '../test.helper';
 
 describe('AuthGuard', () => {
     let app: INestApplication;
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                AuthGuardModule,
-                TypeOrmModule.forRoot({
-                    type: 'sqlite',
-                    database: ':memory:',
-                    entities: [BaseEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [AuthGuardModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
 
         app = moduleFixture.createNestApplication();
@@ -29,10 +19,9 @@ describe('AuthGuard', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should be applied to readOne', async () => {

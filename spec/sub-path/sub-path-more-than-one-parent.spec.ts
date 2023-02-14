@@ -4,6 +4,7 @@ import _ from 'lodash';
 import request from 'supertest';
 
 import { SubPathModule } from './sub-path.module';
+import { TestHelper } from '../test.helper';
 
 describe('Subpath - more then one parent parameter', () => {
     let app: INestApplication;
@@ -34,9 +35,8 @@ describe('Subpath - more then one parent parameter', () => {
     });
 
     afterEach(async () => {
-        if (app) {
-            await app.close();
-        }
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should meet conditions of parent params - create', async () => {

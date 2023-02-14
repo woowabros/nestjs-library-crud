@@ -26,10 +26,9 @@ describe('Params Option - entity의 key를 params으로 사용하는 경우', ()
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it(`should be provided /base/:${param}`, () => {

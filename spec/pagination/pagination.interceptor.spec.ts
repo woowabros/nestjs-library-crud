@@ -7,6 +7,7 @@ import { PaginationModule } from './pagination.module';
 import { ReadManyRequestInterceptor } from './read-many.request.interceptor';
 import { PaginationType } from '../../src';
 import { BaseService } from '../base/base.service';
+import { TestHelper } from '../test.helper';
 
 describe('Pagination with interceptor', () => {
     const defaultLimit = 20;
@@ -39,10 +40,9 @@ describe('Pagination with interceptor', () => {
             await app.init();
         });
 
-        afterAll(async () => {
-            if (app) {
-                await app.close();
-            }
+        afterEach(async () => {
+            await TestHelper.dropTypeOrmEntityTables();
+            await app?.close();
         });
 
         it('should be returned deleted entities each interceptor soft-deleted option', async () => {
@@ -139,10 +139,9 @@ describe('Pagination with interceptor', () => {
             await app.init();
         });
 
-        afterAll(async () => {
-            if (app) {
-                await app.close();
-            }
+        afterEach(async () => {
+            await TestHelper.dropTypeOrmEntityTables();
+            await app?.close();
         });
 
         it('should be returned deleted entities each interceptor soft-deleted option', async () => {

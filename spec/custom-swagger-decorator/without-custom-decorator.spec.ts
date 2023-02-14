@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { ExtraModel } from './extra-model';
 import { DynamicCrudModule } from '../dynamic-crud.module';
+import { TestHelper } from '../test.helper';
 
 describe('No custom Swagger Decorator', () => {
     let app: INestApplication;
@@ -18,10 +19,9 @@ describe('No custom Swagger Decorator', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should not include extra model', () => {

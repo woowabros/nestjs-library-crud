@@ -1,6 +1,5 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { TestingModule, Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
 import { SwaggerDecoratorModule } from './swagger-decorator.module';
@@ -12,17 +11,7 @@ describe('SwaggerDecorator', () => {
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                SwaggerDecoratorModule,
-                TypeOrmModule.forRoot({
-                    type: 'sqlite',
-                    database: ':memory:',
-                    entities: [BaseEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [SwaggerDecoratorModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
 
         app = moduleFixture.createNestApplication();
@@ -31,9 +20,8 @@ describe('SwaggerDecorator', () => {
     });
 
     afterEach(async () => {
-        if (app) {
-            await app.close();
-        }
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should be added swagger decorator', async () => {

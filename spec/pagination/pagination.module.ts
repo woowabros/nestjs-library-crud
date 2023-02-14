@@ -2,10 +2,10 @@
 import { Controller, forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Crud } from '../../src/lib/crud.decorator';
-import { CrudController, CrudOptions, PaginationType } from '../../src/lib/interface';
+import { Crud, CrudController, CrudOptions, PaginationType } from '../../src';
 import { BaseEntity } from '../base/base.entity';
 import { BaseService } from '../base/base.service';
+import { TestHelper } from '../test.helper';
 
 export function PaginationModule(crudOptions?: Record<PaginationType, CrudOptions['routes']>) {
     function offsetController() {
@@ -28,19 +28,7 @@ export function PaginationModule(crudOptions?: Record<PaginationType, CrudOption
 
     function getModule() {
         @Module({
-            imports: [
-                forwardRef(() =>
-                    TypeOrmModule.forRoot({
-                        type: 'sqlite',
-                        database: ':memory:',
-                        entities: [BaseEntity],
-                        synchronize: true,
-                        logging: true,
-                        logger: 'file',
-                    }),
-                ),
-                TypeOrmModule.forFeature([BaseEntity]),
-            ],
+            imports: [forwardRef(() => TestHelper.getTypeOrmMysqlModule([BaseEntity])), TypeOrmModule.forFeature([BaseEntity])],
             controllers: [cursorController(), offsetController()],
             providers: [BaseService],
         })

@@ -27,10 +27,9 @@ describe('Params Option - changing params to Interceptor', () => {
         await app.init();
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it(`should be provided /base/:${param}`, () => {

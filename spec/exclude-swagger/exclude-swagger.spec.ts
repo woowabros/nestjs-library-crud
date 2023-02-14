@@ -7,12 +7,12 @@ import { ModelPropertiesAccessor } from '@nestjs/swagger/dist/services/model-pro
 import { SchemaObjectFactory } from '@nestjs/swagger/dist/services/schema-object-factory';
 import { SwaggerTypesMapper } from '@nestjs/swagger/dist/services/swagger-types-mapper';
 import { SwaggerExplorer } from '@nestjs/swagger/dist/swagger-explorer';
-import { TestingModule, Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Test, TestingModule } from '@nestjs/testing';
 
 import { ExcludeSwaggerController } from './exclude-swagger.controller';
 import { ExcludeSwaggerModule } from './exclude-swagger.module';
 import { BaseEntity } from '../base/base.entity';
+import { TestHelper } from '../test.helper';
 
 describe('exclude swagger by route', () => {
     let app: INestApplication;
@@ -21,17 +21,7 @@ describe('exclude swagger by route', () => {
 
     beforeEach(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                ExcludeSwaggerModule,
-                TypeOrmModule.forRoot({
-                    type: 'sqlite',
-                    database: ':memory:',
-                    entities: [BaseEntity],
-                    synchronize: true,
-                    logging: true,
-                    logger: 'file',
-                }),
-            ],
+            imports: [ExcludeSwaggerModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
 
         app = moduleFixture.createNestApplication();
@@ -58,10 +48,9 @@ describe('exclude swagger by route', () => {
         }, {} as Record<string, DenormalizedDoc>);
     });
 
-    afterAll(async () => {
-        if (app) {
-            await app.close();
-        }
+    afterEach(async () => {
+        await TestHelper.dropTypeOrmEntityTables();
+        await app?.close();
     });
 
     it('should not generate recover route in swagger', async () => {

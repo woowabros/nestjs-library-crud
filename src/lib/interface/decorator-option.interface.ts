@@ -54,5 +54,5 @@ export interface CrudOptions {
             params?: string[];
         } & RouteBaseOption;
     };
-    only?: Array<`${Method}`>;
+    only?: Array<Method | `${Method}`>;
 }

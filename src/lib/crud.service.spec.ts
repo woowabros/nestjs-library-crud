@@ -2,7 +2,6 @@ import { ConflictException } from '@nestjs/common';
 import { BaseEntity, Repository } from 'typeorm';
 
 import { CrudService } from './crud.service';
-import { CrudResponseOption } from './interface';
 
 describe('CrudService', () => {
     describe('reservedReadOne', () => {
@@ -27,24 +26,6 @@ describe('CrudService', () => {
             await expect(crudService.reservedReadOne({ params: { id: mockEntity.id } as Partial<BaseEntity> })).resolves.toEqual(
                 mockEntity,
             );
-        });
-
-        it('should return id', async () => {
-            await expect(
-                crudService.reservedReadOne({
-                    params: { id: mockEntity.id } as Partial<BaseEntity>,
-                    options: { response: CrudResponseOption.ID },
-                }),
-            ).resolves.toEqual({ id: mockEntity.id });
-        });
-
-        it('should return undefined', async () => {
-            await expect(
-                crudService.reservedReadOne({
-                    params: { id: mockEntity.id } as Partial<BaseEntity>,
-                    options: { response: CrudResponseOption.NONE },
-                }),
-            ).resolves.toBeUndefined();
         });
     });
 

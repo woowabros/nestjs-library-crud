@@ -1,5 +1,4 @@
 import { HttpStatus, NestInterceptor, RequestMethod, Type } from '@nestjs/common';
-import { BaseEntity } from 'typeorm';
 
 import { ReadOneRequestInterceptor, CreateRequestInterceptor } from './interceptor';
 import { DeleteRequestInterceptor } from './interceptor/delete-request.interceptor';
@@ -8,30 +7,28 @@ import { RecoverRequestInterceptor } from './interceptor/recover-request.interce
 import { SearchRequestInterceptor } from './interceptor/search-request.interceptor';
 import { UpdateRequestInterceptor } from './interceptor/update-request.interceptor';
 import { UpsertRequestInterceptor } from './interceptor/upsert-request.interceptor';
-import { CrudOptions, Method, CrudResponseOption, PrimaryKey, FactoryOption, Sort, PaginationType } from './interface';
+import { CrudOptions, Method, PrimaryKey, FactoryOption, Sort, PaginationType } from './interface';
 import { capitalizeFirstLetter } from './util';
 
 interface CrudMethodPolicy {
     method: RequestMethod; // Method (Get, Post, Patch ...)
-    response: CrudResponseOption; // Response Type
     useBody: boolean; // included body
     interceptor: (crudOptions: CrudOptions, factoryOption: FactoryOption) => Type<NestInterceptor>;
     uriParameter: (crudOptions: CrudOptions, primaryKeys?: PrimaryKey[]) => { path: string; params: string[] };
     swagger: {
         operationMetadata: (tableName: string) => { summary: string; description: string };
-        responseMetadata: (opts: { entity: typeof BaseEntity; tableName: string; paginationType: PaginationType }) => {
-            [key in HttpStatus]?: { description: string; type?: typeof BaseEntity; schema?: unknown };
+        responseMetadata: (opts: { type: Type<unknown>; tableName: string; paginationType: PaginationType }) => {
+            [key in HttpStatus]?: { description: string; type?: Type<unknown>; schema?: unknown };
         };
     };
     default?: Record<string, unknown>;
 }
 /**
- * Method별 기본 정책
+ * Basic Policy by method
  */
 export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
     [Method.READ_ONE]: {
         method: RequestMethod.GET,
-        response: CrudResponseOption.ENTITY,
         useBody: false,
         interceptor: (crudOptions: CrudOptions, factoryOption: FactoryOption) => ReadOneRequestInterceptor(crudOptions, factoryOption),
         uriParameter: (crudOptions: CrudOptions, primaryKeys?: PrimaryKey[]) => {
@@ -43,10 +40,10 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 summary: `Read one from '${capitalizeFirstLetter(tableName)}' Table`,
                 description: `Fetch one entity in '${capitalizeFirstLetter(tableName)}' Table`,
             }),
-            responseMetadata: ({ entity, tableName }) => ({
+            responseMetadata: ({ type, tableName }) => ({
                 [HttpStatus.OK]: {
                     description: `Fetch one entity from ${capitalizeFirstLetter(tableName)} table`,
-                    type: entity,
+                    type,
                 },
                 [HttpStatus.UNPROCESSABLE_ENTITY]: {
                     description: 'Invalid field',
@@ -62,7 +59,6 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
     },
     [Method.SEARCH]: {
         method: RequestMethod.POST,
-        response: CrudResponseOption.ENTITY,
         useBody: true,
         interceptor: (crudOptions: CrudOptions, factoryOption: FactoryOption) => SearchRequestInterceptor(crudOptions, factoryOption),
         uriParameter: () => ({
@@ -74,7 +70,7 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 summary: `Search from '${capitalizeFirstLetter(tableName)}' Table`,
                 description: `Fetch multiple entities in '${capitalizeFirstLetter(tableName)}' Table via custom query in body`,
             }),
-            responseMetadata: ({ entity, tableName }) => ({
+            responseMetadata: ({ type, tableName }) => ({
                 [HttpStatus.OK]: {
                     description: `Fetch multiple entities from '${capitalizeFirstLetter(tableName)}' table`,
                     schema: {
@@ -83,7 +79,7 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                             data: {
                                 type: 'array',
                                 items: {
-                                    $ref: `#/components/schemas/${entity.name}`,
+                                    $ref: `#/components/schemas/${type.name}`,
                                 },
                             },
                         },
@@ -101,7 +97,6 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
     },
     [Method.READ_MANY]: {
         method: RequestMethod.GET,
-        response: CrudResponseOption.ENTITY,
         useBody: false,
         interceptor: (crudOptions: CrudOptions, factoryOption: FactoryOption) => ReadManyRequestInterceptor(crudOptions, factoryOption),
         uriParameter: () => ({
@@ -113,7 +108,7 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 summary: `read many from '${capitalizeFirstLetter(tableName)}' Table`,
                 description: `Fetch multiple entities in '${capitalizeFirstLetter(tableName)}' Table`,
             }),
-            responseMetadata: ({ entity, tableName, paginationType }) => {
+            responseMetadata: ({ type, tableName, paginationType }) => {
                 const metaProperties =
                     paginationType === PaginationType.OFFSET
                         ? {
@@ -138,7 +133,7 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                                         data: {
                                             type: 'array',
                                             items: {
-                                                $ref: `#/components/schemas/${entity.name}`,
+                                                $ref: `#/components/schemas/${type.name}`,
                                             },
                                         },
                                         metadata: {
@@ -165,7 +160,6 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
     },
     [Method.CREATE]: {
         method: RequestMethod.POST,
-        response: CrudResponseOption.ENTITY,
         useBody: true,
         interceptor: (crudOptions: CrudOptions, factoryOption: FactoryOption) => CreateRequestInterceptor(crudOptions, factoryOption),
         uriParameter: () => ({
@@ -177,9 +171,10 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 summary: `create one to '${capitalizeFirstLetter(tableName)}' Table`,
                 description: `Create an entity in '${capitalizeFirstLetter(tableName)}' Table`,
             }),
-            responseMetadata: () => ({
+            responseMetadata: ({ type }) => ({
                 [HttpStatus.CREATED]: {
                     description: 'Created ok',
+                    type,
                 },
                 [HttpStatus.CONFLICT]: {
                     description: 'Cannot create',
@@ -192,7 +187,6 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
     },
     [Method.UPSERT]: {
         method: RequestMethod.PUT,
-        response: CrudResponseOption.ENTITY,
         useBody: true,
         interceptor: (crudOptions: CrudOptions, factoryOption: FactoryOption) => UpsertRequestInterceptor(crudOptions, factoryOption),
         uriParameter: (crudOptions: CrudOptions, primaryKeys?: PrimaryKey[]) => {
@@ -204,8 +198,8 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 summary: `upsert one to '${capitalizeFirstLetter(tableName)}' Table`,
                 description: `Create or update one entity in '${capitalizeFirstLetter(tableName)}' Table`,
             }),
-            responseMetadata: () => ({
-                [HttpStatus.OK]: { description: 'Upsert ok' },
+            responseMetadata: ({ type }) => ({
+                [HttpStatus.OK]: { description: 'Upsert ok', type },
                 [HttpStatus.UNPROCESSABLE_ENTITY]: {
                     description: 'Invalid field',
                 },
@@ -217,7 +211,6 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
     },
     [Method.UPDATE]: {
         method: RequestMethod.PATCH,
-        response: CrudResponseOption.NONE,
         useBody: true,
         interceptor: (crudOptions: CrudOptions, factoryOption: FactoryOption) => UpdateRequestInterceptor(crudOptions, factoryOption),
         uriParameter: (crudOptions: CrudOptions, primaryKeys?: PrimaryKey[]) => {
@@ -229,11 +222,12 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 summary: `update one in '${capitalizeFirstLetter(tableName)}' Table`,
                 description: `Update on entity in '${capitalizeFirstLetter(tableName)}' Table`,
             }),
-            responseMetadata: () => ({
+            responseMetadata: ({ type }) => ({
                 [HttpStatus.OK]: {
                     description: 'Updated ok',
+                    type,
                 },
-                [HttpStatus.NOT_FOUND]: {
+                [HttpStatus.BAD_REQUEST]: {
                     description: 'Not found entity',
                 },
                 [HttpStatus.UNPROCESSABLE_ENTITY]: {
@@ -244,7 +238,6 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
     },
     [Method.DELETE]: {
         method: RequestMethod.DELETE,
-        response: CrudResponseOption.NONE,
         useBody: false,
         interceptor: (crudOptions: CrudOptions, factoryOption: FactoryOption) => DeleteRequestInterceptor(crudOptions, factoryOption),
         uriParameter: (crudOptions: CrudOptions, primaryKeys?: PrimaryKey[]) => {
@@ -259,11 +252,12 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 summary: `delete one from '${capitalizeFirstLetter(tableName)}' Table`,
                 description: `Delete one entity from '${capitalizeFirstLetter(tableName)}' Table`,
             }),
-            responseMetadata: () => ({
+            responseMetadata: ({ type }) => ({
                 [HttpStatus.OK]: {
                     description: 'Deleted ok',
+                    type,
                 },
-                [HttpStatus.NOT_FOUND]: {
+                [HttpStatus.BAD_REQUEST]: {
                     description: 'Not found entity',
                 },
                 [HttpStatus.CONFLICT]: {
@@ -277,7 +271,6 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
     },
     [Method.RECOVER]: {
         method: RequestMethod.POST,
-        response: CrudResponseOption.ENTITY,
         useBody: false,
         interceptor: (crudOptions: CrudOptions, factoryOption: FactoryOption) => RecoverRequestInterceptor(crudOptions, factoryOption),
         uriParameter: (crudOptions: CrudOptions, primaryKeys?: PrimaryKey[]) => {
@@ -295,11 +288,12 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 summary: `recover one from '${capitalizeFirstLetter(tableName)}' Table`,
                 description: `Recover one entity from '${capitalizeFirstLetter(tableName)}' Table`,
             }),
-            responseMetadata: () => ({
+            responseMetadata: ({ type }) => ({
                 [HttpStatus.CREATED]: {
                     description: 'Recovered ok',
+                    type,
                 },
-                [HttpStatus.NOT_FOUND]: {
+                [HttpStatus.BAD_REQUEST]: {
                     description: 'Not found entity',
                 },
             }),

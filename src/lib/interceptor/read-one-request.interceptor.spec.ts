@@ -5,7 +5,7 @@ import { BaseEntity } from 'typeorm';
 
 import { ReadOneRequestInterceptor } from './read-one-request.interceptor';
 import { Constants } from '../constants';
-import { CrudResponseOption, Method } from '../interface';
+import { Method } from '../interface';
 import { ExecutionContextHost } from '../provider';
 
 describe('ReadOneRequestInterceptor', () => {
@@ -79,34 +79,11 @@ describe('ReadOneRequestInterceptor', () => {
         }
     });
 
-    it('should use default response option from CRUD_POLICY when it is not provided by crudOption', async () => {
-        const Interceptor = ReadOneRequestInterceptor({ entity: {} as typeof BaseEntity }, {});
-        const interceptor = new Interceptor();
-
-        const mockRequest = jest.fn();
-        mockRequest[Constants.CUSTOM_REQUEST_OPTIONS] = {};
-
-        await interceptor.intercept(new ExecutionContextHost([mockRequest]), handler);
-        expect(mockRequest[Constants.CRUD_ROUTE_ARGS]).toHaveProperty('options.response', CrudResponseOption.ENTITY);
-
-        const InterceptorWithRouteResponse = ReadOneRequestInterceptor(
-            { entity: {} as typeof BaseEntity, routes: { [Method.READ_ONE]: { response: CrudResponseOption.ID } } },
-            {},
-        );
-        const interceptorWithRouteResponse = new InterceptorWithRouteResponse();
-
-        const mockRequestWithRouteResponse = jest.fn();
-        mockRequestWithRouteResponse[Constants.CUSTOM_REQUEST_OPTIONS] = {};
-
-        await interceptorWithRouteResponse.intercept(new ExecutionContextHost([mockRequestWithRouteResponse]), handler);
-        expect(mockRequestWithRouteResponse[Constants.CRUD_ROUTE_ARGS]).toHaveProperty('options.response', CrudResponseOption.ID);
-    });
-
     it('should get relations from custom request options and crudOption', async () => {
         const Interceptor = ReadOneRequestInterceptor({ entity: {} as typeof BaseEntity }, {});
         const interceptor = new Interceptor();
 
-        const mockRequest = jest.fn();
+        const mockRequest: any = jest.fn();
         mockRequest[Constants.CUSTOM_REQUEST_OPTIONS] = { relations: ['foo'] };
 
         await interceptor.intercept(new ExecutionContextHost([mockRequest]), handler);
@@ -118,7 +95,7 @@ describe('ReadOneRequestInterceptor', () => {
         );
         const interceptorNoRelations = new InterceptorNoRelations();
 
-        const mockRequestNoRelations = jest.fn();
+        const mockRequestNoRelations: any = jest.fn();
         mockRequestNoRelations[Constants.CUSTOM_REQUEST_OPTIONS] = {};
 
         await interceptorNoRelations.intercept(new ExecutionContextHost([mockRequestNoRelations]), handler);
@@ -130,7 +107,7 @@ describe('ReadOneRequestInterceptor', () => {
         );
         const interceptorWithRelations = new InterceptorWithRelations();
 
-        const mockRequestWithRelations = jest.fn();
+        const mockRequestWithRelations: any = jest.fn();
         mockRequestWithRelations[Constants.CUSTOM_REQUEST_OPTIONS] = {};
 
         await interceptorWithRelations.intercept(new ExecutionContextHost([mockRequestWithRelations]), handler);

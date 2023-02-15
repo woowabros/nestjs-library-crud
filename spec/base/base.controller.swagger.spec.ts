@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { INestApplication } from '@nestjs/common';
-import { ApplicationConfig } from '@nestjs/core';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
-import { ModelPropertiesAccessor } from '@nestjs/swagger/dist/services/model-properties-accessor';
-import { SchemaObjectFactory } from '@nestjs/swagger/dist/services/schema-object-factory';
-import { SwaggerTypesMapper } from '@nestjs/swagger/dist/services/swagger-types-mapper';
-import { SwaggerExplorer } from '@nestjs/swagger/dist/swagger-explorer';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { BaseController } from './base.controller';
@@ -28,22 +23,10 @@ describe('BaseController Swagger Decorator', () => {
         controller = moduleFixture.get<BaseController>(BaseController);
         await app.init();
 
-        const schemaObjectFactory = new SchemaObjectFactory(new ModelPropertiesAccessor(), new SwaggerTypesMapper());
-        const explorer = new SwaggerExplorer(schemaObjectFactory);
-        const routes = explorer.exploreController(
-            {
-                instance: controller,
-                metatype: BaseController,
-            } as InstanceWrapper<BaseController>,
-            new ApplicationConfig(),
-        );
-        routeSet = routes.reduce((summary, route) => {
-            if (!route.root?.operationId) {
-                return summary;
-            }
-            summary[route.root.operationId] = route;
-            return summary;
-        }, {} as Record<string, DenormalizedDoc>);
+        routeSet = TestHelper.getSwaggerExplorer({
+            instance: controller,
+            metatype: BaseController,
+        } as InstanceWrapper<BaseController>);
     });
 
     afterEach(async () => {
@@ -110,6 +93,11 @@ describe('BaseController Swagger Decorator', () => {
         expect(routeSet[create].responses).toEqual({
             '201': {
                 description: 'Created ok',
+                content: {
+                    'application/json': {
+                        schema: { $ref: '#/components/schemas/BaseEntity' },
+                    },
+                },
             },
             '409': {
                 description: 'Cannot create',
@@ -128,8 +116,13 @@ describe('BaseController Swagger Decorator', () => {
         expect(routeSet[deleteKey].responses).toEqual({
             '200': {
                 description: 'Deleted ok',
+                content: {
+                    'application/json': {
+                        schema: { $ref: '#/components/schemas/BaseEntity' },
+                    },
+                },
             },
-            '404': {
+            '400': {
                 description: 'Not found entity',
             },
             '409': {
@@ -146,8 +139,13 @@ describe('BaseController Swagger Decorator', () => {
         expect(routeSet[updateKey].responses).toEqual({
             '200': {
                 description: 'Updated ok',
+                content: {
+                    'application/json': {
+                        schema: { $ref: '#/components/schemas/BaseEntity' },
+                    },
+                },
             },
-            '404': {
+            '400': {
                 description: 'Not found entity',
             },
             '422': {
@@ -164,6 +162,13 @@ describe('BaseController Swagger Decorator', () => {
         expect(routeSet[updateKey].responses).toEqual({
             '200': {
                 description: 'Upsert ok',
+                content: {
+                    'application/json': {
+                        schema: {
+                            $ref: '#/components/schemas/BaseEntity',
+                        },
+                    },
+                },
             },
             '409': {
                 description: 'Invalid params or if deleted',
@@ -182,8 +187,15 @@ describe('BaseController Swagger Decorator', () => {
         expect(routeSet[recover].responses).toEqual({
             '201': {
                 description: 'Recovered ok',
+                content: {
+                    'application/json': {
+                        schema: {
+                            $ref: '#/components/schemas/BaseEntity',
+                        },
+                    },
+                },
             },
-            '404': {
+            '400': {
                 description: 'Not found entity',
             },
         });

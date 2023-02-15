@@ -7,14 +7,11 @@ import { Observable } from 'rxjs';
 
 import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
-import { CRUD_POLICY } from '../crud.policy';
-import { CrudOptions, CrudUpsertRequest, FactoryOption, Method, GROUP } from '../interface';
+import { CrudOptions, CrudUpsertRequest, FactoryOption, GROUP } from '../interface';
 
-const method = Method.UPSERT;
 export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
-            const upsertOptions = crudOptions.routes?.[method] ?? {};
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
 
             const params = await this.checkParams(
@@ -40,9 +37,6 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const crudUpsertRequest: CrudUpsertRequest<typeof crudOptions.entity> = {
                 params,
                 body,
-                options: {
-                    response: upsertOptions.response ?? CRUD_POLICY[method].response,
-                },
             };
 
             req[Constants.CRUD_ROUTE_ARGS] = crudUpsertRequest;

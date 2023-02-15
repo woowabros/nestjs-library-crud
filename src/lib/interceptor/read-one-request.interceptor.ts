@@ -18,7 +18,6 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
-            const readOneOptions = crudOptions.routes?.[method] ?? {};
 
             const customReadOneRequestOptions: CustomReadOneRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
 
@@ -34,9 +33,6 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
                 params,
                 fields: this.getFields(customReadOneRequestOptions?.fields, fieldsByRequest),
                 softDeleted,
-                options: {
-                    response: readOneOptions.response ?? CRUD_POLICY[method].response,
-                },
                 relations: this.getRelations(customReadOneRequestOptions),
             };
             req[Constants.CRUD_ROUTE_ARGS] = crudReadOneRequest;

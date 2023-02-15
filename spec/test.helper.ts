@@ -1,3 +1,10 @@
+import { ApplicationConfig } from '@nestjs/core';
+import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
+import { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
+import { ModelPropertiesAccessor } from '@nestjs/swagger/dist/services/model-properties-accessor';
+import { SchemaObjectFactory } from '@nestjs/swagger/dist/services/schema-object-factory';
+import { SwaggerTypesMapper } from '@nestjs/swagger/dist/services/swagger-types-mapper';
+import { SwaggerExplorer } from '@nestjs/swagger/dist/swagger-explorer';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BaseEntity, getMetadataArgsStorage } from 'typeorm';
 import { MixedList } from 'typeorm/common/MixedList';
@@ -56,5 +63,19 @@ export class TestHelper {
             logging: true,
             logger: 'file',
         });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    static getSwaggerExplorer(wrapper: InstanceWrapper<object>): Record<string, DenormalizedDoc> {
+        const schemaObjectFactory = new SchemaObjectFactory(new ModelPropertiesAccessor(), new SwaggerTypesMapper());
+        const explorer = new SwaggerExplorer(schemaObjectFactory);
+        const routes = explorer.exploreController(wrapper, new ApplicationConfig());
+        return routes.reduce((summary, route) => {
+            if (!route.root?.operationId) {
+                return summary;
+            }
+            summary[route.root.operationId] = route;
+            return summary;
+        }, {} as Record<string, DenormalizedDoc>);
     }
 }

@@ -150,20 +150,6 @@ export class CatController implements CrudController<CatEntity> {
 
 ## Use Case
 
-### Response로 전달되는 값을 설정할 수 있습니다.
-
----
-
-Decorator Option으로 route 마다 `response`를 변경 할 수 있습니다.
-
-entity(default), id, none 3가지 옵션을 제공합니다.
-
-```
-@Crud({ entity: BaseEntity, routes: { recover: { response: 'id' } } })
-```
-
----
-
 ### 전달되는 Response를 제어할 수 있습니다.
 
 ---
@@ -176,10 +162,15 @@ Decorator Option으로 route 마다 `interceptor`를 추가할 수 있습니다.
     routes: {
         readOne: {
             interceptors: [ResponseCustomInterceptor],
+            swagger: {
+                response: BaseResponseDto,
+            }
         },
 ```
 
 `Response Interceptor`를 추가하고 전달되는 Response를 제어할 수 있습니다.
+
+`swagger.response` 옵션을 통해 Swagger의 Response Interface를 변경할 수 있습니다.
 
 ---
 

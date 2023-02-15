@@ -97,6 +97,78 @@ export class CatController implements CrudController<CatEntity> {
 -   `다수`의 Entities를 `Pagination` 형태로 전달 받습니다.
 -   <a href="./src/spec/read-many/read-many.controller.spec.ts"> read-many.controller.spec.ts </a> 을 참고할 수 있습니다.
 
+ReadMany는 query를 통해 단순한 비교 조건으로 사용할 수 있습니다.
+
+다음과 같이 `key: value` 형태로 사용할 수 있습니다.
+
+```
+const { body: cursorResponseBody } = await request(app.getHttpServer())
+   .get(`/${PaginationType.CURSOR}`)
+   .query({ name: 'name-29' })
+   .expect(HttpStatus.OK);
+```
+
+ReadMany는 Cursor 방식(Default)과 Offset 방식의 페이지네이션을 제공합니다.
+
+<a href="./src/spec/pagination">pagination Test</a>를 참고할 수 있습니다.
+
+> Cursor pagination
+
+Cursor Pagination은 첫 페이지 조회 이후 전달 받은 Request Body의 metadata에 포함된 `nextCursor`와 `query` 값을 사용합니다.
+
+`nextCursor`값과 `query`을 Query로 전달함으로써 다음 페이지에 해당하는 데이터를 조회할 수 있습니다.
+
+2가지 토큰을 통해 처음 조회했던 Query 조건과 nextCursor의 위치를 추정합니다.
+
+query 조건에 `nextCursor`와 `query`가 존재하는 경우 그 외의 필드는 무시됩니다.
+
+다음의 테스트 코드를 통해 동작 형태를 참고할 수 있습니다.
+
+```
+const { body: cursorResponseBody } = await request(app.getHttpServer())
+   .get(`/${PaginationType.CURSOR}`)
+   .query({ name: 'name-29' })
+   .expect(HttpStatus.OK);
+
+expect(cursorResponseBody.metadata).toEqual({
+    nextCursor: expect.any(String),
+    limit: defaultLimit,
+    query: expect.any(String),
+});
+
+const { body: nextResponseBody } = await request(app.getHttpServer())
+   .get(`/${PaginationType.CURSOR}`)
+   .query({
+       nextCursor: cursorResponseBody.metadata.nextCursor,
+       query: cursorResponseBody.metadata.query,
+    })
+    .expect(HttpStatus.OK);
+```
+
+> Offset pagination
+
+Offset Pagination은 첫 페이지 조회 이후 전달 받은 Request Body의 metadata에 포함된 `query` 값을 사용합니다.
+
+`offset`과 `query`을 Query로 전달함으로써 다음 페이지에 해당하는 데이터를 조회할 수 있습니다.
+
+```
+const { body: offsetResponseBody } = await request(app.getHttpServer())
+    .get(`/${PaginationType.OFFSET}`)
+    .query({ name: 'name-29' })
+    .expect(HttpStatus.OK);
+
+expect(offsetResponseBody.metadata)
+    .toEqual({page: 1, pages: 1, total: 1, offset: 1, query: expect.any(String) });
+
+const { body: offsetNextResponseBody } = await request(app.getHttpServer())
+    .get(`/${PaginationType.OFFSET}`)
+    .query({
+        query: offsetResponseBody.metadata.query,
+        offset: offsetResponseBody.metadata.offset,
+    })
+    .expect(HttpStatus.OK);
+```
+
 ---
 
 ### Search

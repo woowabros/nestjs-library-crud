@@ -42,9 +42,9 @@ describe('CustomEntity - Delete', () => {
 
             await request(app.getHttpServer()).delete(`/base/${uuid}`).expect(HttpStatus.OK);
 
-            await request(app.getHttpServer()).get(`/base/${uuid}`).expect(HttpStatus.NOT_FOUND);
+            await request(app.getHttpServer()).get(`/base/${uuid}`).expect(HttpStatus.BAD_REQUEST);
 
-            await request(app.getHttpServer()).delete(`/base/${uuid}`).expect(HttpStatus.NOT_FOUND);
+            await request(app.getHttpServer()).delete(`/base/${uuid}`).expect(HttpStatus.BAD_REQUEST);
         });
     });
 });

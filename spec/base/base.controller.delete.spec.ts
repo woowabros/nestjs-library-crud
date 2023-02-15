@@ -36,9 +36,9 @@ describe('BaseController', () => {
 
             await request(app.getHttpServer()).delete(`/base/${id}`).expect(HttpStatus.OK);
 
-            await request(app.getHttpServer()).get(`/base/${id}`).expect(HttpStatus.NOT_FOUND);
+            await request(app.getHttpServer()).get(`/base/${id}`).expect(HttpStatus.BAD_REQUEST);
 
-            await request(app.getHttpServer()).delete(`/base/${id}`).expect(HttpStatus.NOT_FOUND);
+            await request(app.getHttpServer()).delete(`/base/${id}`).expect(HttpStatus.BAD_REQUEST);
         });
 
         it('should be checked params type', async () => {

@@ -46,7 +46,7 @@ describe('BaseController', () => {
             const name = 'name1';
             const id = 1;
 
-            await request(app.getHttpServer()).get(`/base/${id}`).expect(HttpStatus.NOT_FOUND);
+            await request(app.getHttpServer()).get(`/base/${id}`).expect(HttpStatus.BAD_REQUEST);
             await request(app.getHttpServer()).put(`/base/${id}`).send({ name }).expect(HttpStatus.OK);
 
             const response = await request(app.getHttpServer()).get(`/base/${id}`).expect(HttpStatus.OK);

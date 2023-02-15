@@ -45,7 +45,7 @@ describe('CustomEntity - Delete', () => {
             await request(app.getHttpServer()).delete(`/base/${uuid}`).expect(HttpStatus.OK);
 
             // getOne -> NotFOUND
-            await request(app.getHttpServer()).get(`/base/${uuid}`).expect(HttpStatus.NOT_FOUND);
+            await request(app.getHttpServer()).get(`/base/${uuid}`).expect(HttpStatus.BAD_REQUEST);
 
             // getMany -> id가 없다.
             const { body } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);

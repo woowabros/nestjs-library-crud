@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import _ from 'lodash';
 import { BaseEntity, DeepPartial, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
 
@@ -69,7 +69,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             })
             .then((entity) => {
                 if (_.isNil(entity)) {
-                    throw new NotFoundException();
+                    throw new BadRequestException('Not Found Entity');
                 }
                 return entity;
             });
@@ -115,7 +115,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             })
             .then(async (entity: T | null) => {
                 if (!entity) {
-                    throw new NotFoundException();
+                    throw new BadRequestException('Not Found Entity');
                 }
 
                 await this.repository.save(_.merge(entity, crudUpdateOneRequest.body));
@@ -135,7 +135,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             })
             .then(async (entity: T | null) => {
                 if (!entity) {
-                    throw new NotFoundException();
+                    throw new BadRequestException('Not Found Entity');
                 }
 
                 await this.repository[deleteAction](
@@ -153,7 +153,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             })
             .then(async (entity: T | null) => {
                 if (!entity) {
-                    throw new NotFoundException();
+                    throw new BadRequestException('Not Found Entity');
                 }
                 await this.repository.recover(entity);
                 return entity;

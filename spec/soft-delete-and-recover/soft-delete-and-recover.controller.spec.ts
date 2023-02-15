@@ -51,7 +51,7 @@ describe('Soft-delete and recover test', () => {
                 expect(getManyResponseBody.data[0].name).toEqual(url);
             } else {
                 expect(url).toEqual('soft-delete-and-ignore-soft-deleted');
-                expect(getResponse.statusCode).toEqual(HttpStatus.NOT_FOUND);
+                expect(getResponse.statusCode).toEqual(HttpStatus.BAD_REQUEST);
                 expect(getManyResponseBody.data).toHaveLength(0);
             }
             expect(recoverResponse.status).toEqual(HttpStatus.CREATED);
@@ -59,15 +59,15 @@ describe('Soft-delete and recover test', () => {
         } else {
             if (getSoftDeleted) {
                 expect(url).toEqual('delete-and-get-soft-deleted');
-                expect(getResponse.statusCode).toEqual(HttpStatus.NOT_FOUND);
+                expect(getResponse.statusCode).toEqual(HttpStatus.BAD_REQUEST);
                 expect(getManyResponseBody.data).toHaveLength(0);
             } else {
                 expect(url).toEqual('delete-and-ignore-soft-deleted');
-                expect(getResponse.statusCode).toEqual(HttpStatus.NOT_FOUND);
+                expect(getResponse.statusCode).toEqual(HttpStatus.BAD_REQUEST);
                 expect(getManyResponseBody.data).toHaveLength(0);
             }
             expect(recoverResponse.status).toEqual(HttpStatus.NOT_FOUND);
-            await request(app.getHttpServer()).delete(`/${url}/${id}`).expect(HttpStatus.NOT_FOUND);
+            await request(app.getHttpServer()).delete(`/${url}/${id}`).expect(HttpStatus.BAD_REQUEST);
         }
     });
 });

@@ -76,7 +76,7 @@ describe('Request Interceptor', () => {
         expect(readManyResponseBodyAfterDelete.some(({ id }) => id < 3)).not.toBeTruthy();
 
         for (const { id } of readManyResponseBodyAfterDelete) {
-            const httpStatus = id % 2 === 0 ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+            const httpStatus = id % 2 === 0 ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
             await request(app.getHttpServer()).get(`/base/${id}`).expect(httpStatus);
         }
     });

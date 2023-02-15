@@ -55,7 +55,7 @@ describe('CustomEntity - Upsert', () => {
             const name = 'name1';
             const uuid = '0x1234';
 
-            await request(app.getHttpServer()).get(`/base/${uuid}`).expect(HttpStatus.NOT_FOUND);
+            await request(app.getHttpServer()).get(`/base/${uuid}`).expect(HttpStatus.BAD_REQUEST);
             await request(app.getHttpServer()).put(`/base/${uuid}`).send({ name }).expect(HttpStatus.OK);
 
             const responseWithoutDescription = await request(app.getHttpServer()).get(`/base/${uuid}`).expect(HttpStatus.OK);

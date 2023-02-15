@@ -43,7 +43,7 @@ describe('BaseController', () => {
         });
 
         it('should throw when entity does not exist', async () => {
-            await request(app.getHttpServer()).patch('/base/1').send({ name: 'name' }).expect(HttpStatus.NOT_FOUND);
+            await request(app.getHttpServer()).patch('/base/1').send({ name: 'name' }).expect(HttpStatus.BAD_REQUEST);
         });
 
         it('should be able to changed updatedAt', async () => {

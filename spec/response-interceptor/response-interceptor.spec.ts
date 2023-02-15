@@ -83,7 +83,7 @@ describe('Response Interceptor', () => {
         const { body: deletedResponse } = await request(app.getHttpServer()).delete(`/base/${createdResponse.id}`).expect(HttpStatus.OK);
         expect(deletedResponse.body).toBeUndefined();
 
-        await request(app.getHttpServer()).get(`/base/${createdResponse.id}`).expect(HttpStatus.NOT_FOUND);
+        await request(app.getHttpServer()).get(`/base/${createdResponse.id}`).expect(HttpStatus.BAD_REQUEST);
 
         const { body: upsertResponse } = await request(app.getHttpServer())
             .put(`/base/${createdResponse.id}`)
@@ -91,7 +91,7 @@ describe('Response Interceptor', () => {
             .expect(HttpStatus.CONFLICT);
         expect(upsertResponse.message).toEqual('it has been deleted');
 
-        await request(app.getHttpServer()).get(`/base/${createdResponse.id}`).expect(HttpStatus.NOT_FOUND);
+        await request(app.getHttpServer()).get(`/base/${createdResponse.id}`).expect(HttpStatus.BAD_REQUEST);
 
         const { body: readManyResponseBeforeRecover } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
         expect(readManyResponseBeforeRecover.data).toHaveLength(2);

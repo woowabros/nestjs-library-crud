@@ -118,8 +118,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     throw new BadRequestException('Not Found Entity');
                 }
 
-                await this.repository.save(_.merge(entity, crudUpdateOneRequest.body));
-                return entity;
+                return this.repository.save(_.merge(entity, crudUpdateOneRequest.body));
             });
     }
 

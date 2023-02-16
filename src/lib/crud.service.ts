@@ -59,6 +59,12 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             : this.paginateCursor(crudReadManyRequest);
     }
 
+    async getTotalCountByCrudReadManyRequest(crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> {
+        return crudReadManyRequest.pagination.type === PaginationType.OFFSET
+            ? this.paginateOffsetTotalCount(crudReadManyRequest)
+            : this.paginateCursorTotalCount(crudReadManyRequest);
+    }
+
     async reservedReadOne(crudReadOneRequest: CrudReadOneRequest<T>): Promise<T> {
         return this.repository
             .findOne({
@@ -159,6 +165,19 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             });
     }
 
+    private async paginateCursorTotalCount(crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> {
+        if (crudReadManyRequest.pagination.type !== PaginationType.CURSOR) {
+            throw new TypeError('use only cursor Pagination Type');
+        }
+        const pagination: PaginationCursorDto = crudReadManyRequest.pagination;
+        return this.repository.count({
+            where: pagination.token
+                ? this.paginateCursorWhereByToken(pagination, crudReadManyRequest.sort)
+                : (crudReadManyRequest.query as FindOptionsWhere<T>),
+            withDeleted: crudReadManyRequest.softDeleted,
+        });
+    }
+
     private async paginateCursor(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {
         if (crudReadManyRequest.pagination.type !== PaginationType.CURSOR) {
             throw new TypeError('use only cursor Pagination Type');
@@ -201,6 +220,13 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             query[key] = operator(value);
         }
         return query as FindOptionsWhere<T>;
+    }
+
+    private async paginateOffsetTotalCount(crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> {
+        return this.repository.count({
+            where: crudReadManyRequest.query as FindOptionsWhere<T>,
+            withDeleted: crudReadManyRequest.softDeleted,
+        });
     }
 
     private async paginateOffset(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {

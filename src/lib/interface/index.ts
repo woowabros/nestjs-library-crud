@@ -4,5 +4,4 @@ export * from './factory-option.interface';
 export * from './method';
 export * from './pagination.interface';
 export * from './request.interface';
-export * from './response.interface';
 export * from './sort';

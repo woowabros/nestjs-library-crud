@@ -1,15 +1,11 @@
 import { DeepPartial } from 'typeorm';
 
-import { CrudResponseOptions, PaginationRequest, PrimaryKey, Sort } from '.';
+import { PaginationRequest, PrimaryKey, Sort } from '.';
 import { RequestSearchDto } from '../dto/request-search.dto';
 
 export type CrudRequestId<T> = keyof T | Array<keyof T>;
 
-export interface CrudRequestBase {
-    options?: {
-        response?: CrudResponseOptions;
-    };
-}
+export interface CrudRequestBase {}
 
 export interface CrudReadRequestBase extends CrudRequestBase {
     softDeleted?: boolean;

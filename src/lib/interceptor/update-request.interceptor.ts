@@ -7,24 +7,18 @@ import { Observable } from 'rxjs';
 
 import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
-import { CRUD_POLICY } from '../crud.policy';
-import { CrudOptions, CrudUpdateOneRequest, FactoryOption, Method, GROUP } from '../interface';
+import { CrudOptions, CrudUpdateOneRequest, FactoryOption, GROUP } from '../interface';
 
-const method = Method.UPDATE;
 export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
-            const updateOptions = crudOptions.routes?.[method] ?? {};
             const body = await this.validateBody(req.body);
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);
             const crudUpdateOneRequest: CrudUpdateOneRequest<typeof crudOptions.entity> = {
                 params,
                 body,
-                options: {
-                    response: updateOptions.response ?? CRUD_POLICY[method].response,
-                },
             };
             req[Constants.CRUD_ROUTE_ARGS] = crudUpdateOneRequest;
 

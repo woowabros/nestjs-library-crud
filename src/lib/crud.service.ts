@@ -2,17 +2,13 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
 import { BaseEntity, DeepPartial, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
 
-import { CrudAbstractService, CrudResponseType } from './abstract/crud.abstract.service';
-import { CRUD_POLICY } from './crud.policy';
+import { CrudAbstractService } from './abstract/crud.abstract.service';
 import { PaginationCursorDto } from './dto/pagination-cursor.dto';
 import { PaginationOffsetDto } from './dto/pagination-offset.dto';
 import {
     CrudReadManyRequest,
     CrudReadOneRequest,
-    CrudResponseOptions,
-    CrudResponseOption,
     CrudDeleteOneRequest,
-    Method,
     CrudUpdateOneRequest,
     Sort,
     CrudUpsertRequest,
@@ -63,7 +59,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             : this.paginateCursor(crudReadManyRequest);
     }
 
-    async reservedReadOne(crudReadOneRequest: CrudReadOneRequest<T>): Promise<CrudResponseType<T>> {
+    async reservedReadOne(crudReadOneRequest: CrudReadOneRequest<T>): Promise<T> {
         return this.repository
             .findOne({
                 select: crudReadOneRequest.fields as unknown as FindOptionsSelect<T>,
@@ -75,24 +71,19 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 if (_.isNil(entity)) {
                     throw new NotFoundException();
                 }
-                return this.toResponse(entity, crudReadOneRequest.options?.response ?? CRUD_POLICY[Method.READ_ONE].response);
+                return entity;
             });
     }
 
-    reservedCreate(req: CrudCreateOneRequest<T>): Promise<CrudResponseType<T>>;
-    reservedCreate(req: CrudCreateManyRequest<T>): Promise<Array<CrudResponseType<T>>>;
-    async reservedCreate(
-        crudCreateRequest: CrudCreateOneRequest<T> | CrudCreateManyRequest<T>,
-    ): Promise<CrudResponseType<T> | Array<CrudResponseType<T>>> {
-        const responseOption = crudCreateRequest.options?.response;
-
+    reservedCreate(req: CrudCreateOneRequest<T>): Promise<T>;
+    reservedCreate(req: CrudCreateManyRequest<T>): Promise<T[]>;
+    async reservedCreate(crudCreateRequest: CrudCreateOneRequest<T> | CrudCreateManyRequest<T>): Promise<T | T[]> {
         const entities = this.repository.create(
             isCrudCreateManyRequest<T>(crudCreateRequest) ? crudCreateRequest.body : [crudCreateRequest.body],
         );
 
         return this.repository
             .save(entities)
-            .then((result) => result.map((r) => this.toResponse(r, responseOption)))
             .then((result) => {
                 return isCrudCreateManyRequest<T>(crudCreateRequest) ? result : result[0];
             })
@@ -101,8 +92,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             });
     }
 
-    async reservedUpsert(crudUpsertRequest: CrudUpsertRequest<T>): Promise<CrudResponseType<T>> {
-        const responseOption = crudUpsertRequest.options?.response;
+    async reservedUpsert(crudUpsertRequest: CrudUpsertRequest<T>): Promise<T> {
         return this.repository
             .findOne({
                 where: crudUpsertRequest.params as unknown as FindOptionsWhere<T>,
@@ -114,44 +104,33 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     throw new ConflictException('it has been deleted');
                 }
 
-                await this.repository.save(_.merge(upsertEntity, crudUpsertRequest.body));
-
-                return this.toResponse(upsertEntity, responseOption);
+                return this.repository.save(_.merge(upsertEntity, crudUpsertRequest.body));
             });
     }
 
-    async reservedUpdate(crudUpdateOneRequest: CrudUpdateOneRequest<T>): Promise<CrudResponseType<T>> {
-        const responseOption = crudUpdateOneRequest.options?.response;
-        const select = responseOption !== CrudResponseOption.ENTITY ? (this.primaryKey as unknown as FindOptionsSelect<T>) : undefined;
-
+    async reservedUpdate(crudUpdateOneRequest: CrudUpdateOneRequest<T>): Promise<T> {
         return this.repository
             .findOne({
                 where: crudUpdateOneRequest.params as unknown as FindOptionsWhere<T>,
-                select,
             })
             .then(async (entity: T | null) => {
                 if (!entity) {
                     throw new NotFoundException();
                 }
 
-                await this.repository.save(_.merge(entity, crudUpdateOneRequest.body));
-                return this.toResponse(entity, responseOption);
+                return this.repository.save(_.merge(entity, crudUpdateOneRequest.body));
             });
     }
 
-    async reservedDelete(crudDeleteOneRequest: CrudDeleteOneRequest<T>): Promise<CrudResponseType<T>> {
+    async reservedDelete(crudDeleteOneRequest: CrudDeleteOneRequest<T>): Promise<T> {
         if (this.primaryKey.length === 0) {
             throw new ConflictException('cannot found primary key from entity');
         }
-        const responseOption = crudDeleteOneRequest.options?.response;
-        const select = responseOption !== CrudResponseOption.ENTITY ? (this.primaryKey as unknown as FindOptionsSelect<T>) : undefined;
-
         const deleteAction = crudDeleteOneRequest.softDeleted ? 'softDelete' : 'delete';
 
         return this.repository
             .findOne({
                 where: crudDeleteOneRequest.params as unknown as FindOptionsWhere<T>,
-                select,
             })
             .then(async (entity: T | null) => {
                 if (!entity) {
@@ -161,18 +140,14 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 await this.repository[deleteAction](
                     this.primaryKey.reduce((pre, key) => ({ ...pre, [key]: (entity as Record<string, unknown>)[key] }), {}),
                 );
-                return this.toResponse(entity, responseOption);
+                return entity;
             });
     }
 
-    async reservedRecover(crudRecoverRequest: CrudRecoverRequest<T>): Promise<CrudResponseType<T>> {
-        const responseOption = crudRecoverRequest.options?.response;
-        const select = responseOption !== CrudResponseOption.ENTITY ? (this.primaryKey as unknown as FindOptionsSelect<T>) : undefined;
-
+    async reservedRecover(crudRecoverRequest: CrudRecoverRequest<T>): Promise<T> {
         return this.repository
             .findOne({
                 where: crudRecoverRequest.params as unknown as FindOptionsWhere<T>,
-                select,
                 withDeleted: true,
             })
             .then(async (entity: T | null) => {
@@ -180,7 +155,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     throw new NotFoundException();
                 }
                 await this.repository.recover(entity);
-                return this.toResponse(entity, responseOption);
+                return entity;
             });
     }
 
@@ -265,16 +240,6 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 query: pagination.query ?? PaginationHelper.serialize(crudReadManyRequest.query ?? {}),
             },
         };
-    }
-
-    private toResponse(entity: T, option: CrudResponseOptions | undefined): CrudResponseType<T> {
-        if (!option || option === CrudResponseOption.NONE) {
-            return;
-        }
-        if (option === CrudResponseOption.ID) {
-            return _.pick(entity, this.primaryKey);
-        }
-        return entity;
     }
 
     private getRelation(relations: undefined | string[]): string[] {

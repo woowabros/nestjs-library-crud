@@ -1,14 +1,14 @@
 import { NestInterceptor, Type } from '@nestjs/common';
 import { BaseEntity, ColumnType } from 'typeorm';
 
-import { Method, Sort, PaginationType, CrudResponseOptions } from '.';
+import { Method, Sort, PaginationType } from '.';
 
 interface RouteBaseOption {
     decorators?: Array<PropertyDecorator | MethodDecorator>;
     interceptors?: Array<Type<NestInterceptor>>;
-    response?: CrudResponseOptions;
     swagger?: {
         hide?: boolean;
+        response?: Type<unknown>;
     };
 }
 

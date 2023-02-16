@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { INestApplication } from '@nestjs/common';
-import { ApplicationConfig } from '@nestjs/core';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
-import { ModelPropertiesAccessor } from '@nestjs/swagger/dist/services/model-properties-accessor';
-import { SchemaObjectFactory } from '@nestjs/swagger/dist/services/schema-object-factory';
-import { SwaggerTypesMapper } from '@nestjs/swagger/dist/services/swagger-types-mapper';
-import { SwaggerExplorer } from '@nestjs/swagger/dist/swagger-explorer';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ExcludeSwaggerController } from './exclude-swagger.controller';
@@ -29,23 +24,10 @@ describe('exclude swagger by route', () => {
 
         await app.init();
 
-        const schemaObjectFactory = new SchemaObjectFactory(new ModelPropertiesAccessor(), new SwaggerTypesMapper());
-        const explorer = new SwaggerExplorer(schemaObjectFactory);
-        const routes = explorer.exploreController(
-            {
-                instance: controller,
-                metatype: ExcludeSwaggerController,
-            } as InstanceWrapper<ExcludeSwaggerController>,
-            new ApplicationConfig(),
-        );
-
-        routeSet = routes.reduce((summary, route) => {
-            if (!route.root?.operationId) {
-                return summary;
-            }
-            summary[route.root.operationId] = route;
-            return summary;
-        }, {} as Record<string, DenormalizedDoc>);
+        routeSet = TestHelper.getSwaggerExplorer({
+            instance: controller,
+            metatype: ExcludeSwaggerController,
+        } as InstanceWrapper<ExcludeSwaggerController>);
     });
 
     afterEach(async () => {
@@ -56,5 +38,68 @@ describe('exclude swagger by route', () => {
     it('should not generate recover route in swagger', async () => {
         const recover = 'HideSwaggerController_reservedRecover';
         expect(routeSet[recover]).toBeUndefined();
+    });
+
+    it('Should be changed swagger readOne response interface', () => {
+        const readOne = 'ExcludeSwaggerController_reservedReadOne';
+        expect(routeSet[readOne].responses).toEqual({
+            '200': {
+                content: {
+                    'application/json': {
+                        schema: { $ref: '#/components/schemas/ReadOneBaseResponseDto' },
+                    },
+                },
+                description: 'Fetch one entity from Base table',
+            },
+            '400': {
+                description: 'Entity that does not exist',
+            },
+            '422': {
+                description: 'Invalid field',
+            },
+        });
+        expect(routeSet[readOne].root?.method).toEqual('get');
+        expect(routeSet[readOne].root?.summary).toEqual("Read one from 'Base' Table");
+        expect(routeSet[readOne].root?.description).toEqual("Fetch one entity in 'Base' Table");
+    });
+
+    it('Should be changed swagger update response interface', () => {
+        const update = 'ExcludeSwaggerController_reservedUpdate';
+        expect(routeSet[update].responses).toEqual({
+            '200': {
+                content: {
+                    'application/json': {
+                        schema: { $ref: '#/components/schemas/CustomResponseDto' },
+                    },
+                },
+                description: 'Updated ok',
+            },
+            '404': {
+                description: 'Not found entity',
+            },
+            '422': {
+                description: 'Invalid field',
+            },
+        });
+        expect(routeSet[update].root?.method).toEqual('patch');
+        expect(routeSet[update].root?.summary).toEqual("update one in 'Base' Table");
+        expect(routeSet[update].root?.description).toEqual("Update on entity in 'Base' Table");
+    });
+
+    it('Should be changed swagger Create request body interface', () => {
+        const create = 'ExcludeSwaggerController_reservedCreate';
+        expect(routeSet[create].root).toEqual({
+            method: 'post',
+            path: '/exclude-swagger',
+            operationId: 'ExcludeSwaggerController_reservedCreate',
+            summary: "create one to 'Base' Table",
+            description: "Create an entity in 'Base' Table",
+            parameters: [],
+            requestBody: {
+                description: 'CreateBaseDto',
+                required: true,
+                content: { 'application/json': { schema: { $ref: '#/components/schemas/CreateBaseBodyDto' } } },
+            },
+        });
     });
 });

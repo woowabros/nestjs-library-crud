@@ -24,9 +24,6 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const crudDeleteOneRequest: CrudDeleteOneRequest<typeof crudOptions.entity> = {
                 params,
                 softDeleted,
-                options: {
-                    response: deleteOptions.response ?? CRUD_POLICY[method].response,
-                },
             };
             req[Constants.CRUD_ROUTE_ARGS] = crudDeleteOneRequest;
 

@@ -1,4 +1,3 @@
-import { CrudResponseType } from '../abstract';
 import { PaginationCursorDto } from '../dto/pagination-cursor.dto';
 import { PaginationOffsetDto } from '../dto/pagination-offset.dto';
 
@@ -24,7 +23,7 @@ export interface PaginationRequestAbstract {
 }
 
 export interface PaginationAbstractResponse<T> {
-    data: Array<CrudResponseType<T>>;
+    data: T[];
 }
 
 export interface CursorPaginationResponse<T> extends PaginationAbstractResponse<T> {

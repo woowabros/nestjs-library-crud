@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { ExecutionContext, HttpStatus } from '@nestjs/common';
+import { ExecutionContext, HttpStatus, Type } from '@nestjs/common';
 import {
     INTERCEPTORS_METADATA,
     CUSTOM_ROUTE_ARGS_METADATA,
@@ -214,10 +214,19 @@ export class CrudRouteFactory {
         Reflect.defineMetadata(DECORATORS.API_OPERATION, CRUD_POLICY[method].swagger.operationMetadata(this.tableName), target);
         this.defineParameterSwagger(method, params, target);
 
+        if (this.crudOptions.routes?.[method]?.swagger?.response) {
+            const responseDto = this.generalTypeGuard(this.crudOptions.routes?.[method]?.swagger?.response!, method, 'response');
+            const extraModels: Array<{ name: string }> = Reflect.getMetadata(DECORATORS.API_EXTRA_MODELS, target) ?? [];
+            if (!extraModels.some((model) => model.name === responseDto.name)) {
+                Reflect.defineMetadata(DECORATORS.API_EXTRA_MODELS, [...extraModels, responseDto], target);
+            }
+        }
+        const swaggerResponse = this.crudOptions.routes?.[method]?.swagger?.response ?? this.crudOptions.entity;
+
         Reflect.defineMetadata(
             DECORATORS.API_RESPONSE,
             CRUD_POLICY[method].swagger.responseMetadata({
-                entity: this.crudOptions.entity,
+                type: swaggerResponse,
                 tableName: this.tableName,
                 paginationType: this.paginationType,
             }),
@@ -269,8 +278,8 @@ export class CrudRouteFactory {
                         return RequestSearchDto;
                     }
                     const routeConfig = this.crudOptions.routes?.[method];
-                    if (routeConfig && 'body' in routeConfig) {
-                        return routeConfig['body'];
+                    if (routeConfig?.swagger && 'body' in routeConfig.swagger) {
+                        return this.generalTypeGuard(routeConfig.swagger['body']!, method, 'body');
                     }
 
                     return CreateRequestDto(this.crudOptions.entity, method);
@@ -337,5 +346,19 @@ export class CrudRouteFactory {
                 pipes,
             },
         };
+    }
+
+    private generalTypeGuard<T extends Type<unknown>>(type: T, method: Method, postFix?: string): T {
+        if (['PickTypeClass', 'OmitTypeClass'].includes(type.name)) {
+            Object.defineProperty(type, 'name', {
+                value: [
+                    capitalizeFirstLetter(method),
+                    capitalizeFirstLetter(this.tableName),
+                    postFix && capitalizeFirstLetter(postFix),
+                    'Dto',
+                ].join(''),
+            });
+        }
+        return type;
     }
 }

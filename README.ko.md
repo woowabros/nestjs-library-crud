@@ -60,19 +60,19 @@ export class CatController implements CrudController<CatEntity> {
 
 1. Entity를 정의합니다.
 
--   <a href="./src/spec/base/base.entity.ts"> base.entity.ts </a>와 같이 `CrudAbstractEntity`를 상속받거나, <a href="./src/spec/custom-entity/custom.entity.ts"> custom.entity.ts </a>와 같이 Typeorm의 `BaseEntity`를 상속받아 작성합니다.
+-   <a href="./tree/main/spec/base/base.entity.ts"> base.entity.ts </a>와 같이 `CrudAbstractEntity`를 상속받거나, <a href="./tree/main/spec/custom-entity/custom.entity.ts"> custom.entity.ts </a>와 같이 Typeorm의 `BaseEntity`를 상속받아 작성합니다.
 
 2. Service File 생성
 
--   <a href="./src/spec/base/base.service.ts"> base.service.ts </a>와 같이 `CrudService<T extends BaseEntity>`를 상속받아 Service를 생성합니다.
+-   <a href="./tree/main/spec/base/base.service.ts"> base.service.ts </a>와 같이 `CrudService<T extends BaseEntity>`를 상속받아 Service를 생성합니다.
 -   1번에서 생성된 Entity의 Repository가 선언됩니다.
 
 3. Controller File을 생성
 
--   <a href="./src/spec/base/base.controller.ts"> base.controller.ts </a>와 같이 `CrudController<T extends BaseEntity>`를 상속받아 Controller를 생성합니다.
+-   <a href="./tree/main/spec/base/base.controller.ts"> base.controller.ts </a>와 같이 `CrudController<T extends BaseEntity>`를 상속받아 Controller를 생성합니다.
 -   2번에서 생성된 Service가 선언됩니다.
 
-4. <a href="./src/spec/base/base.module.ts"> base.module.ts </a>와 같이 Module을 정의합니다.
+4. <a href="./tree/main/spec/base/base.module.ts"> base.module.ts </a>와 같이 Module을 정의합니다.
 
 5. RestAPI와 Swagger가 제공되는 것을 확인할 수 있습니다.
 
@@ -87,7 +87,7 @@ export class CatController implements CrudController<CatEntity> {
 -   `Get {path}/{:id}`
 -   Entity의 Key를 기반으로 `하나`의 Entity를 조회합니다.
 -   params을 통해 간단한 매칭 조건을 사용할 수 있습니다.
--   <a href="./src/spec/base/base.controller.read-one.spec.ts"> base.controller.read-one.spec.ts </a> 을 참고할 수 있습니다.
+-   <a href="./tree/main/spec/base/base.controller.read-one.spec.ts"> base.controller.read-one.spec.ts </a> 을 참고할 수 있습니다.
 
 ---
 
@@ -95,7 +95,7 @@ export class CatController implements CrudController<CatEntity> {
 
 -   `Get {path}/`
 -   `다수`의 Entities를 `Pagination` 형태로 전달 받습니다.
--   <a href="./src/spec/read-many/read-many.controller.spec.ts"> read-many.controller.spec.ts </a> 을 참고할 수 있습니다.
+-   <a href="./tree/main/spec/read-many/read-many.controller.spec.ts"> read-many.controller.spec.ts </a> 을 참고할 수 있습니다.
 
 ReadMany는 query를 통해 단순한 비교 조건으로 사용할 수 있습니다.
 
@@ -110,7 +110,7 @@ const { body: cursorResponseBody } = await request(app.getHttpServer())
 
 ReadMany는 Cursor 방식(Default)과 Offset 방식의 페이지네이션을 제공합니다.
 
-<a href="./src/spec/pagination">pagination Test</a>를 참고할 수 있습니다.
+<a href="./tree/main/spec/pagination">pagination Test</a>를 참고할 수 있습니다.
 
 > Cursor pagination
 
@@ -177,7 +177,7 @@ const { body: offsetNextResponseBody } = await request(app.getHttpServer())
 
 -   `Post {path}/search`
 -   Body를 통해 조건을 직접 정의하여 조건에 일치하는 Entities를 전달 받습니다.
--   <a href="./src/spec/custom-entity/custom-entity.controller.search.spec.ts">custom-entity.controller.search.spec.ts</a>을 참고할 수 있습니다.
+-   <a href="./tree/main/spec/custom-entity/custom-entity.controller.search.spec.ts">custom-entity.controller.search.spec.ts</a>을 참고할 수 있습니다.
 
 ---
 
@@ -185,7 +185,7 @@ const { body: offsetNextResponseBody } = await request(app.getHttpServer())
 
 -   `Post {path}`
 -   하나 또는 다수의 Entity를 생성합니다.
--   <a href="./src/spec/base/base.controller.create.spec.ts">base.controller.create.spec.ts</a> 을 참고할 수 있습니다.
+-   <a href="./tree/main/spec/base/base.controller.create.spec.ts">base.controller.create.spec.ts</a> 을 참고할 수 있습니다.
 
 ---
 
@@ -193,7 +193,7 @@ const { body: offsetNextResponseBody } = await request(app.getHttpServer())
 
 -   `Patch {path}/{:id}`
 -   하나의 Entity를 수정합니다.
--   <a href="./src/spec/base/base.controller.update.spec.ts">base.controller.update.spec.ts</a> 을 참고할 수 있습니다.
+-   <a href="./tree/main/spec/base/base.controller.update.spec.ts">base.controller.update.spec.ts</a> 을 참고할 수 있습니다.
 
 ---
 
@@ -201,7 +201,7 @@ const { body: offsetNextResponseBody } = await request(app.getHttpServer())
 
 -   `Put {path}/{:id}`
 -   하나의 Entity에 대해서 존재 하지 않는 경우 생성하고, 그렇지 않은 경우 수정합니다.
--   <a href="./src/spec/base/base.controller.upsert.spec.ts">base.controller.upsert.spec.ts</a> 을 참고할 수 있습니다.
+-   <a href="./tree/main/spec/base/base.controller.upsert.spec.ts">base.controller.upsert.spec.ts</a> 을 참고할 수 있습니다.
 
 ---
 
@@ -209,7 +209,7 @@ const { body: offsetNextResponseBody } = await request(app.getHttpServer())
 
 -   `Delete {path}/{:id}`
 -   하나의 Entity를 삭제합니다.
--   <a href="./src/spec/base/base.controller.delete.spec.ts">base.controller.delete.spec.ts</a> 을 참고할 수 있습니다.
+-   <a href="./tree/main/spec/base/base.controller.delete.spec.ts">base.controller.delete.spec.ts</a> 을 참고할 수 있습니다.
 
 ---
 
@@ -218,25 +218,11 @@ const { body: offsetNextResponseBody } = await request(app.getHttpServer())
 -   `Post {path}/{:id}/recover`
 -   Soft-delete로 삭제된 하나의 Entity를 복구합니다.
 -   Delete Method의 softDeleted 옵션이 활성화 된 경우 사용됩니다.
--   <a href="./src/spec/base/base.controller.recover.spec.ts">base.controller.recover.spec.ts</a> 을 참고할 수 있습니다.
+-   <a href="./tree/main/spec/base/base.controller.recover.spec.ts">base.controller.recover.spec.ts</a> 을 참고할 수 있습니다.
 
 ---
 
 ## Use Case
-
-### Response로 전달되는 값을 설정할 수 있습니다.
-
----
-
-Decorator Option으로 route 마다 `response`를 변경 할 수 있습니다.
-
-entity(default), id, none 3가지 옵션을 제공합니다.
-
-```
-@Crud({ entity: BaseEntity, routes: { recover: { response: 'id' } } })
-```
-
----
 
 ### 전달되는 Response를 제어할 수 있습니다.
 
@@ -250,10 +236,15 @@ Decorator Option으로 route 마다 `interceptor`를 추가할 수 있습니다.
     routes: {
         readOne: {
             interceptors: [ResponseCustomInterceptor],
+            swagger: {
+                response: BaseResponseDto,
+            }
         },
 ```
 
 `Response Interceptor`를 추가하고 전달되는 Response를 제어할 수 있습니다.
+
+`swagger.response` 옵션을 통해 Swagger의 Response Interface를 변경할 수 있습니다.
 
 ---
 

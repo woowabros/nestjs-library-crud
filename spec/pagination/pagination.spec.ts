@@ -4,12 +4,13 @@ import _ from 'lodash';
 import request from 'supertest';
 
 import { PaginationModule } from './pagination.module';
-import { PaginationType } from '../../src';
+import { PaginationType, Sort } from '../../src';
 import { BaseService } from '../base/base.service';
 import { TestHelper } from '../test.helper';
 
 describe('Pagination', () => {
     let app: INestApplication;
+    let service: BaseService;
     const defaultLimit = 20;
 
     beforeEach(async () => {
@@ -23,7 +24,7 @@ describe('Pagination', () => {
         }).compile();
         app = moduleFixture.createNestApplication();
 
-        const service: BaseService = moduleFixture.get<BaseService>(BaseService);
+        service = moduleFixture.get<BaseService>(BaseService);
         await Promise.all(_.range(100).map((number) => service.repository.save(service.repository.create({ name: `name-${number}` }))));
         await app.init();
     });
@@ -164,8 +165,8 @@ describe('Pagination', () => {
             for (const { name } of responseBody.data) expect(name).toEqual('same name');
             for (const { name } of nextResponseBody.data) expect(name).toEqual('same name');
 
-            const nextDataIds = new Set(nextResponseBody.data.map(({ id }) => id));
-            expect(responseBody.data.some(({ id }) => nextDataIds.has(id))).not.toBeTruthy();
+            const nextDataIds = new Set((nextResponseBody.data as Array<{ id: string }>).map(({ id }) => id));
+            expect((responseBody.data as Array<{ id: string }>).some(({ id }) => nextDataIds.has(id))).not.toBeTruthy();
         });
 
         it('should throw when offset pagination query provided', async () => {
@@ -179,6 +180,27 @@ describe('Pagination', () => {
                     limit: 15,
                 })
                 .expect(HttpStatus.UNPROCESSABLE_ENTITY);
+        });
+
+        it('should be calculate the number of entities', async () => {
+            expect(
+                await service.getTotalCountByCrudReadManyRequest({
+                    pagination: { type: PaginationType.CURSOR },
+                    numberOfTake: 15,
+                    sort: Sort.ASC,
+                    primaryKeys: [],
+                }),
+            ).toEqual(100);
+
+            expect(
+                await service.getTotalCountByCrudReadManyRequest({
+                    pagination: { type: PaginationType.CURSOR },
+                    numberOfTake: 15,
+                    sort: Sort.ASC,
+                    primaryKeys: [],
+                    query: { name: 'name-1' },
+                }),
+            ).toEqual(1);
         });
     });
 
@@ -295,6 +317,27 @@ describe('Pagination', () => {
 
             expect(lastOneOfFirstResponse.id - 1).toEqual(firstOneOfNextResponse.id);
             expect(lastOneOfFirstResponse.name).not.toEqual(firstOneOfNextResponse.name);
+        });
+
+        it('should be calculate the number of entities', async () => {
+            expect(
+                await service.getTotalCountByCrudReadManyRequest({
+                    pagination: { type: PaginationType.OFFSET },
+                    numberOfTake: 15,
+                    sort: Sort.ASC,
+                    primaryKeys: [],
+                }),
+            ).toEqual(100);
+
+            expect(
+                await service.getTotalCountByCrudReadManyRequest({
+                    pagination: { type: PaginationType.OFFSET },
+                    numberOfTake: 15,
+                    sort: Sort.ASC,
+                    primaryKeys: [],
+                    query: { name: 'name-1' },
+                }),
+            ).toEqual(1);
         });
     });
 });

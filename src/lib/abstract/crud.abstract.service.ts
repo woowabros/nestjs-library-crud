@@ -13,10 +13,6 @@ import {
     PaginationResponse,
 } from '../interface';
 
-/**
- * Rule
- * - Interceptor로부터 전달받는 Request는 첫번째 Argument로 사용합니다.
- */
 export abstract class CrudAbstractService<T extends BaseEntity> {
     abstract reservedReadMany(req: CrudReadManyRequest<T>): Promise<PaginationResponse<T>>;
 
@@ -34,4 +30,6 @@ export abstract class CrudAbstractService<T extends BaseEntity> {
     abstract reservedDelete(req: CrudDeleteOneRequest<T>): Promise<T>;
 
     abstract reservedRecover(req: CrudRecoverRequest<T>): Promise<T>;
+
+    abstract getTotalCountByCrudReadManyRequest(req: CrudReadManyRequest<T>): Promise<number>;
 }

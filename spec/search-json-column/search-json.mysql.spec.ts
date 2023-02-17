@@ -30,7 +30,7 @@ describe('Search JSON column - MySQL', () => {
     });
 
     describe('[JSON_CONTAINS operator] Whether JSON document contains specific object at path', () => {
-        it('should search entites that meets operation for array column', async () => {
+        it('should search entities that meets operation for array column', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ friends: { operator: 'JSON_CONTAINS', operand: '{ "firstName": "Taylor" }' } }] },
             });
@@ -56,7 +56,7 @@ describe('Search JSON column - MySQL', () => {
             expect(data3).toHaveLength(1);
         });
 
-        it('should search entites that meets operation for object column', async () => {
+        it('should search entities that meets operation for object column', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ address: { operator: 'JSON_CONTAINS', operand: '{ "city": "Bali" }' } }] },
             });

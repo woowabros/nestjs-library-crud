@@ -22,13 +22,13 @@ export class CrudAbstractEntity extends BaseEntity {
      * 생성시간
      */
     @CreateDateColumn()
-    @ApiProperty({ description: '생성시간' })
+    @ApiProperty({ description: 'Created At' })
     createdAt?: Date;
 
     /**
      * 수정시간
      */
     @UpdateDateColumn()
-    @ApiProperty({ description: '수정시간' })
+    @ApiProperty({ description: 'Last Modified At' })
     lastModifiedAt?: Date;
 }

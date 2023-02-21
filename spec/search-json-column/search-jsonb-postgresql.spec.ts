@@ -30,7 +30,7 @@ describe('Search JSONB column - PostgreSQL', () => {
     });
 
     describe('[? operator] Does the string exist as a top-level key within the JSON value?', () => {
-        it('should search entites that meets operation', async () => {
+        it('should search entities that meets operation', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ colors: { operator: '?', operand: 'Orange' } }] },
             });
@@ -46,7 +46,7 @@ describe('Search JSONB column - PostgreSQL', () => {
     });
 
     describe('[@> operator] Does the left JSON value contain the right JSON path/value entries at the top level?', () => {
-        it('should search entites that meets operation', async () => {
+        it('should search entities that meets operation', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ friends: { operator: '@>', operand: '[{ "firstName": "Taylor" }]' } }] },
             });

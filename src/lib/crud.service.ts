@@ -197,7 +197,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             ),
             relations: this.getRelation(crudReadManyRequest.relations),
         });
-        const lastEntity = entities[entities.length - 1];
+        const lastEntity = entities.at(-1);
         const nextCursor = PaginationHelper.serialize(
             _.pick(
                 lastEntity,

@@ -36,9 +36,9 @@ export class RequestSearchDto<T> {
         [key in keyof Partial<T>]: Sort;
     };
 
-    @ApiPropertyOptional({ description: 'withDeleted' })
+    @ApiPropertyOptional({ description: 'withDeleted', type: Boolean })
     withDeleted?: boolean;
 
-    @ApiPropertyOptional({ description: 'take' })
+    @ApiPropertyOptional({ description: 'take', type: Number })
     take?: number;
 }

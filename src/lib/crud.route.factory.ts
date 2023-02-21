@@ -30,7 +30,7 @@ import {
     Column,
     CrudRecoverRequest,
     PaginationType,
-    PAGINATION_QUERY,
+    PAGINATION_SWAGGER_QUERY,
     FactoryOption,
 } from './interface';
 import { capitalizeFirstLetter, isSomeEnum } from './util';
@@ -247,7 +247,7 @@ export class CrudRouteFactory {
 
         if (method === Method.READ_MANY) {
             parameterDecorators.push(
-                ...PAGINATION_QUERY[this.paginationType].map(({ name, type }) => ({
+                ...PAGINATION_SWAGGER_QUERY[this.paginationType].map(({ name, type }) => ({
                     name,
                     type,
                     in: 'query',

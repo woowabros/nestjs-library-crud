@@ -6,14 +6,14 @@ export enum PaginationType {
     CURSOR = 'cursor',
 }
 
-export const PAGINATION_QUERY: Record<PaginationType, Array<{ name: string; type: string }>> = {
+export const PAGINATION_SWAGGER_QUERY: Record<PaginationType, Array<{ name: string; type: string }>> = {
     [PaginationType.OFFSET]: [
         { name: 'limit', type: 'integer' },
         { name: 'offset', type: 'integer' },
         { name: 'query', type: 'string' },
     ],
     [PaginationType.CURSOR]: [
-        { name: 'token', type: 'string' },
+        { name: 'nextCursor', type: 'string' },
         { name: 'query', type: 'string' },
     ],
 };

@@ -14,6 +14,7 @@ import { CreateParamsDto } from '../dto/params.dto';
 import { RequestSearchDto } from '../dto/request-search.dto';
 import { CrudOptions, FactoryOption, GROUP, Method, Sort } from '../interface';
 import { operatorBetween, operatorIn, operatorNull, operatorList, OperatorUnion } from '../interface/query-operation.interface';
+import { PaginationHelper } from '../provider/pagination.helper';
 
 const method = Method.SEARCH;
 export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
@@ -29,7 +30,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     {},
                 );
                 for (const queryFilter of req.body.where) {
-                    Object.assign(queryFilter, paramsCondition);
+                    _.merge(queryFilter, paramsCondition);
                 }
             }
             const requestSearchDto = await this.validateBody(req.body);
@@ -46,6 +47,10 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             const requestSearchDto = plainToClass(RequestSearchDto<typeof crudOptions.entity>, body);
             const searchOptions = crudOptions.routes?.[method] ?? {};
+
+            if ('nextCursor' in requestSearchDto) {
+                return this.validatePagination(requestSearchDto);
+            }
 
             if ('select' in requestSearchDto) {
                 this.validateSelect(requestSearchDto.select);
@@ -71,6 +76,33 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     : searchOptions.numberOfTake ?? (CRUD_POLICY[method].default?.numberOfTake as number);
 
             return requestSearchDto;
+        }
+
+        validatePagination(requestSearchDto: RequestSearchDto<typeof BaseEntity>): RequestSearchDto<typeof crudOptions.entity> {
+            if (typeof requestSearchDto.nextCursor !== 'string') {
+                throw new UnprocessableEntityException('nextCursor should be String type');
+            }
+            if ('query' in requestSearchDto && typeof requestSearchDto.query !== 'string') {
+                throw new UnprocessableEntityException('query should be String type');
+            }
+            const preCondition = PaginationHelper.deserialize<RequestSearchDto<typeof crudOptions.entity>>(requestSearchDto.query);
+            const lastObject: Record<string, unknown> = PaginationHelper.deserialize(requestSearchDto.nextCursor);
+            preCondition.where = preCondition.where ?? [{}];
+
+            const cursorCondition = Object.entries(lastObject).reduce(
+                (queryFilter, [key, operand]) => ({
+                    ...queryFilter,
+                    [key]: {
+                        operator: _.get(preCondition.order, 'key', CRUD_POLICY[method].default?.sort) === Sort.DESC ? '<' : '>',
+                        operand,
+                    },
+                }),
+                {},
+            );
+            for (const queryFilter of preCondition.where) {
+                _.merge(queryFilter, cursorCondition);
+            }
+            return preCondition;
         }
 
         validateSelect(select: RequestSearchDto<typeof crudOptions.entity>['select']): void {
@@ -172,7 +204,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 if (!factoryOption.columns?.some((column) => column.name === key)) {
                     throw new UnprocessableEntityException(`${key} is unknown key`);
                 }
-                if (!sortOptions.includes(sort)) {
+                if (!sortOptions.includes(sort as Sort)) {
                     throw new UnprocessableEntityException(`${sort} is unknown Order Type`);
                 }
             }

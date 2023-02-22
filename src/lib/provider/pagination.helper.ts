@@ -1,17 +1,18 @@
 const encoding = 'base64';
+
 export class PaginationHelper {
     static serialize<T>(entity: Partial<T>): string {
         return Buffer.from(JSON.stringify(entity)).toString(encoding);
     }
 
-    static deserialize(token?: string): Record<string, unknown> {
+    static deserialize<T>(token?: string): T {
         if (!token) {
-            return {};
+            return {} as T;
         }
         try {
             return JSON.parse(Buffer.from(token, encoding).toString());
         } catch {
-            return {};
+            return {} as T;
         }
     }
 }

@@ -63,9 +63,12 @@ describe('Search Query Operator', () => {
         ];
 
         for (const requestSearchDto of requestSearchDtoList) {
-            const { data } = await service.reservedSearch({ requestSearchDto });
+            const { data, metadata } = await service.reservedSearch({ requestSearchDto });
             expect(data).toHaveLength(5);
             expect(Object.keys(data[0])).toEqual(expect.arrayContaining(requestSearchDto.select as unknown[]));
+
+            expect(metadata.nextCursor).toBeDefined();
+            expect(metadata.query).toBeDefined();
         }
     });
 
@@ -105,16 +108,19 @@ describe('Search Query Operator', () => {
             [{ where: [{ col3: { operator: 'NULL', not: true } }] }, [0, 1, 2, 3, 4]],
         ];
         for (const [requestSearchDto, expected] of fixtures) {
-            const { data } = await service.reservedSearch({ requestSearchDto });
+            const { data, metadata } = await service.reservedSearch({ requestSearchDto });
             const col2Values = data.map((d) => d.col2);
             expect(col2Values).toHaveLength(expected.length);
             expect(col2Values).toEqual(expect.arrayContaining(expected));
+
+            expect(metadata.nextCursor).toBeDefined();
+            expect(metadata.query).toBeDefined();
         }
     });
 
     it('nested complex where condition test', async () => {
         const fixtures: Array<[RequestSearchDto<TestEntity>, number[]]> = [
-            [{ where: [{ col2: { operator: 'BETWEEN', operand: [3, 5] } }] }, [3, 4, 5]],
+            [{ where: [{ col2: { operator: 'BETWEEN', operand: [3, 5] } }], order: { col1: 'ASC' } }, [3, 4, 5]],
             [
                 {
                     where: [
@@ -143,17 +149,27 @@ describe('Search Query Operator', () => {
                 [3, 5, 6],
             ],
             [{ where: [{ col3: { operator: 'NULL' }, col2: { operator: 'IN', operand: [1, 3, 5] } }] }, [5]],
-            [{ where: [{ col3: { operator: 'NULL', not: true }, col2: { operator: 'IN', operand: [1, 3, 5] } }] }, [1, 3]],
             [
-                { where: [{ col2: { operator: 'BETWEEN', operand: [4, 6], not: true }, col3: { operator: 'BETWEEN', operand: [3, 9] } }] },
+                {
+                    where: [{ col3: { operator: 'NULL', not: true }, col2: { operator: 'IN', operand: [1, 3, 5] } }],
+                },
+                [1, 3],
+            ],
+            [
+                {
+                    where: [{ col2: { operator: 'BETWEEN', operand: [4, 6], not: true }, col3: { operator: 'BETWEEN', operand: [3, 9] } }],
+                },
                 [1, 2, 3],
             ],
         ];
         for (const [requestSearchDto, expected] of fixtures) {
-            const { data } = await service.reservedSearch({ requestSearchDto });
+            const { data, metadata } = await service.reservedSearch({ requestSearchDto });
             const col2Values = data.map((d) => d.col2);
             expect(col2Values).toHaveLength(expected.length);
             expect(col2Values).toEqual(expect.arrayContaining(expected));
+
+            expect(metadata.nextCursor).toBeDefined();
+            expect(metadata.query).toBeDefined();
         }
     });
 });

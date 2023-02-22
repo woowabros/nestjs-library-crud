@@ -34,6 +34,20 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
         this.relations = this.repository.metadata.relations?.map((relation) => relation.propertyName);
     }
 
+    async getTotalCountByCrudSearchRequest(crudSearchRequest: CrudSearchRequest<T>): Promise<number> {
+        const { requestSearchDto } = crudSearchRequest;
+        const where =
+            Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
+                ? requestSearchDto.where.map((queryFilter) => TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter))
+                : undefined;
+
+        return this.repository.count({
+            select: requestSearchDto.select,
+            where,
+            withDeleted: requestSearchDto.withDeleted,
+        });
+    }
+
     async reservedSearch(crudSearchRequest: CrudSearchRequest<T>) {
         const { requestSearchDto, relations } = crudSearchRequest;
         const where =
@@ -49,8 +63,12 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             order: requestSearchDto.order as FindOptionsOrder<T>,
             relations: this.getRelation(relations),
         });
+        const nextCursor = PaginationHelper.serialize(_.pick(data.at(-1), this.primaryKey));
 
-        return { data };
+        return {
+            data,
+            metadata: { nextCursor, query: PaginationHelper.serialize(requestSearchDto ?? {}) },
+        };
     }
 
     async reservedReadMany(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {
@@ -197,10 +215,9 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             ),
             relations: this.getRelation(crudReadManyRequest.relations),
         });
-        const lastEntity = entities.at(-1);
         const nextCursor = PaginationHelper.serialize(
             _.pick(
-                lastEntity,
+                entities.at(-1),
                 crudReadManyRequest.primaryKeys.map(({ name }) => name),
             ),
         );
@@ -212,8 +229,8 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
     }
 
     private paginateCursorWhereByToken(pagination: PaginationCursorDto, sort: Sort): FindOptionsWhere<T> {
-        const query = PaginationHelper.deserialize(pagination.query);
-        const lastObject = PaginationHelper.deserialize(pagination.token);
+        const query: Record<string, unknown> = PaginationHelper.deserialize(pagination.query);
+        const lastObject: Record<string, unknown> = PaginationHelper.deserialize(pagination.token);
 
         const operator = sort === Sort.DESC ? LessThan : MoreThan;
         for (const [key, value] of Object.entries(lastObject)) {

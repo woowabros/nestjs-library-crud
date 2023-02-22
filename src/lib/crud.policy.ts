@@ -93,6 +93,7 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
         default: {
             numberOfTake: 20,
             softDeleted: false,
+            sort: Sort.DESC,
         },
     },
     [Method.READ_MANY]: {

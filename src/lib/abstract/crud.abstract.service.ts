@@ -32,4 +32,6 @@ export abstract class CrudAbstractService<T extends BaseEntity> {
     abstract reservedRecover(req: CrudRecoverRequest<T>): Promise<T>;
 
     abstract getTotalCountByCrudReadManyRequest(req: CrudReadManyRequest<T>): Promise<number>;
+
+    abstract getTotalCountByCrudSearchRequest(req: CrudSearchRequest<T>): Promise<number>;
 }

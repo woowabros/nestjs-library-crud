@@ -179,6 +179,115 @@ const { body: offsetNextResponseBody } = await request(app.getHttpServer())
 -   Body를 통해 조건을 직접 정의하여 조건에 일치하는 Entities를 전달 받습니다.
 -   <a href="./tree/main/spec/custom-entity/custom-entity.controller.search.spec.ts">custom-entity.controller.search.spec.ts</a>을 참고할 수 있습니다.
 
+Search는 ReadMany가 Query parameter를 통한 key: value 형태의 exact match만을 지원함에 따라 추가되었습니다.
+
+다양한 형태의 명령을 지원하기 위해 Post Method의 Body를 활용하여, `Cursor Pagination`을 제공합니다.
+
+Body의 인터페이스는 첫 페이지와 다음 페이지를 호출하는 형태로 구분될 수 있습니다.
+
+> 첫 페이지
+
+```
+    select?: Array<keyof Partial<T>>;
+    where?: Array<QueryFilter<T>>;
+    order?: {
+        [key in keyof Partial<T>]: Sort | `${Sort}`;
+    };
+    withDeleted?: boolean;
+    take?: number;
+```
+
+TypeORM의 `FindManyOptions` 형태를 사용하여, 기본적은 SQL 형태를 사용합니다.
+
+Where절은 Array형태로 입력받으며, CRUD Decorator에서 정의한 `QueryFilter`를 사용됩니다.
+
+QueryFilter는 `AND 연산`으로 동작되며, 각 Array는 `OR 연산`으로 동작됩니다.<br/>`NOT` 연산은 각 QueryFilter에서 정의할수 있습니다.
+
+제공하는 조건(operator)는 <a href="./tree/main/src/lib/interface/query-operation.interface.ts">query-operation.interface.ts</a>를 참고할 수 있습니다.
+
+```
+type QueryFilter<T> = {
+    [key in keyof Partial<T>]: QueryFilterOperation;
+};
+
+type QueryFilterOperation =
+    | { operator: OperatorUnion; operand: unknown; not?: boolean }
+    | {
+          operator: typeof operatorBetween;
+          operand: [unknown, unknown];
+          not?: boolean;
+      }
+    | {
+          operator: typeof operatorIn;
+          operand: unknown[];
+          not?: boolean;
+      }
+    | { operator: typeof operatorNull; not?: boolean };
+```
+
+예를 들어 `name이 "Hong"으로 시작`하는 조건이 필요하다면 다음과 같이 사용합니다.
+
+```
+   where: [
+      { name: { operator: 'LIKE', operand: 'Hong%' } }
+   ]
+```
+
+`name이 "Hong"으로 시작` 하고 `age가 20세 미만`이라면 다음과 같이 사용합니다.
+
+```
+   where: [
+        {
+            name: { operator: 'LIKE', operand: 'Hong%' },
+            age: { operator: '<', operand: 20 },
+        }
+    ]
+```
+
+`name이 "Hong"으로 시작` 하고 `age가 20세 미만` 이거나, `name이 "Park"으로 시작` 하고 `age가 20세부터 30세`까지인 조건은 다음과 같이 사용합니다.
+
+```
+   where: [
+        {
+            name: { operator: 'LIKE', operand: 'Hong%' },
+            age: { operator: '<', operand: 20 },
+        },
+        {
+            name: { operator: 'LIKE', operand: 'Park%' },
+            age: { operator: 'BETWEEN', operand: [20, 30] },
+        },
+    ]
+```
+
+`name이 "Hong"으로 시작` 하고 `age가 20세 미만` 이거나, `name이 "Park"으로 시작` 하고 `age가 20세부터 30세`이거나, `class가 null이 아닌` 조건은 다음과 같이 사용합니다.
+
+```
+   where: [
+        {
+            name: { operator: 'LIKE', operand: 'Hong%' },
+            age: { operator: '<', operand: 20 },
+        },
+        {
+            name: { operator: 'LIKE', operand: 'Park%' },
+            age: { operator: 'BETWEEN', operand: [20, 30] },
+        },
+        {
+            class: { operator: 'NULL', not: true },
+        }
+    ]
+```
+
+> 다음 페이지
+
+```
+    nextCursor?: string;
+    query?: string;
+```
+
+ReadMany의 `Cursor Pagination의 사용법`과 동일하며 `NextCursor와 Query` 값을 Body로 전달함으로써 동작합니다.
+
+nextCursor와 query는 `response body의 metadata로 전달`됩니다.
+
 ---
 
 ### Create

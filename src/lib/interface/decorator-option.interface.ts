@@ -2,6 +2,7 @@ import { NestInterceptor, Type } from '@nestjs/common';
 import { BaseEntity, ColumnType } from 'typeorm';
 
 import { Method, Sort, PaginationType } from '.';
+import { Author } from '../provider';
 
 interface RouteBaseOption {
     decorators?: Array<PropertyDecorator | MethodDecorator>;
@@ -41,25 +42,30 @@ export interface CrudOptions {
             swagger?: {
                 body?: Type<unknown>;
             };
+            author?: Author<string>;
         } & RouteBaseOption;
         [Method.UPDATE]?: {
             params?: string[];
             swagger?: {
                 body?: Type<unknown>;
             };
+            author?: Author<string>;
         } & RouteBaseOption;
         [Method.DELETE]?: {
             params?: string[];
             softDelete?: boolean;
+            author?: Author<string>;
         } & RouteBaseOption;
         [Method.UPSERT]?: {
             params?: string[];
             swagger?: {
                 body?: Type<unknown>;
             };
+            author?: Author<string>;
         } & RouteBaseOption;
         [Method.RECOVER]?: {
             params?: string[];
+            author?: Author<string>;
         } & RouteBaseOption;
     };
     only?: Array<Method | `${Method}`>;

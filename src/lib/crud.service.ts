@@ -106,6 +106,12 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             isCrudCreateManyRequest<T>(crudCreateRequest) ? crudCreateRequest.body : [crudCreateRequest.body],
         );
 
+        if (crudCreateRequest.author) {
+            for (const entity of entities) {
+                _.merge(entity, { [crudCreateRequest.author.key]: crudCreateRequest.author.value });
+            }
+        }
+
         return this.repository
             .save(entities)
             .then((result) => {
@@ -128,6 +134,10 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     throw new ConflictException('it has been deleted');
                 }
 
+                if (crudUpsertRequest.author) {
+                    _.merge(upsertEntity, { [crudUpsertRequest.author.key]: crudUpsertRequest.author.value });
+                }
+
                 return this.repository.save(_.merge(upsertEntity, crudUpsertRequest.body));
             });
     }
@@ -142,6 +152,10 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     throw new NotFoundException();
                 }
 
+                if (crudUpdateOneRequest.author) {
+                    _.merge(entity, { [crudUpdateOneRequest.author.key]: crudUpdateOneRequest.author.value });
+                }
+
                 return this.repository.save(_.merge(entity, crudUpdateOneRequest.body));
             });
     }
@@ -150,7 +164,6 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
         if (this.primaryKey.length === 0) {
             throw new ConflictException('cannot found primary key from entity');
         }
-        const deleteAction = crudDeleteOneRequest.softDeleted ? 'softDelete' : 'delete';
 
         return this.repository
             .findOne({
@@ -161,9 +174,12 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     throw new NotFoundException();
                 }
 
-                await this.repository[deleteAction](
-                    this.primaryKey.reduce((pre, key) => ({ ...pre, [key]: (entity as Record<string, unknown>)[key] }), {}),
-                );
+                if (crudDeleteOneRequest.author) {
+                    _.merge(entity, { [crudDeleteOneRequest.author.key]: crudDeleteOneRequest.author.value });
+                    await this.repository.save(entity);
+                }
+
+                await (crudDeleteOneRequest.softDeleted ? entity.softRemove() : entity.remove());
                 return entity;
             });
     }

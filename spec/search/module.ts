@@ -9,7 +9,7 @@ import { CrudService } from '../../src/lib/crud.service';
 import { GROUP } from '../../src/lib/interface';
 import { CrudController } from '../../src/lib/interface';
 
-@Entity('TestEntity')
+@Entity('test')
 export class TestEntity extends BaseEntity {
     @PrimaryColumn()
     @IsOptional({ groups: [GROUP.SEARCH] })

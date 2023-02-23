@@ -7,7 +7,8 @@ import { Observable } from 'rxjs';
 
 import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
-import { CrudOptions, CrudUpsertRequest, FactoryOption, GROUP } from '../interface';
+import { CrudOptions, CrudUpsertRequest, FactoryOption, GROUP, Method } from '../interface';
+import { AuthorHelper } from '../provider';
 
 export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
@@ -37,6 +38,7 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const crudUpsertRequest: CrudUpsertRequest<typeof crudOptions.entity> = {
                 params,
                 body,
+                author: AuthorHelper.extract(req, crudOptions, Method.UPSERT),
             };
 
             req[Constants.CRUD_ROUTE_ARGS] = crudUpsertRequest;

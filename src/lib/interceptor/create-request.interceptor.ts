@@ -7,9 +7,9 @@ import { BaseEntity } from 'typeorm';
 
 import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
-import { CrudOptions, FactoryOption, CrudCreateRequest, GROUP } from '../interface';
+import { CrudOptions, FactoryOption, CrudCreateRequest, GROUP, Method } from '../interface';
+import { AuthorHelper } from '../provider';
 
-// https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#more-recursive-type-aliases
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface NestedBaseEntityArray extends Array<NestedBaseEntityArray | BaseEntity> {}
 type BaseEntityOrArray = BaseEntity | NestedBaseEntityArray;
@@ -26,6 +26,7 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, _factoryOptio
 
             const crudCreateRequest: CrudCreateRequest<typeof crudOptions.entity> = {
                 body,
+                author: AuthorHelper.extract(req, crudOptions, Method.CREATE),
             };
             (req as Record<string, any>)[Constants.CRUD_ROUTE_ARGS] = crudCreateRequest;
             return next.handle();

@@ -10,7 +10,7 @@ import { Crud } from '../../src/lib/crud.decorator';
 import { CrudService } from '../../src/lib/crud.service';
 import { CrudController, Method } from '../../src/lib/interface';
 
-@Entity('author')
+@Entity('author_value')
 export class TestEntity extends BaseEntity {
     @PrimaryColumn()
     @IsString({ always: true })
@@ -62,15 +62,16 @@ export class TestService extends CrudService<TestEntity> {
         create: {
             interceptors: [AuthorInterceptor],
             author: {
-                filter: 'user',
                 property: 'createdBy',
+                value: 'fixed value',
             },
         },
         update: {
-            interceptors: [AuthorInterceptor],
+            interceptors: [],
             author: {
                 filter: 'user',
                 property: 'updatedBy',
+                value: 'default value',
             },
         },
         upsert: {
@@ -78,13 +79,6 @@ export class TestService extends CrudService<TestEntity> {
             author: {
                 filter: 'user',
                 property: 'updatedBy',
-            },
-        },
-        delete: {
-            interceptors: [AuthorInterceptor],
-            author: {
-                filter: 'user',
-                property: 'deletedBy',
             },
         },
     },

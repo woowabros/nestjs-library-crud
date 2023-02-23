@@ -108,7 +108,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
 
         if (crudCreateRequest.author) {
             for (const entity of entities) {
-                _.merge(entity, { [crudCreateRequest.author.key]: crudCreateRequest.author.value });
+                _.merge(entity, { [crudCreateRequest.author.property]: crudCreateRequest.author.value });
             }
         }
 
@@ -135,7 +135,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 }
 
                 if (crudUpsertRequest.author) {
-                    _.merge(upsertEntity, { [crudUpsertRequest.author.key]: crudUpsertRequest.author.value });
+                    _.merge(upsertEntity, { [crudUpsertRequest.author.property]: crudUpsertRequest.author.value });
                 }
 
                 return this.repository.save(_.merge(upsertEntity, crudUpsertRequest.body));
@@ -153,7 +153,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 }
 
                 if (crudUpdateOneRequest.author) {
-                    _.merge(entity, { [crudUpdateOneRequest.author.key]: crudUpdateOneRequest.author.value });
+                    _.merge(entity, { [crudUpdateOneRequest.author.property]: crudUpdateOneRequest.author.value });
                 }
 
                 return this.repository.save(_.merge(entity, crudUpdateOneRequest.body));
@@ -175,7 +175,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 }
 
                 if (crudDeleteOneRequest.author) {
-                    _.merge(entity, { [crudDeleteOneRequest.author.key]: crudDeleteOneRequest.author.value });
+                    _.merge(entity, { [crudDeleteOneRequest.author.property]: crudDeleteOneRequest.author.value });
                     await this.repository.save(entity);
                 }
 

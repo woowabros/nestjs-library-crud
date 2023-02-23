@@ -42,30 +42,30 @@ export interface CrudOptions {
             swagger?: {
                 body?: Type<unknown>;
             };
-            author?: Author<string>;
+            author?: Author;
         } & RouteBaseOption;
         [Method.UPDATE]?: {
             params?: string[];
             swagger?: {
                 body?: Type<unknown>;
             };
-            author?: Author<string>;
+            author?: Author;
         } & RouteBaseOption;
         [Method.DELETE]?: {
             params?: string[];
             softDelete?: boolean;
-            author?: Author<string>;
+            author?: Author;
         } & RouteBaseOption;
         [Method.UPSERT]?: {
             params?: string[];
             swagger?: {
                 body?: Type<unknown>;
             };
-            author?: Author<string>;
+            author?: Author;
         } & RouteBaseOption;
         [Method.RECOVER]?: {
             params?: string[];
-            author?: Author<string>;
+            author?: Author;
         } & RouteBaseOption;
     };
     only?: Array<Method | `${Method}`>;

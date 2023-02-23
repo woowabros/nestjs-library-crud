@@ -7,7 +7,7 @@ import { Author } from '../provider';
 export type CrudRequestId<T> = keyof T | Array<keyof T>;
 
 export interface CrudRequestBase {
-    author?: Author<unknown>;
+    author?: Author;
 }
 
 export interface CrudReadRequestBase extends CrudRequestBase {

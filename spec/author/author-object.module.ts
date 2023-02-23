@@ -58,29 +58,29 @@ export class TestService extends CrudService<TestEntity> {
         create: {
             interceptors: [AuthorInterceptor],
             author: {
-                key: 'user',
-                value: 'createdBy',
+                filter: 'user',
+                property: 'createdBy',
             },
         },
         update: {
             interceptors: [AuthorInterceptor],
             author: {
-                key: 'user',
-                value: 'updatedBy',
+                filter: 'user',
+                property: 'updatedBy',
             },
         },
         upsert: {
             interceptors: [AuthorInterceptor],
             author: {
-                key: 'user',
-                value: 'updatedBy',
+                filter: 'user',
+                property: 'updatedBy',
             },
         },
         delete: {
             interceptors: [AuthorInterceptor],
             author: {
-                key: 'user',
-                value: 'deletedBy',
+                filter: 'user',
+                property: 'deletedBy',
             },
         },
     },

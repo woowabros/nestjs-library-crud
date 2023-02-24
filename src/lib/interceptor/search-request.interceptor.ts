@@ -12,9 +12,9 @@ import { Constants } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { CreateParamsDto } from '../dto/params.dto';
 import { RequestSearchDto } from '../dto/request-search.dto';
-import { CrudOptions, FactoryOption, GROUP, Method, Sort } from '../interface';
+import { CrudOptions, CrudSearchRequest, FactoryOption, GROUP, Method, Sort } from '../interface';
 import { operatorBetween, operatorIn, operatorNull, operatorList, OperatorUnion } from '../interface/query-operation.interface';
-import { PaginationHelper } from '../provider/pagination.helper';
+import { PaginationHelper } from '../provider';
 
 const method = Method.SEARCH;
 export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
@@ -34,7 +34,11 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 }
             }
             const requestSearchDto = await this.validateBody(req.body);
-            req[Constants.CRUD_ROUTE_ARGS] = { requestSearchDto, relations: customSearchRequestOptions?.relations };
+            const crudSearchRequest: CrudSearchRequest<typeof crudOptions.entity> = {
+                requestSearchDto,
+                relations: customSearchRequestOptions?.relations,
+            };
+            req[Constants.CRUD_ROUTE_ARGS] = crudSearchRequest;
 
             return next.handle();
         }

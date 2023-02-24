@@ -1,4 +1,5 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor } from '@nestjs/common';
+import { Request } from 'express';
 import _ from 'lodash';
 import { Observable } from 'rxjs';
 
@@ -12,7 +13,7 @@ const method = Method.DELETE;
 export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
-            const req: Record<string, any> = context.switchToHttp().getRequest();
+            const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const deleteOptions = crudOptions.routes?.[method] ?? {};
             const customDeleteRequestOptions: CustomDeleteRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
 
@@ -24,6 +25,7 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const crudDeleteOneRequest: CrudDeleteOneRequest<typeof crudOptions.entity> = {
                 params,
                 softDeleted,
+                author: this.getAuthor(req, crudOptions, method),
             };
             req[Constants.CRUD_ROUTE_ARGS] = crudDeleteOneRequest;
 

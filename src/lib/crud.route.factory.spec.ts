@@ -4,7 +4,7 @@ import { CrudRouteFactory } from './crud.route.factory';
 import { PaginationType } from './interface';
 
 describe('CrudRouteFactory', () => {
-    @Entity('TestEntity')
+    @Entity('test')
     class TestEntity extends BaseEntity {}
 
     it('should check tableName in TypeORM', () => {

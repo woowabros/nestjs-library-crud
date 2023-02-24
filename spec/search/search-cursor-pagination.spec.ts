@@ -85,4 +85,14 @@ describe('Search Cursor Pagination', () => {
             _.merge(searchRequestBody, { where: [{ col1: { operand: lastEntity.col1, operator: '<' } }] }, { withDeleted: false }),
         );
     });
+
+    it('should be less than limitOfTake', async () => {
+        const { body } = await request(app.getHttpServer())
+            .post('/base/search')
+            .send({
+                take: 200,
+            })
+            .expect(HttpStatus.UNPROCESSABLE_ENTITY);
+        expect(body.message).toEqual('take must be less than 100');
+    });
 });

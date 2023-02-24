@@ -1,8 +1,7 @@
 import { DeepPartial } from 'typeorm';
 
-import { PaginationRequest, PrimaryKey, Sort } from '.';
+import { Author, PaginationRequest, PrimaryKey, Sort } from '.';
 import { RequestSearchDto } from '../dto/request-search.dto';
-import { Author } from '../provider';
 
 export type CrudRequestId<T> = keyof T | Array<keyof T>;
 

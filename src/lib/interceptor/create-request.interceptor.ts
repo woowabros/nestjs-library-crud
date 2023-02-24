@@ -8,7 +8,6 @@ import { BaseEntity } from 'typeorm';
 import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
 import { CrudOptions, FactoryOption, CrudCreateRequest, GROUP, Method } from '../interface';
-import { AuthorHelper } from '../provider';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface NestedBaseEntityArray extends Array<NestedBaseEntityArray | BaseEntity> {}
@@ -26,7 +25,7 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, _factoryOptio
 
             const crudCreateRequest: CrudCreateRequest<typeof crudOptions.entity> = {
                 body,
-                author: AuthorHelper.extract(req, crudOptions, Method.CREATE),
+                author: this.getAuthor(req, crudOptions, Method.CREATE),
             };
             (req as Record<string, any>)[Constants.CRUD_ROUTE_ARGS] = crudCreateRequest;
             return next.handle();

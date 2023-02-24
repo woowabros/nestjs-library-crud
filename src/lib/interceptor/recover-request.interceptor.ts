@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
 import { CrudOptions, CrudRecoverRequest, FactoryOption, Method } from '../interface';
-import { AuthorHelper } from '../provider';
 
 export function RecoverRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
@@ -16,7 +15,7 @@ export function RecoverRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             const params = await this.checkParams(crudOptions.entity, customRequestOption?.params ?? req.params, factoryOption.columns);
             const crudRecoverRequest: CrudRecoverRequest<typeof crudOptions.entity> = {
                 params,
-                author: AuthorHelper.extract(req, crudOptions, Method.RECOVER),
+                author: this.getAuthor(req, crudOptions, Method.RECOVER),
             };
 
             req[Constants.CRUD_ROUTE_ARGS] = crudRecoverRequest;

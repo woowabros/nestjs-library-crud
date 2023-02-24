@@ -8,7 +8,6 @@ import { Observable } from 'rxjs';
 import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
 import { CrudOptions, CrudUpdateOneRequest, FactoryOption, GROUP, Method } from '../interface';
-import { AuthorHelper } from '../provider';
 
 export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
@@ -20,7 +19,7 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const crudUpdateOneRequest: CrudUpdateOneRequest<typeof crudOptions.entity> = {
                 params,
                 body,
-                author: AuthorHelper.extract(req, crudOptions, Method.UPDATE),
+                author: this.getAuthor(req, crudOptions, Method.UPDATE),
             };
             req[Constants.CRUD_ROUTE_ARGS] = crudUpdateOneRequest;
 

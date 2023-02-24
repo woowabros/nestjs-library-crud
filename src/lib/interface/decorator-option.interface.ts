@@ -1,8 +1,7 @@
 import { NestInterceptor, Type } from '@nestjs/common';
 import { BaseEntity, ColumnType } from 'typeorm';
 
-import { Method, Sort, PaginationType } from '.';
-import { Author } from '../provider';
+import { Method, Sort, PaginationType, Author } from '.';
 
 interface RouteBaseOption {
     decorators?: Array<PropertyDecorator | MethodDecorator>;

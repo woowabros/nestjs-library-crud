@@ -8,7 +8,6 @@ import { RequestAbstractInterceptor } from '../abstract';
 import { Constants } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { CrudDeleteOneRequest, CrudOptions, Method, FactoryOption } from '../interface';
-import { AuthorHelper } from '../provider';
 
 const method = Method.DELETE;
 export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
@@ -26,7 +25,7 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const crudDeleteOneRequest: CrudDeleteOneRequest<typeof crudOptions.entity> = {
                 params,
                 softDeleted,
-                author: AuthorHelper.extract(req, crudOptions, method),
+                author: this.getAuthor(req, crudOptions, method),
             };
             req[Constants.CRUD_ROUTE_ARGS] = crudDeleteOneRequest;
 

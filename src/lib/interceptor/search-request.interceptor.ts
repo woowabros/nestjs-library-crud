@@ -76,8 +76,8 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             requestSearchDto.take =
                 'take' in requestSearchDto
-                    ? this.validateTake(requestSearchDto.take)
-                    : searchOptions.numberOfTake ?? (CRUD_POLICY[method].default?.numberOfTake as number);
+                    ? this.validateTake(requestSearchDto.take, searchOptions.limitOfTake)
+                    : searchOptions.limitOfTake ?? (CRUD_POLICY[method].default?.numberOfTake as number);
 
             return requestSearchDto;
         }
@@ -220,13 +220,16 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             }
         }
 
-        validateTake(take: RequestSearchDto<typeof crudOptions.entity>['take']): number | undefined {
+        validateTake(take: RequestSearchDto<typeof crudOptions.entity>['take'], limitOfTake: number | undefined): number | undefined {
             if (take == null) {
                 throw new UnprocessableEntityException('take must be positive number type');
             }
             const takeNumber = +take;
             if (!Number.isInteger(takeNumber) || takeNumber < 1) {
                 throw new UnprocessableEntityException('take must be positive number type');
+            }
+            if (!!limitOfTake && takeNumber > limitOfTake) {
+                throw new UnprocessableEntityException(`take must be less than ${limitOfTake}`);
             }
             return takeNumber;
         }

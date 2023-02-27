@@ -33,6 +33,11 @@ export class TestService extends CrudService<TestEntity> {
 
 @Crud({
     entity: TestEntity,
+    routes: {
+        search: {
+            limitOfTake: 100,
+        },
+    },
 })
 @Controller('base')
 export class TestController implements CrudController<TestEntity> {

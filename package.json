@@ -33,6 +33,7 @@
         "type-check": "tsc -p tsconfig.lib.json --noEmit && tsc -p tsconfig.spec.json",
         "format-check": "prettier --check --ignore-path .gitignore \"**/*.+(ts|json|js)\"",
         "format": "prettier --write --ignore-path .gitignore \"**/*.+(ts|json|js)\"",
+        "format:all": "prettier -w -l .",
         "lint": "eslint --ext .ts,.js .",
         "docker-compose-up:test": "docker-compose -f docker-compose.test.yml --env-file .env.test up -d",
         "docker-compose-down:test": "docker-compose -f docker-compose.test.yml --env-file .env.test down",

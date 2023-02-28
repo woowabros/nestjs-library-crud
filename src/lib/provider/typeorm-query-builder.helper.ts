@@ -17,11 +17,25 @@ import {
 import { QueryFilter, operatorBetween, operatorIn, operatorNull } from '../interface/query-operation.interface';
 
 export class TypeOrmQueryBuilderHelper {
-    static queryFilterToFindOptionsWhere<T extends BaseEntity>(filter: QueryFilter<T>): FindOptionsWhere<T> {
+    static queryFilterToFindOptionsWhere<T extends BaseEntity>(filter: QueryFilter<T>, index: number): FindOptionsWhere<T> {
+        const prefix = (() => {
+            let num = index;
+            let letters = '';
+            while (num >= 0) {
+                letters = String.fromCharCode(65 + (num % 26)) + letters;
+                num = Math.floor(num / 26) - 1;
+            }
+            return letters;
+        })();
+        let parametersIndex = 0;
+        function getParameterName() {
+            return [prefix, parametersIndex++].join('');
+        }
         const findOptionsWhere: Record<string, unknown> = {};
         for (const [field, operation] of Object.entries(filter)) {
             if (typeof operation === 'object' && operation !== null) {
                 if ('operator' in operation) {
+                    const paramName = getParameterName();
                     switch (operation.operator) {
                         case '=':
                             findOptionsWhere[field] = operation.operand;
@@ -48,13 +62,19 @@ export class TypeOrmQueryBuilderHelper {
                             findOptionsWhere[field] = ILike(operation.operand);
                             break;
                         case '?':
-                            findOptionsWhere[field] = Raw((alias) => `${alias} ? :operand`, { operand: operation.operand });
+                            findOptionsWhere[field] = Raw((alias) => `${alias} ? :${paramName}`, {
+                                [paramName]: operation.operand,
+                            });
                             break;
                         case '@>':
-                            findOptionsWhere[field] = Raw((alias) => `${alias} @> :operand`, { operand: operation.operand });
+                            findOptionsWhere[field] = Raw((alias) => `${alias} @> :${paramName}`, {
+                                [paramName]: operation.operand,
+                            });
                             break;
                         case 'JSON_CONTAINS':
-                            findOptionsWhere[field] = Raw((alias) => `JSON_CONTAINS (${alias}, :operand)`, { operand: operation.operand });
+                            findOptionsWhere[field] = Raw((alias) => `JSON_CONTAINS (${alias}, :${paramName})`, {
+                                [paramName]: operation.operand,
+                            });
                             break;
                         case operatorBetween:
                             findOptionsWhere[field] = Between(...operation.operand);

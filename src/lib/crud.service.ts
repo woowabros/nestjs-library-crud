@@ -142,7 +142,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     _.merge(upsertEntity, { [crudUpsertRequest.author.property]: crudUpsertRequest.author.value });
                 }
 
-                return this.repository.save(_.merge(upsertEntity, crudUpsertRequest.body));
+                return this.repository.save(_.assign(upsertEntity, crudUpsertRequest.body));
             });
     }
 
@@ -160,7 +160,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     _.merge(entity, { [crudUpdateOneRequest.author.property]: crudUpdateOneRequest.author.value });
                 }
 
-                return this.repository.save(_.merge(entity, crudUpdateOneRequest.body));
+                return this.repository.save(_.assign(entity, crudUpdateOneRequest.body));
             });
     }
 

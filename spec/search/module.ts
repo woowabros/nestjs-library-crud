@@ -35,6 +35,7 @@ export class TestService extends CrudService<TestEntity> {
     entity: TestEntity,
     routes: {
         search: {
+            numberOfTake: 5,
             limitOfTake: 100,
         },
     },

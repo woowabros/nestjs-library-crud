@@ -77,7 +77,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             requestSearchDto.take =
                 'take' in requestSearchDto
                     ? this.validateTake(requestSearchDto.take, searchOptions.limitOfTake)
-                    : searchOptions.limitOfTake ?? (CRUD_POLICY[method].default?.numberOfTake as number);
+                    : searchOptions.numberOfTake ?? (CRUD_POLICY[method].default?.numberOfTake as number);
 
             return requestSearchDto;
         }

@@ -95,4 +95,16 @@ describe('Search Cursor Pagination', () => {
             .expect(HttpStatus.UNPROCESSABLE_ENTITY);
         expect(body.message).toEqual('take must be less than 100');
     });
+
+    it('should be fetch the entities count set in numberOfTake', async () => {
+        const {
+            body: { data: defaultData },
+        } = await request(app.getHttpServer()).post('/base/search').send({}).expect(HttpStatus.OK);
+        expect(defaultData).toHaveLength(5);
+
+        const {
+            body: { data: customData },
+        } = await request(app.getHttpServer()).post('/base/search').send({ take: 13 }).expect(HttpStatus.OK);
+        expect(customData).toHaveLength(13);
+    });
 });

@@ -1,34 +1,28 @@
-<p align='left'>
-  <a href='./README.md'>English</a> | <a href='./README.ko.md'>한국어</a>
-</p>
+[English](./README.md) | [한국어](./README.ko.md)
 
 # @nestjs-library/crud
 
----
-
 NestJS + TypeOrm 기반으로 CRUD를 자동으로 생성합니다.
 
-이 라이브러리는 Entity가 제공하는 CRUD API를 자동으로 제공함으로써,
-<br/>반복 작업을 줄여 생산성을 높이기 위해 만들어졌습니다.
+[![npm version](https://img.shields.io/npm/v/@nestjs-library/crud)](https://www.npmjs.com/package/@nestjs-library/crud)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/@nestjs-library/crud)](https://www.npmjs.com/package/@nestjs-library/crud?activeTab=explore)
+[![npm download](https://img.shields.io/npm/dw/@nestjs-library/crud)](https://www.npmjs.com/package/@nestjs-library/crud)
 
----
+<!-- [![npm download](https://img.shields.io/github/license/woowabros/nestjs-library-crud)](https://github.com/woowabros/nestjs-library-crud/LICENSE.md) -->
 
-## Install
+이 라이브러리는 Entity가 제공하는 CRUD API를 자동으로 제공함으로써 반복 작업을 줄여 생산성을 높이기 위해 만들어졌습니다.
 
----
+## Installation
 
-<a href="https://www.npmjs.com/package/@nestjs-library/crud"> @nestjs-library/crud </a>
+```sh
+# npm
+npm install @nestjs-library/crud
 
--   NPM
+# yarn
+yarn add @nestjs-library/crud
 
-```
-$ npm install @nestjs-library/crud
-```
-
--   YARN
-
-```
-$ yarn add @nestjs-library/crud
+# pnpm
+pnpm add @nestjs-library/crud
 ```
 
 ## Usage
@@ -59,21 +53,21 @@ export class CatController implements CrudController<CatEntity> {
 
 1. Entity를 정의합니다.
 
--   <a href="./tree/main/spec/base/base.entity.ts"> base.entity.ts </a>와 같이 `CrudAbstractEntity`를 상속받거나, <a href="./tree/main/spec/custom-entity/custom.entity.ts"> custom.entity.ts </a>와 같이 Typeorm의 `BaseEntity`를 상속받아 작성합니다.
+-   [base.entity.ts](./spec/base/base.entity.ts)와 같이 `CrudAbstractEntity`를 상속받거나, [custom.entity.ts](./spec/custom-entity/custom.entity.ts) 와 같이 Typeorm의 `BaseEntity`를 상속받아 작성합니다.
 
 2. Service File 생성
 
--   <a href="./tree/main/spec/base/base.service.ts"> base.service.ts </a>와 같이 `CrudService<T extends BaseEntity>`를 상속받아 Service를 생성합니다.
+-   [base.service.ts](./spec/base/base.service.ts) 와 같이 `CrudService<T extends BaseEntity>`를 상속받아 Service를 생성합니다.
 -   1번에서 생성된 Entity의 Repository가 선언됩니다.
 
 3. Controller File을 생성
 
--   <a href="./tree/main/spec/base/base.controller.ts"> base.controller.ts </a>와 같이 `CrudController<T extends BaseEntity>`를 상속받아 Controller를 생성합니다.
+-   [base.controller.ts](./spec/base/base.controller.ts) 와 같이 `CrudController<T extends BaseEntity>`를 상속받아 Controller를 생성합니다.
 -   2번에서 생성된 Service가 선언됩니다.
 
-4. <a href="./tree/main/spec/base/base.module.ts"> base.module.ts </a>와 같이 Module을 정의합니다.
+4.  [base.module.ts](./spec/base/base.module.ts) 와 같이 Module을 정의합니다.
 
-5. RestAPI와 Swagger가 제공되는 것을 확인할 수 있습니다.
+5.  RestAPI와 Swagger가 제공되는 것을 확인할 수 있습니다.
 
 ---
 
@@ -83,18 +77,18 @@ export class CatController implements CrudController<CatEntity> {
 
 #### ReadOne
 
--   `Get {path}/{:id}`
+-   `GET {path}/{:id}`
 -   Entity의 Key를 기반으로 `하나`의 Entity를 조회합니다.
 -   params을 통해 간단한 매칭 조건을 사용할 수 있습니다.
--   <a href="./tree/main/spec/base/base.controller.read-one.spec.ts"> base.controller.read-one.spec.ts </a> 을 참고할 수 있습니다.
+-   [base.controller.read-one.spec.ts](./spec/base/base.controller.read-one.spec.ts) 을 참고할 수 있습니다.
 
 ---
 
 ### ReadMany
 
--   `Get {path}/`
+-   `GET {path}/`
 -   `다수`의 Entities를 `Pagination` 형태로 전달 받습니다.
--   <a href="./tree/main/spec/read-many/read-many.controller.spec.ts"> read-many.controller.spec.ts </a> 을 참고할 수 있습니다.
+-   [read-many.controller.spec.ts](./spec/read-many/read-many.controller.spec.ts) 을 참고할 수 있습니다.
 
 ReadMany는 query를 통해 단순한 비교 조건으로 사용할 수 있습니다.
 
@@ -107,9 +101,7 @@ const { body: cursorResponseBody } = await request(app.getHttpServer())
     .expect(HttpStatus.OK);
 ```
 
-ReadMany는 Cursor 방식(Default)과 Offset 방식의 페이지네이션을 제공합니다.
-
-<a href="./tree/main/spec/pagination">pagination Test</a>를 참고할 수 있습니다.
+ReadMany는 Cursor 방식(Default)과 Offset 방식의 페이지네이션을 제공합니다. [pagination test](./spec/pagination)를 참고할 수 있습니다.
 
 > Cursor pagination
 
@@ -173,13 +165,13 @@ const { body: offsetNextResponseBody } = await request(app.getHttpServer())
 
 ### Search
 
--   `Post {path}/search`
+-   `POST {path}/search`
 -   Body를 통해 조건을 직접 정의하여 조건에 일치하는 Entities를 전달 받습니다.
--   <a href="./tree/main/spec/custom-entity/custom-entity.controller.search.spec.ts">custom-entity.controller.search.spec.ts</a>을 참고할 수 있습니다.
+-   [custom-entity.controller.search.spec.ts](./spec/custom-entity/custom-entity.controller.search.spec.ts) 을 참고할 수 있습니다.
 
 Search는 ReadMany가 Query parameter를 통한 key: value 형태의 exact match만을 지원함에 따라 추가되었습니다.
 
-다양한 형태의 명령을 지원하기 위해 Post Method의 Body를 활용하여, `Cursor Pagination`을 제공합니다.
+다양한 형태의 명령을 지원하기 위해 POST Method의 Body를 활용하여, `Cursor Pagination`을 제공합니다.
 
 Body의 인터페이스는 첫 페이지와 다음 페이지를 호출하는 형태로 구분될 수 있습니다.
 
@@ -199,9 +191,11 @@ TypeORM의 `FindManyOptions` 형태를 사용하여, 기본적은 SQL 형태를 
 
 Where절은 Array형태로 입력받으며, CRUD Decorator에서 정의한 `QueryFilter`를 사용됩니다.
 
-QueryFilter는 `AND 연산`으로 동작되며, 각 Array는 `OR 연산`으로 동작됩니다.<br/>`NOT` 연산은 각 QueryFilter에서 정의할수 있습니다.
+QueryFilter는 `AND 연산`으로 동작되며, 각 Array는 `OR 연산`으로 동작됩니다.
 
-제공하는 조건(operator)는 <a href="./tree/main/src/lib/interface/query-operation.interface.ts">query-operation.interface.ts</a>를 참고할 수 있습니다.
+`NOT` 연산은 각 QueryFilter에서 정의할수 있습니다.
+
+제공하는 조건(operator)는 [query-operation.interface.ts](./src/lib/interface/query-operation.interface.ts)를 참고할 수 있습니다.
 
 ```ts
 type QueryFilter<T> = {
@@ -228,8 +222,12 @@ type QueryFilterOperation =
 ```ts
 {
     // other options...
-    where: [{ name: { operator: 'LIKE', operand: 'Hong%' } }];
-}
+    where: [
+        {
+            name: { operator: 'LIKE', operand: 'Hong%' },
+        },
+    ],
+};
 ```
 
 `name이 "Hong"으로 시작` 하고 `age가 20세 미만`이라면 다음과 같이 사용합니다.
@@ -287,7 +285,7 @@ type QueryFilterOperation =
 
 > 다음 페이지
 
-```
+```ts
     nextCursor?: string;
     query?: string;
 ```
@@ -300,42 +298,42 @@ nextCursor와 query는 `response body의 metadata로 전달`됩니다.
 
 ### Create
 
--   `Post {path}`
+-   `POST {path}`
 -   하나 또는 다수의 Entity를 생성합니다.
--   <a href="./tree/main/spec/base/base.controller.create.spec.ts">base.controller.create.spec.ts</a> 을 참고할 수 있습니다.
+-   [base.controller.create.spec.ts](./spec/base/base.controller.create.spec.ts) 을 참고할 수 있습니다.
 
 ---
 
 ### Update
 
--   `Patch {path}/{:id}`
+-   `PATCH {path}/{:id}`
 -   하나의 Entity를 수정합니다.
--   <a href="./tree/main/spec/base/base.controller.update.spec.ts">base.controller.update.spec.ts</a> 을 참고할 수 있습니다.
+-   [base.controller.update.spec.ts]("./spec/base/base.controller.update.spec.ts") 을 참고할 수 있습니다.
 
 ---
 
 ### Upsert
 
--   `Put {path}/{:id}`
+-   `PUT {path}/{:id}`
 -   하나의 Entity에 대해서 존재 하지 않는 경우 생성하고, 그렇지 않은 경우 수정합니다.
--   <a href="./tree/main/spec/base/base.controller.upsert.spec.ts">base.controller.upsert.spec.ts</a> 을 참고할 수 있습니다.
+-   [base.controller.upsert.spec.ts](./spec/base/base.controller.upsert.spec.ts) 을 참고할 수 있습니다.
 
 ---
 
 ### Delete
 
--   `Delete {path}/{:id}`
+-   `DELETE {path}/{:id}`
 -   하나의 Entity를 삭제합니다.
--   <a href="./tree/main/spec/base/base.controller.delete.spec.ts">base.controller.delete.spec.ts</a> 을 참고할 수 있습니다.
+-   [base.controller.delete.spec.ts](./spec/base/base.controller.delete.spec.ts) 을 참고할 수 있습니다.
 
 ---
 
 ### Recover
 
--   `Post {path}/{:id}/recover`
+-   `POST {path}/{:id}/recover`
 -   Soft-delete로 삭제된 하나의 Entity를 복구합니다.
 -   Delete Method의 softDeleted 옵션이 활성화 된 경우 사용됩니다.
--   <a href="./tree/main/spec/base/base.controller.recover.spec.ts">base.controller.recover.spec.ts</a> 을 참고할 수 있습니다.
+-   [base.controller.recover.spec.ts](./spec/base/base.controller.recover.spec.ts) 을 참고할 수 있습니다.
 
 ---
 
@@ -374,9 +372,9 @@ class FooController {}
 
 Decorator Option으로 route 마다 `swagger`를 비 활성화 할 수 있습니다.
 
-<a href="./spe/exclude-swagger/exclude-swagger.spec.ts">exclude-swagger.spec.ts</a>와 같이 method 별로 Swagger를 비활성화 할 수 있습니다.
+[exclude-swagger.spec.ts](./spec/exclude-swagger/exclude-swagger.spec.ts) 와 같이 method 별로 Swagger를 비활성화 할 수 있습니다.
 
-```
+```ts
 @Crud({ entity: BaseEntity, routes: { recover: { swagger: { hide: true } } } })
 ```
 
@@ -388,7 +386,7 @@ Decorator Option으로 route 마다 `swagger`를 비 활성화 할 수 있습니
 
 Decorator Option으로 route 마다 `decorators`를 정의할 수 있습니다.
 
-<a href="./spec/auth-guard/auth-guard.spec.ts">auth-guard.spec.ts</a>, <a href="./spec/custom-swagger-decorator/apply-api-extra-model.spec.ts">apply-api-extra-model.spec.ts</a>, <a href="./spec/swagger-decorator">swagger-decorator</a>와 같이 method 별로 Decorator를 추가할 수 있습니다.
+[auth-guard.spec.ts](./spec/auth-guard/auth-guard.spec.ts) , [apply-api-extra-model.spec.ts](./spec/custom-swagger-decorator/apply-api-extra-model.spec.ts) , [swagger-decorator](./spec/swagger-decorator) 와 같이 method 별로 Decorator를 추가할 수 있습니다.
 
 Decorator의 기능이 CRUD에서 제공하는 기능과 중복될 경우 입력된 Decorator로 override 됩니다.
 
@@ -412,11 +410,9 @@ class FooController {}
 
 ### method를 Override 할 수 있습니다.
 
----
-
 `Override` 데코레이터를 통해 Controller에서 Method의 기능을 변경 할 수 있습니다.
 
-<a href="./spec/override-decorator/override-decorator.controller.spec.ts">override-decorator.controller.spec.ts</a> 를 참고할 수 있습니다.
+[override-decorator.controller.spec.ts](./spec/override-decorator/override-decorator.controller.spec.ts) 를 참고할 수 있습니다.
 
 ```ts
 @Crud({
@@ -433,15 +429,11 @@ export class DuplicatedOverrideController implements CrudController<BaseEntity> 
 }
 ```
 
----
-
 ### ReadMany Method는 Cursor와 Offset Pagination을 지원합니다.
-
----
 
 ReadMany Method는 `Cursor`(default)와 `Offset` 방식의 Pagination을 지원합니다.
 
-<a href="./spec/pagination/pagination.spec.ts">pagination.spec.ts</a>, <a href="./spec/read-many/read-many.controller.spec.ts">read-many.controller.spec.ts</a> 를 참고할 수 있습니다.
+[pagination.spec.ts](./spec/pagination/pagination.spec.ts) , [read-many.controller.spec.ts](./spec/read-many/read-many.controller.spec.ts) 를 참고할 수 있습니다.
 
 ```ts
 // option 1. cursor
@@ -463,7 +455,7 @@ Primary Key 대신 Entity의 다른 Key를 Param으로 사용하거나,
 
 Custom Interceptor와 함께 Param 조건을 자유롭게 변경할 수 있습니다.
 
-<a href="./spec/param-option">param-option</a>에서 구현된 케이스를 확인할 수 있습니다.
+[param-option](./spec/param-option) 에서 구현된 케이스를 확인할 수 있습니다.
 
 ```ts
 @Crud({ entity: BaseEntity, routes: { readOne: { params: [param] } })
@@ -481,7 +473,7 @@ Decorator Option으로 route 마다 `relations`을 변경 할 수 있습니다.
 
 Custom Interceptor와 함께 relations 조건을 자유롭게 변경할 수 있습니다.
 
-<a href="./spec/relation-entities">relation-entities</a>에서 작성된 케이스를 확인할 수 있습니다.
+[relation-entities](./spec/relation-entities) 에서 작성된 케이스를 확인할 수 있습니다.
 
 ---
 
@@ -507,7 +499,7 @@ class FooController {}
 
 Custom Interceptor로 Request를 수정하거나, 제공되는 CustomRequestOptions을 통해 설정 할 수 있습니다.
 
-<a href="./spec/request-interceptor">request-interceptor</a>에서 작성된 케이스를 확인할 수 있습니다.
+[request-interceptor](./spec/request-interceptor) 에서 작성된 케이스를 확인할 수 있습니다.
 
 ```ts
 @Injectable()
@@ -523,7 +515,7 @@ export class ReadOneRequestInterceptor extends CustomRequestInterceptor {
 }
 ```
 
-<a href="./spec/response-interceptor">response-interceptor</a>에서 작성된 케이스를 확인할 수 있습니다.
+[response-interceptor](./spec/response-interceptor) 에서 작성된 케이스를 확인할 수 있습니다.
 
 ---
 
@@ -535,7 +527,7 @@ Decorator Option으로 route 마다 `softDelete` 여부를 설정할 수 있습�
 
 `recover`는 Delete Method에 softDelete가 활성화된 경우에만 사용할 수 있습니다..
 
-<a href="./spec/soft-delete-and-recover">soft-delete-and-recover</a>에서 작성된 케이스를 확인할 수 있습니다.
+[soft-delete-and-recover](./spec/soft-delete-and-recover) 에서 작성된 케이스를 확인할 수 있습니다.
 
 ```ts
 @Crud({ entity: BaseEntity, routes: { readOne: { softDelete: true } })
@@ -551,4 +543,4 @@ Decorator Option으로 route 마다 `softDelete` 여부를 설정할 수 있습�
 
 ## License
 
-MIT
+[MIT](./LICENSE.md)

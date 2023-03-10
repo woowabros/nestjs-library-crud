@@ -30,6 +30,7 @@ This is a Typescript library that provides a NestJS decorator which automaticall
 -   Automatically generates swagger for generated routes
 -   Supports pagination, sorting, filtering, relation, searching, upserting, recovering and soft deleting
 -   Supports complex search criteria(`LIKE`, `ILIKE`, `BETWEEN`, `IN`, `NULL`, `?`, `@>`, `JSON_CONTAINS`)
+-   Supports strong validation by using [class-validator](https://github.com/typestack/class-validator)
 -   Supports saving author information for mutating operations(Create, Update, Upsert, Delete and Recover)
 -   Supports adding decorators, interceptors to each routes in Controller for customizing
 -   Supports customizing swagger response

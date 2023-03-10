@@ -1,10 +1,26 @@
 # @nestjs-library/crud
 
-[![npm version](https://img.shields.io/npm/v/@nestjs-library/crud)](https://www.npmjs.com/package/@nestjs-library/crud)
-[![npm bundle size](https://img.shields.io/bundlephobia/minzip/@nestjs-library/crud)](https://www.npmjs.com/package/@nestjs-library/crud?activeTab=explore)
-[![npm download](https://img.shields.io/npm/dw/@nestjs-library/crud)](https://www.npmjs.com/package/@nestjs-library/crud)
+<p align="center">
+    <a href="https://www.npmjs.com/package/@nestjs-library/crud">
+        <img src="https://img.shields.io/npm/v/@nestjs-library/crud">
+    </a>
+    <a href="https://www.npmjs.com/package/@nestjs-library/crud">
+        <img src="https://img.shields.io/bundlephobia/minzip/@nestjs-library/crud">
+    </a>
+    <a href="https://www.npmjs.com/package/@nestjs-library/crud">
+        <img src="https://img.shields.io/npm/dw/@nestjs-library/crud">
+    </a>        
+</p>
 
-[English](./README.md) | [한국어](./README.ko.md)
+<p align="center">
+    <a href="blob/main/README.md">
+        <span>English<span>
+    </a> 
+    <span>|</span>
+    <a href="./blob/main/README.ko.md">
+        <span>한국어<span>
+    </a> 
+</p>
 
 This is a Typescript library that provides a NestJS decorator which automatically generates CRUD routes of a controller for given TypeORM entity. The decorator generates endpoints for not only create, retrieve one, retrieve many, update, delete but also upsert, recover and search operations for the entity.
 

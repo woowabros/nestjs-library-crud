@@ -33,6 +33,7 @@ export interface CrudOptions {
             softDelete?: boolean;
         } & Omit<RouteBaseOption, 'response'>;
         [Method.SEARCH]?: {
+            numberOfTake?: number;
             limitOfTake?: number;
             softDelete?: boolean;
             relations?: false | string[];

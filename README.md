@@ -112,7 +112,6 @@ In your NestJS module, add Service, Controller and TypeORM module to providers, 
 ```typescript
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CrudRoutesModule } from 'nestjs-crud-routes-generator';
 
 import { User } from './user.entity';
 import { UserController } from './user.controller';

@@ -59,7 +59,7 @@ export class CrudRouteFactory {
         this.overrideMap = this.getOverrideMap();
     }
 
-    public init() {
+    init() {
         for (const method of Object.values(Method)) {
             if (!this.enabledMethod(method)) {
                 continue;

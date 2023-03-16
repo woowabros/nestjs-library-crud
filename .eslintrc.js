@@ -164,6 +164,19 @@ module.exports = {
                 'unicorn/string-content': 'off',
                 'unicorn/throw-new-error': 'error',
                 'unicorn/no-unnecessary-await': 'error',
+                '@typescript-eslint/explicit-member-accessibility': [
+                    'error',
+                    {
+                        accessibility: 'no-public',
+                        overrides: {
+                            accessors: 'no-public',
+                            constructors: 'off',
+                            methods: 'no-public',
+                            properties: 'off',
+                            parameterProperties: 'explicit',
+                        },
+                    },
+                ],
             },
         },
         {

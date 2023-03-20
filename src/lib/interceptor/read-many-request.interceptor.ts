@@ -16,6 +16,10 @@ import { CrudOptions, CrudReadManyRequest, FactoryOption, Method, Sort, GROUP, P
 const method = Method.READ_MANY;
 export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const readManyOptions = crudOptions.routes?.[method] ?? {};
@@ -53,6 +57,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 softDeleted,
             };
 
+            this.crudLogger.interceptor(req, crudReadManyRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudReadManyRequest;
 
             return next.handle();
@@ -85,6 +90,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             });
 
             if (errorList.length > 0) {
+                this.crudLogger.log(errorList, 'ValidationError');
                 throw new UnprocessableEntityException(errorList);
             }
             return transformed;

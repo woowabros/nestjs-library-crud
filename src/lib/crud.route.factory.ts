@@ -33,9 +33,11 @@ import {
     PAGINATION_SWAGGER_QUERY,
     FactoryOption,
 } from './interface';
+import { CrudLogger } from './provider/crud-logger';
 import { capitalizeFirstLetter, isSomeEnum } from './util';
 
 export class CrudRouteFactory {
+    private crudLogger: CrudLogger;
     private entity: {
         tableName: string;
         primaryKeys?: PrimaryKey[];
@@ -49,7 +51,7 @@ export class CrudRouteFactory {
     constructor(protected target: any, protected crudOptions: CrudOptions) {
         this.entityInformation(crudOptions.entity);
 
-        const paginationType = this.crudOptions.routes?.readMany?.paginationType ?? CRUD_POLICY[Method.READ_MANY].default?.paginationType;
+        const paginationType = crudOptions.routes?.readMany?.paginationType ?? CRUD_POLICY[Method.READ_MANY].default?.paginationType;
         const isPaginationType = isSomeEnum(PaginationType);
         if (!isPaginationType(paginationType)) {
             throw new TypeError(`invalid PaginationType ${paginationType}`);
@@ -57,6 +59,7 @@ export class CrudRouteFactory {
         this.paginationType = paginationType;
 
         this.overrideMap = this.getOverrideMap();
+        this.crudLogger = new CrudLogger(crudOptions.logger);
     }
 
     init() {
@@ -167,6 +170,7 @@ export class CrudRouteFactory {
         const factoryOption: FactoryOption = {
             columns: this.entity.columns,
             primaryKeys: this.entity.primaryKeys ?? [{ name: 'id', type: 'number' }],
+            logger: this.crudLogger,
         };
 
         Reflect.defineMetadata(

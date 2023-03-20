@@ -5,6 +5,7 @@ import { BaseEntity } from 'typeorm';
 import { DeleteRequestInterceptor } from './delete-request.interceptor';
 import { Constants } from '../constants';
 import { ExecutionContextHost } from '../provider';
+import { CrudLogger } from '../provider/crud-logger';
 
 describe('DeleteRequestInterceptor', () => {
     it('should intercept', async () => {
@@ -12,7 +13,7 @@ describe('DeleteRequestInterceptor', () => {
             col1: string;
         }
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const Interceptor = DeleteRequestInterceptor({ entity: BodyDto }, {});
+        const Interceptor = DeleteRequestInterceptor({ entity: BodyDto }, { logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         const handler: CallHandler = {

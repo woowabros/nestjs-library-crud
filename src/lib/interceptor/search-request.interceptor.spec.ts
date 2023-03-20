@@ -5,6 +5,7 @@ import { BaseEntity } from 'typeorm';
 
 import { SearchRequestInterceptor } from './search-request.interceptor';
 import { Sort } from '../interface';
+import { CrudLogger } from '../provider/crud-logger';
 
 describe('SearchRequestInterceptor', () => {
     class TestEntity extends BaseEntity {
@@ -21,7 +22,7 @@ describe('SearchRequestInterceptor', () => {
         col3: number;
     }
 
-    let interceptor;
+    let interceptor: any;
     beforeEach(() => {
         const Interceptor = SearchRequestInterceptor(
             { entity: TestEntity },
@@ -31,6 +32,7 @@ describe('SearchRequestInterceptor', () => {
                     { name: 'col2', type: 'number', isPrimary: false },
                     { name: 'col3', type: 'number', isPrimary: false },
                 ],
+                logger: new CrudLogger(),
             },
         );
         interceptor = new Interceptor();

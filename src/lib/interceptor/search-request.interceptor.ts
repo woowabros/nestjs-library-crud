@@ -43,7 +43,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 relations: customSearchRequestOptions?.relations,
             };
 
-            this.crudLogger.interceptor(req, crudSearchRequest);
+            this.crudLogger.logRequest(req, crudSearchRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudSearchRequest;
 
             return next.handle();

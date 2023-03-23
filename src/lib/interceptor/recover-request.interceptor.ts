@@ -22,7 +22,7 @@ export function RecoverRequestInterceptor(crudOptions: CrudOptions, factoryOptio
                 author: this.getAuthor(req, crudOptions, Method.RECOVER),
             };
 
-            this.crudLogger.interceptor(req, crudRecoverRequest);
+            this.crudLogger.logRequest(req, crudRecoverRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudRecoverRequest;
             return next.handle();
         }

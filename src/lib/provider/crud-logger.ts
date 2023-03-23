@@ -1,17 +1,17 @@
-import { LoggerService, LogLevel } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { Request } from 'express';
 
 export class CrudLogger {
-    constructor(private readonly logService?: LoggerService, private readonly logLevel: LogLevel = 'debug') {}
+    constructor(private readonly enabled: boolean = false) {}
 
     log(message: any, context?: string) {
-        if (!this.logService) {
+        if (!this.enabled) {
             return;
         }
-        this.logService[this.logLevel]?.(message, ['CRUD', context].filter(Boolean).join(' '));
+        Logger.debug(message, ['CRUD', context].filter(Boolean).join(' '));
     }
 
-    interceptor(req: Request | Record<string, unknown>, routeArg: unknown) {
+    logRequest(req: Request | Record<string, unknown>, routeArg: unknown) {
         this.log(routeArg, `${req.method} ${req.url}`);
     }
 }

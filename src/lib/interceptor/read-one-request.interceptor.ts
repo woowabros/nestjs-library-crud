@@ -40,7 +40,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
                 relations: this.getRelations(customReadOneRequestOptions),
             };
 
-            this.crudLogger.interceptor(req, crudReadOneRequest);
+            this.crudLogger.logRequest(req, crudReadOneRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudReadOneRequest;
 
             return next.handle();

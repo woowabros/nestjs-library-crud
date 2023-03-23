@@ -59,7 +59,7 @@ export class CrudRouteFactory {
         this.paginationType = paginationType;
 
         this.overrideMap = this.getOverrideMap();
-        this.crudLogger = new CrudLogger(crudOptions.logger);
+        this.crudLogger = new CrudLogger(crudOptions.logging);
     }
 
     init() {

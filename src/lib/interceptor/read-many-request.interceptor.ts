@@ -57,7 +57,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 softDeleted,
             };
 
-            this.crudLogger.interceptor(req, crudReadManyRequest);
+            this.crudLogger.logRequest(req, crudReadManyRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudReadManyRequest;
 
             return next.handle();

@@ -32,7 +32,7 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 author: this.getAuthor(req, crudOptions, method),
             };
 
-            this.crudLogger.interceptor(req, crudDeleteOneRequest);
+            this.crudLogger.logRequest(req, crudDeleteOneRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudDeleteOneRequest;
 
             return next.handle();

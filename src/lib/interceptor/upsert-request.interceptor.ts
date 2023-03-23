@@ -45,7 +45,7 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 author: this.getAuthor(req, crudOptions, Method.UPSERT),
             };
 
-            this.crudLogger.interceptor(req, crudUpsertRequest);
+            this.crudLogger.logRequest(req, crudUpsertRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudUpsertRequest;
 
             return next.handle();

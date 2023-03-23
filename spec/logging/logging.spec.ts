@@ -35,7 +35,7 @@ class TestService extends CrudService<TestEntity> {
     }
 }
 
-@Crud({ entity: TestEntity, logger: logger })
+@Crud({ entity: TestEntity, logging: true })
 @Controller('base')
 class TestController implements CrudController<TestEntity> {
     constructor(public readonly crudService: TestService) {}

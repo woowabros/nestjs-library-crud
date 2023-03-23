@@ -26,7 +26,7 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 author: this.getAuthor(req, crudOptions, Method.UPDATE),
             };
 
-            this.crudLogger.interceptor(req, crudUpdateOneRequest);
+            this.crudLogger.logRequest(req, crudUpdateOneRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudUpdateOneRequest;
 
             return next.handle();

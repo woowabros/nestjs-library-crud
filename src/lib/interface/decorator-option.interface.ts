@@ -1,4 +1,4 @@
-import { LoggerService, NestInterceptor, Type } from '@nestjs/common';
+import { NestInterceptor, Type } from '@nestjs/common';
 import { BaseEntity, ColumnType } from 'typeorm';
 
 import { Method, Sort, PaginationType, Author } from '.';
@@ -37,10 +37,12 @@ export interface CrudOptions {
      * Entity class which CRUD operations will be performed
      */
     entity: typeof BaseEntity;
+
     /**
-     * Debug Logger
+     * enable Debug logging, default is false
      */
-    logger?: LoggerService;
+    logging?: boolean;
+
     /**
      * Configures each CRUD method
      */

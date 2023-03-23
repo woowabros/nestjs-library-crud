@@ -32,7 +32,7 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 author: this.getAuthor(req, crudOptions, Method.CREATE),
             };
 
-            this.crudLogger.interceptor(req, crudCreateRequest);
+            this.crudLogger.logRequest(req, crudCreateRequest);
             (req as Record<string, any>)[Constants.CRUD_ROUTE_ARGS] = crudCreateRequest;
             return next.handle();
         }

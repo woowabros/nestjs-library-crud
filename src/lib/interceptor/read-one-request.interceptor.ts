@@ -16,6 +16,10 @@ import { CrudOptions, Method, FactoryOption, CrudReadOneRequest } from '../inter
 const method = Method.READ_ONE;
 export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
 
@@ -35,6 +39,8 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
                 softDeleted,
                 relations: this.getRelations(customReadOneRequestOptions),
             };
+
+            this.crudLogger.logRequest(req, crudReadOneRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudReadOneRequest;
 
             return next.handle();
@@ -57,6 +63,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             const requestFields = plainToClass(RequestFieldsDto, { fields });
             const errorList = validateSync(requestFields);
             if (errorList.length > 0) {
+                this.crudLogger.log(errorList, 'ValidationError');
                 throw new UnprocessableEntityException(errorList);
             }
             const columns = (factoryOption.columns ?? []).map(({ name }) => name);

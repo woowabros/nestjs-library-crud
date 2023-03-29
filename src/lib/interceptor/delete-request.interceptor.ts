@@ -12,6 +12,10 @@ import { CrudDeleteOneRequest, CrudOptions, Method, FactoryOption } from '../int
 const method = Method.DELETE;
 export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const deleteOptions = crudOptions.routes?.[method] ?? {};
@@ -27,6 +31,8 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 softDeleted,
                 author: this.getAuthor(req, crudOptions, method),
             };
+
+            this.crudLogger.logRequest(req, crudDeleteOneRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudDeleteOneRequest;
 
             return next.handle();

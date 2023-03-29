@@ -19,6 +19,10 @@ import { PaginationHelper } from '../provider';
 const method = Method.SEARCH;
 export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
 
@@ -38,6 +42,8 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 requestSearchDto,
                 relations: customSearchRequestOptions?.relations,
             };
+
+            this.crudLogger.logRequest(req, crudSearchRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudSearchRequest;
 
             return next.handle();
@@ -193,6 +199,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 });
 
                 if (errorList.length > 0) {
+                    this.crudLogger.log(errorList, 'ValidationError');
                     throw new UnprocessableEntityException(errorList);
                 }
             }

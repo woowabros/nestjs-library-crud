@@ -8,6 +8,10 @@ import { CrudOptions, CrudRecoverRequest, FactoryOption, Method } from '../inter
 
 export function RecoverRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
 
@@ -18,6 +22,7 @@ export function RecoverRequestInterceptor(crudOptions: CrudOptions, factoryOptio
                 author: this.getAuthor(req, crudOptions, Method.RECOVER),
             };
 
+            this.crudLogger.logRequest(req, crudRecoverRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudRecoverRequest;
             return next.handle();
         }

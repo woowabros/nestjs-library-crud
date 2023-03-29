@@ -37,6 +37,12 @@ export interface CrudOptions {
      * Entity class which CRUD operations will be performed
      */
     entity: typeof BaseEntity;
+
+    /**
+     * enable Debug logging, default is false
+     */
+    logging?: boolean;
+
     /**
      * Configures each CRUD method
      */

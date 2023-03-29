@@ -11,6 +11,10 @@ import { CrudOptions, CrudUpdateOneRequest, FactoryOption, GROUP, Method } from 
 
 export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const body = await this.validateBody(req.body);
@@ -21,6 +25,8 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 body,
                 author: this.getAuthor(req, crudOptions, Method.UPDATE),
             };
+
+            this.crudLogger.logRequest(req, crudUpdateOneRequest);
             req[Constants.CRUD_ROUTE_ARGS] = crudUpdateOneRequest;
 
             return next.handle();
@@ -33,6 +39,11 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const bodyKeys = Object.keys(body);
             const bodyContainsPrimaryKey = (factoryOption.primaryKeys ?? []).some((primaryKey) => bodyKeys.includes(primaryKey.name));
             if (bodyContainsPrimaryKey) {
+                this.crudLogger.log(
+                    `Cannot include value of primary key (primary key: ${(
+                        factoryOption.primaryKeys ?? []
+                    ).toLocaleString()}, body key: ${bodyKeys.toLocaleString()}`,
+                );
                 throw new UnprocessableEntityException('Cannot changed value of primary key');
             }
 
@@ -45,6 +56,7 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
             });
 
             if (errorList.length > 0) {
+                this.crudLogger.log(errorList, 'ValidationError');
                 throw new UnprocessableEntityException(errorList);
             }
             return transformed;

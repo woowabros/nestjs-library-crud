@@ -13,8 +13,12 @@ import { CrudOptions, FactoryOption, CrudCreateRequest, GROUP, Method } from '..
 interface NestedBaseEntityArray extends Array<NestedBaseEntityArray | BaseEntity> {}
 type BaseEntityOrArray = BaseEntity | NestedBaseEntityArray;
 
-export function CreateRequestInterceptor(crudOptions: CrudOptions, _factoryOption: FactoryOption) {
+export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req = context.switchToHttp().getRequest<Request>();
 
@@ -27,6 +31,8 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, _factoryOptio
                 body,
                 author: this.getAuthor(req, crudOptions, Method.CREATE),
             };
+
+            this.crudLogger.logRequest(req, crudCreateRequest);
             (req as Record<string, any>)[Constants.CRUD_ROUTE_ARGS] = crudCreateRequest;
             return next.handle();
         }
@@ -38,6 +44,7 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, _factoryOptio
             const transformed = plainToClass(crudOptions.entity, body, { groups: [GROUP.CREATE] });
             const errorList = await validate(transformed, { groups: [GROUP.CREATE], whitelist: true, forbidNonWhitelisted: true });
             if (errorList.length > 0) {
+                this.crudLogger.log(errorList, 'ValidationError');
                 throw new UnprocessableEntityException(errorList);
             }
             return transformed;

@@ -196,6 +196,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     whitelist: true,
                     forbidNonWhitelisted: true,
                     stopAtFirstError: true,
+                    forbidUnknownValues: false,
                 });
 
                 if (errorList.length > 0) {

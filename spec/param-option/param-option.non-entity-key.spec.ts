@@ -6,7 +6,7 @@ import request from 'supertest';
 import { DynamicCrudModule } from '../dynamic-crud.module';
 import { TestHelper } from '../test.helper';
 
-describe('Params Option - entity의 key가 아닌 params으로 사용하는 경우', () => {
+describe('Params Option - used as params instead of key of entity', () => {
     let app: INestApplication;
     const param = 'unknownProperty';
 

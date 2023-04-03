@@ -34,7 +34,7 @@ const config: Config = {
             lines: 60,
         },
     },
-    coveragePathIgnorePatterns: ['<rootDir>/jest.config.ts', '.mock.ts'],
+    coveragePathIgnorePatterns: ['<rootDir>/jest.config.ts', '.mock.ts', 'spec/'],
     setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 };
 

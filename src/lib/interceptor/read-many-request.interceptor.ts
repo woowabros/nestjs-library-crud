@@ -87,6 +87,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 whitelist: true,
                 forbidNonWhitelisted: true,
                 stopAtFirstError: true,
+                forbidUnknownValues: false,
             });
 
             if (errorList.length > 0) {

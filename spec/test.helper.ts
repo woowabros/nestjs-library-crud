@@ -69,6 +69,16 @@ export class TestHelper {
         });
     }
 
+    static async getTypeOrmMongoModule(url: string, entities: MixedList<typeof BaseEntity>) {
+        return TypeOrmModule.forRoot({
+            type: 'mongodb',
+            url,
+            entities,
+            logging: true,
+            logger: 'file',
+        });
+    }
+
     // eslint-disable-next-line @typescript-eslint/ban-types
     static getSwaggerExplorer(wrapper: InstanceWrapper<object>): Record<string, DenormalizedDoc> {
         const schemaObjectFactory = new SchemaObjectFactory(new ModelPropertiesAccessor(), new SwaggerTypesMapper());

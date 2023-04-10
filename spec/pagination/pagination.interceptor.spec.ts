@@ -62,9 +62,10 @@ describe('Pagination with interceptor', () => {
             );
             const deletedIdSet = new Set(deleteIdList);
 
-            const { body: responseBodyAfterDelete } = await request(app.getHttpServer())
-                .get(`/${PaginationType.CURSOR}`)
-                .expect(HttpStatus.OK);
+            const {
+                body: responseBodyAfterDelete,
+            }: { body: { data: Array<{ id: number; deletedAt?: unknown }>; metadata: { nextCursor: unknown; query: unknown } } } =
+                await request(app.getHttpServer()).get(`/${PaginationType.CURSOR}`).expect(HttpStatus.OK);
             const { body: offsetResponseBodyAfterDelete } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .expect(HttpStatus.OK);
@@ -145,7 +146,7 @@ describe('Pagination with interceptor', () => {
         });
 
         it('should be returned deleted entities each interceptor soft-deleted option', async () => {
-            const { body: responseBodyBeforeDelete } = await request(app.getHttpServer())
+            const { body: responseBodyBeforeDelete }: { body: { data: Array<{ id: number }> } } = await request(app.getHttpServer())
                 .get(`/${PaginationType.CURSOR}`)
                 .expect(HttpStatus.OK);
             const { body: offsetResponseBodyBeforeDelete } = await request(app.getHttpServer())
@@ -161,7 +162,7 @@ describe('Pagination with interceptor', () => {
             );
             const deletedIdSet = new Set(deleteIdList);
 
-            const { body: responseBodyAfterDelete } = await request(app.getHttpServer())
+            const { body: responseBodyAfterDelete }: { body: { data: Array<{ id: number }> } } = await request(app.getHttpServer())
                 .get(`/${PaginationType.CURSOR}`)
                 .expect(HttpStatus.OK);
             const { body: offsetResponseBodyAfterDelete } = await request(app.getHttpServer())

@@ -62,7 +62,7 @@ describe('Request Interceptor', () => {
 
         const {
             body: { data: readManyResponseBodyBeforeDelete },
-        } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
+        }: { body: { data: Array<{ id: number }> } } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
         expect(readManyResponseBodyBeforeDelete).toHaveLength(5);
 
         await Promise.all(
@@ -71,7 +71,7 @@ describe('Request Interceptor', () => {
 
         const {
             body: { data: readManyResponseBodyAfterDelete },
-        } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
+        }: { body: { data: Array<{ id: number }> } } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
         expect(readManyResponseBodyAfterDelete).toHaveLength(3);
         expect(readManyResponseBodyAfterDelete.some(({ id }) => id < 3)).not.toBeTruthy();
 

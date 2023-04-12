@@ -3,13 +3,14 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-    globals: {
-        'ts-jest': {
-            tsconfig: '<rootDir>/tsconfig.spec.json',
-        },
-    },
     moduleFileExtensions: ['js', 'json', 'ts'],
     transform: {
+        '^.+\\.spec\\.(t|j)s$': [
+            'ts-jest',
+            {
+                tsconfig: '<rootDir>/tsconfig.spec.json',
+            },
+        ],
         '^.+\\.(t|j)s$': [
             'ts-jest',
             {

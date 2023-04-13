@@ -31,7 +31,7 @@ export abstract class RequestAbstractInterceptor {
         const transformed = plainToClass(CreateParamsDto(entity, paramsKey as unknown as Array<keyof BaseEntity>), params);
         const errorList = await validate(transformed, { groups: [GROUP.PARAMS] });
         if (errorList.length > 0) {
-            this.crudLogger.log(exception, 'ValidationError');
+            this.crudLogger.log(errorList, 'ValidationError');
             throw exception;
         }
         return Object.assign({}, transformed);

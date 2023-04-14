@@ -1,5 +1,5 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
@@ -41,7 +41,7 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption
             if (Array.isArray(body)) {
                 return Promise.all(body.map((b) => this.validateBody(b)));
             }
-            const transformed = plainToClass(crudOptions.entity, body, { groups: [GROUP.CREATE] });
+            const transformed = plainToInstance(crudOptions.entity, body, { groups: [GROUP.CREATE] });
             const errorList = await validate(transformed, { groups: [GROUP.CREATE], whitelist: true, forbidNonWhitelisted: true });
             if (errorList.length > 0) {
                 this.crudLogger.log(errorList, 'ValidationError');

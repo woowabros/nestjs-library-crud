@@ -1,5 +1,5 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
@@ -55,7 +55,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 throw new UnprocessableEntityException('body should be object');
             }
 
-            const requestSearchDto = plainToClass(RequestSearchDto<typeof crudOptions.entity>, body);
+            const requestSearchDto = plainToInstance(RequestSearchDto<typeof crudOptions.entity>, body);
             const searchOptions = crudOptions.routes?.[method] ?? {};
 
             if ('nextCursor' in requestSearchDto) {
@@ -187,7 +187,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     }
                 }
 
-                const transformed = plainToClass(
+                const transformed = plainToInstance(
                     CreateParamsDto(crudOptions.entity, Object.keys(query) as unknown as Array<keyof BaseEntity>),
                     query,
                 );

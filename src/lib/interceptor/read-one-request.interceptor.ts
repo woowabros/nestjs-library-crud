@@ -1,5 +1,5 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
@@ -60,7 +60,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             if (!fields || (Array.isArray(fields) && fields.length === 0)) {
                 return;
             }
-            const requestFields = plainToClass(RequestFieldsDto, { fields });
+            const requestFields = plainToInstance(RequestFieldsDto, { fields });
             const errorList = validateSync(requestFields);
             if (errorList.length > 0) {
                 this.crudLogger.log(errorList, 'ValidationError');

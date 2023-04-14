@@ -1,11 +1,11 @@
 import 'reflect-metadata';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 
 import { PaginationOffsetDto } from './pagination-offset.dto';
 
 function validateByPaginationOffsetDto(obj: unknown) {
-    const paginationOffsetDto = plainToClass(PaginationOffsetDto, obj);
+    const paginationOffsetDto = plainToInstance(PaginationOffsetDto, obj);
     const error = validateSync(paginationOffsetDto);
     if (error.length > 0) {
         throw error;
@@ -14,17 +14,17 @@ function validateByPaginationOffsetDto(obj: unknown) {
 }
 describe('PaginationOffsetDto', () => {
     it('should be optional all values', () => {
-        expect(validateSync(plainToClass(PaginationOffsetDto, {}))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, {}))).toEqual([]);
 
-        expect(validateSync(plainToClass(PaginationOffsetDto, { limit: 100 }))).toEqual([]);
-        expect(validateSync(plainToClass(PaginationOffsetDto, { limit: 100, offset: 20 }))).toEqual([]);
-        expect(validateSync(plainToClass(PaginationOffsetDto, { limit: 100, offset: 20, query: 'queryToken' }))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100 }))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100, offset: 20 }))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100, offset: 20, query: 'queryToken' }))).toEqual([]);
     });
 
     it('should be positive number', () => {
-        expect(validateSync(plainToClass(PaginationOffsetDto, { limit: 10 }))).toEqual([]);
-        expect(validateSync(plainToClass(PaginationOffsetDto, { offset: 10 }))).toEqual([]);
-        expect(validateSync(plainToClass(PaginationOffsetDto, { query: 10 }))).toEqual([
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 10 }))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { offset: 10 }))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { query: 10 }))).toEqual([
             {
                 children: [],
                 constraints: { isString: 'query must be a string' },
@@ -36,7 +36,7 @@ describe('PaginationOffsetDto', () => {
     });
 
     it('should be character type', () => {
-        expect(validateSync(plainToClass(PaginationOffsetDto, { limit: 'a' }))).toEqual([
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 'a' }))).toEqual([
             {
                 target: { limit: Number.NaN, type: 'offset' },
                 value: Number.NaN,
@@ -49,7 +49,7 @@ describe('PaginationOffsetDto', () => {
             },
         ]);
 
-        expect(validateSync(plainToClass(PaginationOffsetDto, { offset: 'b' }))).toEqual([
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { offset: 'b' }))).toEqual([
             {
                 target: { offset: Number.NaN, type: 'offset' },
                 value: Number.NaN,
@@ -58,13 +58,13 @@ describe('PaginationOffsetDto', () => {
                 constraints: { isPositive: 'offset must be a positive number' },
             },
         ]);
-        expect(validateSync(plainToClass(PaginationOffsetDto, { query: 'c' }))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { query: 'c' }))).toEqual([]);
     });
 
     it('should be limited', () => {
-        expect(validateSync(plainToClass(PaginationOffsetDto, { limit: 100 }))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100 }))).toEqual([]);
 
-        expect(validateSync(plainToClass(PaginationOffsetDto, { limit: 101 }))).toEqual([
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 101 }))).toEqual([
             {
                 target: { limit: 101, type: 'offset' },
                 value: 101,
@@ -73,7 +73,7 @@ describe('PaginationOffsetDto', () => {
                 constraints: { max: 'limit must not be greater than 100' },
             },
         ]);
-        expect(validateSync(plainToClass(PaginationOffsetDto, { limit: -1 }))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: -1 }))).toEqual([]);
     });
 
     it('should be allowed zero', () => {

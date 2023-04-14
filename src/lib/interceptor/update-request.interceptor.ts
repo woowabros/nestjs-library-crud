@@ -1,5 +1,5 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
@@ -47,7 +47,7 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 throw new UnprocessableEntityException('Cannot changed value of primary key');
             }
 
-            const transformed = plainToClass(crudOptions.entity, body, { groups: [GROUP.UPDATE] });
+            const transformed = plainToInstance(crudOptions.entity, body, { groups: [GROUP.UPDATE] });
             const errorList = await validate(transformed, {
                 groups: [GROUP.UPDATE],
                 whitelist: true,

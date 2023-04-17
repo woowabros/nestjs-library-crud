@@ -1,5 +1,5 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validate, validateSync } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
@@ -67,8 +67,8 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             const plain = query ?? {};
             const transformed =
                 paginationType === PaginationType.OFFSET
-                    ? plainToClass(PaginationOffsetDto, plain, { excludeExtraneousValues: true })
-                    : plainToClass(PaginationCursorDto, plain, { excludeExtraneousValues: true });
+                    ? plainToInstance(PaginationOffsetDto, plain, { excludeExtraneousValues: true })
+                    : plainToInstance(PaginationCursorDto, plain, { excludeExtraneousValues: true });
             const [error] = validateSync(transformed, { stopAtFirstError: true });
 
             if (error) {
@@ -81,7 +81,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             if (_.isNil(query)) {
                 return;
             }
-            const transformed = plainToClass(crudOptions.entity, query, { groups: [GROUP.READ_MANY] });
+            const transformed = plainToInstance(crudOptions.entity, query, { groups: [GROUP.READ_MANY] });
             const errorList = await validate(transformed, {
                 groups: [GROUP.READ_MANY],
                 whitelist: true,

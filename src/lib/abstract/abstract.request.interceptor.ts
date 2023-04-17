@@ -1,5 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
@@ -28,7 +28,7 @@ export abstract class RequestAbstractInterceptor {
             this.crudLogger.log(`Invalid query params: ${invalidColumns.toLocaleString()}`);
             throw exception;
         }
-        const transformed = plainToClass(CreateParamsDto(entity, paramsKey as unknown as Array<keyof BaseEntity>), params);
+        const transformed = plainToInstance(CreateParamsDto(entity, paramsKey as unknown as Array<keyof BaseEntity>), params);
         const errorList = await validate(transformed, { groups: [GROUP.PARAMS], forbidUnknownValues: false });
         if (errorList.length > 0) {
             this.crudLogger.log(errorList, 'ValidationError');

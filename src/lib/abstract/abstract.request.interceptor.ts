@@ -29,7 +29,7 @@ export abstract class RequestAbstractInterceptor {
             throw exception;
         }
         const transformed = plainToClass(CreateParamsDto(entity, paramsKey as unknown as Array<keyof BaseEntity>), params);
-        const errorList = await validate(transformed, { groups: [GROUP.PARAMS] });
+        const errorList = await validate(transformed, { groups: [GROUP.PARAMS], forbidUnknownValues: false });
         if (errorList.length > 0) {
             this.crudLogger.log(errorList, 'ValidationError');
             throw exception;

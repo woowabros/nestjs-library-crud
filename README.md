@@ -14,11 +14,11 @@
 </p>
 
 <p align="center">
-    <a href="blob/main/README.md">
+    <a href="./README.md">
         <span>English<span>
     </a> 
     <span>|</span>
-    <a href="./blob/main/README.ko.md">
+    <a href="./README.ko.md">
         <span>한국어<span>
     </a> 
 </p>
@@ -179,9 +179,9 @@ import { Crud, Method } from '@nestjs-library/crud';
 @Crud({ entity: User, only: [Method.CREATE,  Method.READ_ONE] })
 ```
 
-## Contributing
+## [Contributors](https://github.com/type-challenges/type-challenges/graphs/contributors)
 
-(To be added)
+![Contributors](https://contrib.rocks/image?repo=woowabros/nestjs-library-crud)
 
 ## License
 

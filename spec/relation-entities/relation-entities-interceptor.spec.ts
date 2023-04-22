@@ -70,7 +70,7 @@ describe('relation interceptor', () => {
             if (comment.id % 2 === 0) {
                 expect(commentBody.writer).toBeDefined();
             } else {
-                expect(commentBody.writer).not.toBeDefined();
+                expect(commentBody.writer).toBeUndefined();
             }
         }
     });

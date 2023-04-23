@@ -19,7 +19,7 @@ describe('CrudService', () => {
         });
 
         it('should be defined', () => {
-            expect(crudService).not.toBeUndefined();
+            expect(crudService).toBeDefined();
         });
 
         it('should return entity', async () => {
@@ -38,7 +38,7 @@ describe('CrudService', () => {
         const crudService = new CrudService<BaseEntity>(mockRepository as unknown as Repository<BaseEntity>);
 
         it('should be defined', () => {
-            expect(crudService).not.toBeUndefined();
+            expect(crudService).toBeDefined();
         });
 
         it('should not be delete entity, when primary keys not exists ', async () => {

@@ -179,7 +179,7 @@ import { Crud, Method } from '@nestjs-library/crud';
 @Crud({ entity: User, only: [Method.CREATE,  Method.READ_ONE] })
 ```
 
-## [Contributors](https://github.com/type-challenges/type-challenges/graphs/contributors)
+## [Contributors](https://github.com/woowabros/nestjs-library-crud/graphs/contributors)
 
 ![Contributors](https://contrib.rocks/image?repo=woowabros/nestjs-library-crud)
 

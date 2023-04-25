@@ -62,10 +62,10 @@ pnpm add @nestjs-library/crud
 ### Step 1. Entity를 정의합니다.
 
 ```typescript
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
-export class User {
+export class User extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -89,7 +89,7 @@ import { User } from './user.entity';
 
 @Injectable()
 export class UserService extends CrudService<User> {
-    constructor(@InjectRepository(BaseEntity) repository: Repository<User>) {
+    constructor(@InjectRepository(User) repository: Repository<User>) {
         super(repository);
     }
 }

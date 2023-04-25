@@ -56,10 +56,10 @@ pnpm add @nestjs-library/crud
 In order to use the Crud decorator, you need to define a TypeORM entity first. The following example defines a User entity with the following properties.
 
 ```typescript
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
-export class User {
+export class User extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -85,7 +85,7 @@ import { User } from './user.entity';
 
 @Injectable()
 export class UserService extends CrudService<User> {
-    constructor(@InjectRepository(BaseEntity) repository: Repository<User>) {
+    constructor(@InjectRepository(User) repository: Repository<User>) {
         super(repository);
     }
 }
@@ -171,7 +171,7 @@ And each route has its own options as below.
 
 (optional) An array of methods to generate routes for. If not specified, all routes will be generated.
 
-For exmple, if you want to generate only create and retrieve one, you can specify the following configuration.
+For example, if you want to generate only create and retrieve one, you can specify the following configuration.
 
 ```typescript
 import { Crud, Method } from '@nestjs-library/crud';

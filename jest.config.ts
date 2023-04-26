@@ -25,8 +25,6 @@ const config: Config = {
     detectOpenHandles: true,
     collectCoverage: true,
     collectCoverageFrom: ['**/*.ts', '!**/*.d.ts'],
-    coverageReporters: ['text'],
-    coverageDirectory: 'coverage',
     coverageThreshold: {
         global: {
             statements: 60,

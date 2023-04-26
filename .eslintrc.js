@@ -99,6 +99,7 @@ module.exports = {
                     {
                         selector: 'classProperty',
                         format: ['camelCase'],
+                        leadingUnderscore: 'allow',
                     },
                 ],
                 '@typescript-eslint/prefer-nullish-coalescing': [

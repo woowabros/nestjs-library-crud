@@ -17,7 +17,6 @@ class TestEntity extends BaseEntity {
     @ObjectIdColumn()
     @Transform(({ value }) => value && new ObjectId(value))
     @IsObject({ groups: [GROUP.PARAMS] })
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     _id: ObjectId;
 
     @Column({ nullable: true })

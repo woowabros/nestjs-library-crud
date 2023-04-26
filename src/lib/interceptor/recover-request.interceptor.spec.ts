@@ -3,7 +3,7 @@ import { of } from 'rxjs';
 import { BaseEntity } from 'typeorm';
 
 import { RecoverRequestInterceptor } from './recover-request.interceptor';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS } from '../constants';
 import { ExecutionContextHost } from '../provider';
 import { CrudLogger } from '../provider/crud-logger';
 
@@ -20,6 +20,6 @@ describe('RecoverRequestInterceptor', () => {
         };
         const context = new ExecutionContextHost([{}]);
         await interceptor.intercept(context, handler);
-        expect(context.switchToHttp().getRequest()).toHaveProperty(Constants.CRUD_ROUTE_ARGS);
+        expect(context.switchToHttp().getRequest()).toHaveProperty(CRUD_ROUTE_ARGS);
     });
 });

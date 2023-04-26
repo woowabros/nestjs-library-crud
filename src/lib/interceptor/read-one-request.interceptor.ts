@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 
 import { CustomReadOneRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { RequestFieldsDto } from '../dto/request-fields.dto';
 import { CrudOptions, Method, FactoryOption, CrudReadOneRequest } from '../interface';
@@ -23,7 +23,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
 
-            const customReadOneRequestOptions: CustomReadOneRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+            const customReadOneRequestOptions: CustomReadOneRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
 
             const fieldsByRequest = this.checkFields(req.query?.fields);
 
@@ -41,7 +41,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             };
 
             this.crudLogger.logRequest(req, crudReadOneRequest);
-            req[Constants.CRUD_ROUTE_ARGS] = crudReadOneRequest;
+            req[CRUD_ROUTE_ARGS] = crudReadOneRequest;
 
             return next.handle();
         }

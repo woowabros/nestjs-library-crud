@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { BaseEntity } from 'typeorm';
 
 import { RequestAbstractInterceptor } from '../abstract';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS } from '../constants';
 import { CrudOptions, FactoryOption, CrudCreateRequest, GROUP, Method } from '../interface';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -33,7 +33,7 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption
             };
 
             this.crudLogger.logRequest(req, crudCreateRequest);
-            (req as Record<string, any>)[Constants.CRUD_ROUTE_ARGS] = crudCreateRequest;
+            (req as Record<string, any>)[CRUD_ROUTE_ARGS] = crudCreateRequest;
             return next.handle();
         }
 

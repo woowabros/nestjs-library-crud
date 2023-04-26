@@ -96,6 +96,11 @@ module.exports = {
                         selector: 'enumMember',
                         format: ['UPPER_CASE'],
                     },
+                    {
+                        selector: 'classProperty',
+                        format: ['camelCase'],
+                        leadingUnderscore: 'allow',
+                    },
                 ],
                 '@typescript-eslint/prefer-nullish-coalescing': [
                     'error',

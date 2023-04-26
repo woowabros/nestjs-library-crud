@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 
 import { CustomDeleteRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { CrudDeleteOneRequest, CrudOptions, Method, FactoryOption } from '../interface';
 
@@ -19,7 +19,7 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const deleteOptions = crudOptions.routes?.[method] ?? {};
-            const customDeleteRequestOptions: CustomDeleteRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+            const customDeleteRequestOptions: CustomDeleteRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
 
             const softDeleted = _.isBoolean(customDeleteRequestOptions?.softDeleted)
                 ? customDeleteRequestOptions.softDeleted
@@ -33,7 +33,7 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
             };
 
             this.crudLogger.logRequest(req, crudDeleteOneRequest);
-            req[Constants.CRUD_ROUTE_ARGS] = crudDeleteOneRequest;
+            req[CRUD_ROUTE_ARGS] = crudDeleteOneRequest;
 
             return next.handle();
         }

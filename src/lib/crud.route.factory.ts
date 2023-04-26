@@ -13,7 +13,7 @@ import { DECORATORS } from '@nestjs/swagger/dist/constants';
 import { BaseEntity, getMetadataArgsStorage } from 'typeorm';
 import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 
-import { Constants } from './constants';
+import { CRUD_ROUTE_ARGS, OVERRIDE_METHOD_METADATA } from './constants';
 import { CRUD_POLICY } from './crud.policy';
 import { RequestSearchDto } from './dto/request-search.dto';
 import { CreateRequestDto } from './dto/request.dto';
@@ -298,10 +298,7 @@ export class CrudRouteFactory {
         const overrideMap = new Map<string, string>();
 
         for (const name of Object.getOwnPropertyNames(this.targetPrototype)) {
-            const overrodeCrudMethodName: keyof typeof Method = Reflect.getMetadata(
-                Constants.OVERRIDE_METHOD_METADATA,
-                this.targetPrototype[name],
-            );
+            const overrodeCrudMethodName: keyof typeof Method = Reflect.getMetadata(OVERRIDE_METHOD_METADATA, this.targetPrototype[name]);
             if (!overrodeCrudMethodName) {
                 continue;
             }
@@ -343,9 +340,9 @@ export class CrudRouteFactory {
         data = undefined,
     ) {
         return {
-            [`${Constants.CRUD_ROUTE_ARGS}${CUSTOM_ROUTE_ARGS_METADATA}:${index}`]: {
+            [`${CRUD_ROUTE_ARGS}${CUSTOM_ROUTE_ARGS_METADATA}:${index}`]: {
                 index,
-                factory: (_: unknown, ctx: ExecutionContext) => ctx.switchToHttp().getRequest()[Constants.CRUD_ROUTE_ARGS],
+                factory: (_: unknown, ctx: ExecutionContext) => ctx.switchToHttp().getRequest()[CRUD_ROUTE_ARGS],
                 data,
                 pipes,
             },

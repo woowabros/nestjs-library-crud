@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { Constants } from './constants';
+import { OVERRIDE_METHOD_METADATA } from './constants';
 import { Override } from './override.decorator';
 
 describe('@Override', () => {
@@ -11,7 +11,7 @@ describe('@Override', () => {
             static testMethod() {}
         }
 
-        const metadata = Reflect.getMetadata(Constants.OVERRIDE_METHOD_METADATA, Test.testMethod);
+        const metadata = Reflect.getMetadata(OVERRIDE_METHOD_METADATA, Test.testMethod);
         expect(metadata).toBe('READ_ONE');
     });
 });

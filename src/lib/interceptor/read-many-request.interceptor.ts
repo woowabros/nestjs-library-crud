@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 
 import { CustomReadManyRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { PaginationCursorDto } from '../dto/pagination-cursor.dto';
 import { PaginationOffsetDto } from '../dto/pagination-offset.dto';
@@ -24,7 +24,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const readManyOptions = crudOptions.routes?.[method] ?? {};
 
-            const customReadManyRequestOptions: CustomReadManyRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+            const customReadManyRequestOptions: CustomReadManyRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
             const paginationType = (readManyOptions.paginationType ?? CRUD_POLICY[method].default?.paginationType) as PaginationType;
 
             if (req.params) {
@@ -58,7 +58,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             };
 
             this.crudLogger.logRequest(req, crudReadManyRequest);
-            req[Constants.CRUD_ROUTE_ARGS] = crudReadManyRequest;
+            req[CRUD_ROUTE_ARGS] = crudReadManyRequest;
 
             return next.handle();
         }

@@ -8,7 +8,7 @@ import { BaseEntity } from 'typeorm';
 
 import { CustomSearchRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { CreateParamsDto } from '../dto/params.dto';
 import { RequestSearchDto } from '../dto/request-search.dto';
@@ -26,7 +26,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
 
-            const customSearchRequestOptions: CustomSearchRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+            const customSearchRequestOptions: CustomSearchRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
 
             if (req.params && req.body?.where && Array.isArray(req.body.where)) {
                 const paramsCondition = Object.entries(req.params).reduce(
@@ -44,7 +44,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             };
 
             this.crudLogger.logRequest(req, crudSearchRequest);
-            req[Constants.CRUD_ROUTE_ARGS] = crudSearchRequest;
+            req[CRUD_ROUTE_ARGS] = crudSearchRequest;
 
             return next.handle();
         }

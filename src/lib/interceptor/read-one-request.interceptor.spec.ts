@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { BaseEntity } from 'typeorm';
 
 import { ReadOneRequestInterceptor } from './read-one-request.interceptor';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { Method } from '../interface';
 import { ExecutionContextHost } from '../provider';
 import { CrudLogger } from '../provider/crud-logger';
@@ -23,7 +23,7 @@ describe('ReadOneRequestInterceptor', () => {
 
         expect(interceptor).toBeDefined();
         expect(async () => {
-            await interceptor.intercept(new ExecutionContextHost([{ [Constants.CUSTOM_REQUEST_OPTIONS]: {} }]), handler);
+            await interceptor.intercept(new ExecutionContextHost([{ [CUSTOM_REQUEST_OPTIONS]: {} }]), handler);
         }).not.toThrowError();
     });
 
@@ -86,10 +86,10 @@ describe('ReadOneRequestInterceptor', () => {
         const interceptor = new Interceptor();
 
         const mockRequest: any = jest.fn();
-        mockRequest[Constants.CUSTOM_REQUEST_OPTIONS] = { relations: ['foo'] };
+        mockRequest[CUSTOM_REQUEST_OPTIONS] = { relations: ['foo'] };
 
         await interceptor.intercept(new ExecutionContextHost([mockRequest]), handler);
-        expect(mockRequest[Constants.CRUD_ROUTE_ARGS]).toHaveProperty('relations', ['foo']);
+        expect(mockRequest[CRUD_ROUTE_ARGS]).toHaveProperty('relations', ['foo']);
 
         const InterceptorNoRelations = ReadOneRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { [Method.READ_ONE]: { relations: false } } },
@@ -98,10 +98,10 @@ describe('ReadOneRequestInterceptor', () => {
         const interceptorNoRelations = new InterceptorNoRelations();
 
         const mockRequestNoRelations: any = jest.fn();
-        mockRequestNoRelations[Constants.CUSTOM_REQUEST_OPTIONS] = {};
+        mockRequestNoRelations[CUSTOM_REQUEST_OPTIONS] = {};
 
         await interceptorNoRelations.intercept(new ExecutionContextHost([mockRequestNoRelations]), handler);
-        expect(mockRequestNoRelations[Constants.CRUD_ROUTE_ARGS]).toHaveProperty('relations', []);
+        expect(mockRequestNoRelations[CRUD_ROUTE_ARGS]).toHaveProperty('relations', []);
 
         const InterceptorWithRelations = ReadOneRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { [Method.READ_ONE]: { relations: ['bar'] } } },
@@ -110,9 +110,9 @@ describe('ReadOneRequestInterceptor', () => {
         const interceptorWithRelations = new InterceptorWithRelations();
 
         const mockRequestWithRelations: any = jest.fn();
-        mockRequestWithRelations[Constants.CUSTOM_REQUEST_OPTIONS] = {};
+        mockRequestWithRelations[CUSTOM_REQUEST_OPTIONS] = {};
 
         await interceptorWithRelations.intercept(new ExecutionContextHost([mockRequestWithRelations]), handler);
-        expect(mockRequestWithRelations[Constants.CRUD_ROUTE_ARGS]).toHaveProperty('relations', ['bar']);
+        expect(mockRequestWithRelations[CRUD_ROUTE_ARGS]).toHaveProperty('relations', ['bar']);
     });
 });

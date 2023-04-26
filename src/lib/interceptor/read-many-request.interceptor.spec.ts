@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { BaseEntity } from 'typeorm';
 
 import { ReadManyRequestInterceptor } from './read-many-request.interceptor';
-import { Constants } from '../constants';
+import { CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { PaginationType } from '../interface';
 import { ExecutionContextHost } from '../provider';
 import { CrudLogger } from '../provider/crud-logger';
@@ -28,7 +28,7 @@ describe('ReadManyRequestInterceptor', () => {
 
         expect(interceptor).toBeDefined();
         expect(async () => {
-            await interceptor.intercept(new ExecutionContextHost([{ [Constants.CUSTOM_REQUEST_OPTIONS]: {} }]), handler);
+            await interceptor.intercept(new ExecutionContextHost([{ [CUSTOM_REQUEST_OPTIONS]: {} }]), handler);
         }).not.toThrowError();
     });
 

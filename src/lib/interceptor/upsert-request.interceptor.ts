@@ -6,7 +6,7 @@ import _ from 'lodash';
 import { Observable } from 'rxjs';
 
 import { RequestAbstractInterceptor } from '../abstract';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS } from '../constants';
 import { CrudOptions, CrudUpsertRequest, FactoryOption, GROUP, Method } from '../interface';
 
 export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
@@ -46,7 +46,7 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
             };
 
             this.crudLogger.logRequest(req, crudUpsertRequest);
-            req[Constants.CRUD_ROUTE_ARGS] = crudUpsertRequest;
+            req[CRUD_ROUTE_ARGS] = crudUpsertRequest;
 
             return next.handle();
         }

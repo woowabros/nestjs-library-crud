@@ -2,6 +2,9 @@
 
 <p align="center">
     <img src="https://github.com/woowabros/nestjs-library-crud/actions/workflows/ci.yml/badge.svg" alt="Node.js CI">
+    <a href='https://coveralls.io/github/woowabros/nestjs-library-crud?branch=main'>
+        <img src='https://coveralls.io/repos/github/woowabros/nestjs-library-crud/badge.svg?branch=main' alt='Coverage Status' />
+    </a>
     <a href="https://www.npmjs.com/package/@nestjs-library/crud">
         <img src="https://img.shields.io/npm/v/@nestjs-library/crud">
     </a>

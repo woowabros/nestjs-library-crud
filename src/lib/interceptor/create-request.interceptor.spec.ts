@@ -4,6 +4,7 @@ import { IsEmpty, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { BaseEntity } from 'typeorm';
 
 import { CreateRequestInterceptor } from './create-request.interceptor';
+import { CrudLogger } from '../provider/crud-logger';
 
 describe('CreateRequestInterceptor', () => {
     class BodyDto extends BaseEntity {
@@ -26,7 +27,7 @@ describe('CreateRequestInterceptor', () => {
 
     it('should intercepts and validate body', async () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const Interceptor = CreateRequestInterceptor({ entity: BodyDto }, {});
+        const Interceptor = CreateRequestInterceptor({ entity: BodyDto }, { logger: new CrudLogger() });
         const interceptor = new Interceptor();
         expect(await interceptor.validateBody({ col1: 1, col2: '2' })).toEqual({ col1: '1', col2: 2 });
         expect(await interceptor.validateBody({ col1: 1, col2: 2 })).toEqual({ col1: '1', col2: 2 });
@@ -38,7 +39,7 @@ describe('CreateRequestInterceptor', () => {
 
     it('should intercepts and validate body which is array', async () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const Interceptor = CreateRequestInterceptor({ entity: BodyDto }, {});
+        const Interceptor = CreateRequestInterceptor({ entity: BodyDto }, { logger: new CrudLogger() });
         const interceptor = new Interceptor();
         expect(
             await interceptor.validateBody([

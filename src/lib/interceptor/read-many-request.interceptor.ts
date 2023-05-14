@@ -1,5 +1,5 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validate, validateSync } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 
 import { CustomReadManyRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { PaginationCursorDto } from '../dto/pagination-cursor.dto';
 import { PaginationOffsetDto } from '../dto/pagination-offset.dto';
@@ -16,11 +16,15 @@ import { CrudOptions, CrudReadManyRequest, FactoryOption, Method, Sort, GROUP, P
 const method = Method.READ_MANY;
 export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const readManyOptions = crudOptions.routes?.[method] ?? {};
 
-            const customReadManyRequestOptions: CustomReadManyRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+            const customReadManyRequestOptions: CustomReadManyRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
             const paginationType = (readManyOptions.paginationType ?? CRUD_POLICY[method].default?.paginationType) as PaginationType;
 
             if (req.params) {
@@ -53,7 +57,8 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 softDeleted,
             };
 
-            req[Constants.CRUD_ROUTE_ARGS] = crudReadManyRequest;
+            this.crudLogger.logRequest(req, crudReadManyRequest);
+            req[CRUD_ROUTE_ARGS] = crudReadManyRequest;
 
             return next.handle();
         }
@@ -62,8 +67,8 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             const plain = query ?? {};
             const transformed =
                 paginationType === PaginationType.OFFSET
-                    ? plainToClass(PaginationOffsetDto, plain, { excludeExtraneousValues: true })
-                    : plainToClass(PaginationCursorDto, plain, { excludeExtraneousValues: true });
+                    ? plainToInstance(PaginationOffsetDto, plain, { excludeExtraneousValues: true })
+                    : plainToInstance(PaginationCursorDto, plain, { excludeExtraneousValues: true });
             const [error] = validateSync(transformed, { stopAtFirstError: true });
 
             if (error) {
@@ -76,15 +81,17 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             if (_.isNil(query)) {
                 return;
             }
-            const transformed = plainToClass(crudOptions.entity, query, { groups: [GROUP.READ_MANY] });
+            const transformed = plainToInstance(crudOptions.entity, query, { groups: [GROUP.READ_MANY] });
             const errorList = await validate(transformed, {
                 groups: [GROUP.READ_MANY],
                 whitelist: true,
                 forbidNonWhitelisted: true,
                 stopAtFirstError: true,
+                forbidUnknownValues: false,
             });
 
             if (errorList.length > 0) {
+                this.crudLogger.log(errorList, 'ValidationError');
                 throw new UnprocessableEntityException(errorList);
             }
             return transformed;

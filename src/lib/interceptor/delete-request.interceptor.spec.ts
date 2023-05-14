@@ -3,8 +3,9 @@ import { of } from 'rxjs';
 import { BaseEntity } from 'typeorm';
 
 import { DeleteRequestInterceptor } from './delete-request.interceptor';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS } from '../constants';
 import { ExecutionContextHost } from '../provider';
+import { CrudLogger } from '../provider/crud-logger';
 
 describe('DeleteRequestInterceptor', () => {
     it('should intercept', async () => {
@@ -12,7 +13,7 @@ describe('DeleteRequestInterceptor', () => {
             col1: string;
         }
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const Interceptor = DeleteRequestInterceptor({ entity: BodyDto }, {});
+        const Interceptor = DeleteRequestInterceptor({ entity: BodyDto }, { logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         const handler: CallHandler = {
@@ -20,6 +21,6 @@ describe('DeleteRequestInterceptor', () => {
         };
         const context = new ExecutionContextHost([{}]);
         await interceptor.intercept(context, handler);
-        expect(context.switchToHttp().getRequest()).toHaveProperty(Constants.CRUD_ROUTE_ARGS);
+        expect(context.switchToHttp().getRequest()).toHaveProperty(CRUD_ROUTE_ARGS);
     });
 });

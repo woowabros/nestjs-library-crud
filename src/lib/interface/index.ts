@@ -5,3 +5,4 @@ export * from './method';
 export * from './pagination.interface';
 export * from './request.interface';
 export * from './sort';
+export * from './author.interface';

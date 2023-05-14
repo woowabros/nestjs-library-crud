@@ -13,7 +13,7 @@ import { DECORATORS } from '@nestjs/swagger/dist/constants';
 import { BaseEntity, getMetadataArgsStorage } from 'typeorm';
 import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 
-import { Constants } from './constants';
+import { CRUD_ROUTE_ARGS, OVERRIDE_METHOD_METADATA } from './constants';
 import { CRUD_POLICY } from './crud.policy';
 import { RequestSearchDto } from './dto/request-search.dto';
 import { CreateRequestDto } from './dto/request.dto';
@@ -30,12 +30,14 @@ import {
     Column,
     CrudRecoverRequest,
     PaginationType,
-    PAGINATION_QUERY,
+    PAGINATION_SWAGGER_QUERY,
     FactoryOption,
 } from './interface';
+import { CrudLogger } from './provider/crud-logger';
 import { capitalizeFirstLetter, isSomeEnum } from './util';
 
 export class CrudRouteFactory {
+    private crudLogger: CrudLogger;
     private entity: {
         tableName: string;
         primaryKeys?: PrimaryKey[];
@@ -49,7 +51,7 @@ export class CrudRouteFactory {
     constructor(protected target: any, protected crudOptions: CrudOptions) {
         this.entityInformation(crudOptions.entity);
 
-        const paginationType = this.crudOptions.routes?.readMany?.paginationType ?? CRUD_POLICY[Method.READ_MANY].default?.paginationType;
+        const paginationType = crudOptions.routes?.readMany?.paginationType ?? CRUD_POLICY[Method.READ_MANY].default?.paginationType;
         const isPaginationType = isSomeEnum(PaginationType);
         if (!isPaginationType(paginationType)) {
             throw new TypeError(`invalid PaginationType ${paginationType}`);
@@ -57,9 +59,10 @@ export class CrudRouteFactory {
         this.paginationType = paginationType;
 
         this.overrideMap = this.getOverrideMap();
+        this.crudLogger = new CrudLogger(crudOptions.logging);
     }
 
-    public init() {
+    init() {
         for (const method of Object.values(Method)) {
             if (!this.enabledMethod(method)) {
                 continue;
@@ -167,6 +170,7 @@ export class CrudRouteFactory {
         const factoryOption: FactoryOption = {
             columns: this.entity.columns,
             primaryKeys: this.entity.primaryKeys ?? [{ name: 'id', type: 'number' }],
+            logger: this.crudLogger,
         };
 
         Reflect.defineMetadata(
@@ -247,7 +251,7 @@ export class CrudRouteFactory {
 
         if (method === Method.READ_MANY) {
             parameterDecorators.push(
-                ...PAGINATION_QUERY[this.paginationType].map(({ name, type }) => ({
+                ...PAGINATION_SWAGGER_QUERY[this.paginationType].map(({ name, type }) => ({
                     name,
                     type,
                     in: 'query',
@@ -294,10 +298,7 @@ export class CrudRouteFactory {
         const overrideMap = new Map<string, string>();
 
         for (const name of Object.getOwnPropertyNames(this.targetPrototype)) {
-            const overrodeCrudMethodName: keyof typeof Method = Reflect.getMetadata(
-                Constants.OVERRIDE_METHOD_METADATA,
-                this.targetPrototype[name],
-            );
+            const overrodeCrudMethodName: keyof typeof Method = Reflect.getMetadata(OVERRIDE_METHOD_METADATA, this.targetPrototype[name]);
             if (!overrodeCrudMethodName) {
                 continue;
             }
@@ -339,9 +340,9 @@ export class CrudRouteFactory {
         data = undefined,
     ) {
         return {
-            [`${Constants.CRUD_ROUTE_ARGS}${CUSTOM_ROUTE_ARGS_METADATA}:${index}`]: {
+            [`${CRUD_ROUTE_ARGS}${CUSTOM_ROUTE_ARGS_METADATA}:${index}`]: {
                 index,
-                factory: (_: unknown, ctx: ExecutionContext) => ctx.switchToHttp().getRequest()[Constants.CRUD_ROUTE_ARGS],
+                factory: (_: unknown, ctx: ExecutionContext) => ctx.switchToHttp().getRequest()[CRUD_ROUTE_ARGS],
                 data,
                 pipes,
             },

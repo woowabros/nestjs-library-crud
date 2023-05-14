@@ -6,9 +6,10 @@ import { of } from 'rxjs';
 import { BaseEntity } from 'typeorm';
 
 import { ReadManyRequestInterceptor } from './read-many-request.interceptor';
-import { Constants } from '../constants';
+import { CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { PaginationType } from '../interface';
 import { ExecutionContextHost } from '../provider';
+import { CrudLogger } from '../provider/crud-logger';
 
 describe('ReadManyRequestInterceptor', () => {
     it('should intercept and pass CrudReadManyRequest', () => {
@@ -20,18 +21,19 @@ describe('ReadManyRequestInterceptor', () => {
             {
                 columns: [{ name: 'col1', type: 'string', isPrimary: false }],
                 primaryKeys: [{ name: 'col1', type: 'string' }],
+                logger: new CrudLogger(),
             },
         );
         const interceptor = new Interceptor();
 
         expect(interceptor).toBeDefined();
         expect(async () => {
-            await interceptor.intercept(new ExecutionContextHost([{ [Constants.CUSTOM_REQUEST_OPTIONS]: {} }]), handler);
+            await interceptor.intercept(new ExecutionContextHost([{ [CUSTOM_REQUEST_OPTIONS]: {} }]), handler);
         }).not.toThrowError();
     });
 
     it('should be able to return pagination for GET_MORE type', () => {
-        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, {});
+        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         expect(interceptor.getPaginationRequest(PaginationType.CURSOR, { key: 'value', nextCursor: 'token' })).toEqual({
@@ -59,7 +61,7 @@ describe('ReadManyRequestInterceptor', () => {
             col3: number;
         }
 
-        const Interceptor = ReadManyRequestInterceptor({ entity: QueryDto }, {});
+        const Interceptor = ReadManyRequestInterceptor({ entity: QueryDto }, { logger: new CrudLogger() });
         const interceptor = new Interceptor();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(await interceptor.validateQuery(undefined as any)).toBeUndefined();
@@ -78,7 +80,7 @@ describe('ReadManyRequestInterceptor', () => {
     });
 
     it('should be get relation values per each condition', () => {
-        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, {});
+        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         expect(interceptor.getRelations({ relations: [] })).toEqual([]);
@@ -87,7 +89,7 @@ describe('ReadManyRequestInterceptor', () => {
 
         const InterceptorWithOptions = ReadManyRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { readMany: { relations: ['option'] } } },
-            {},
+            { logger: new CrudLogger() },
         );
         const interceptorWithOptions = new InterceptorWithOptions();
         expect(interceptorWithOptions.getRelations({ relations: [] })).toEqual([]);
@@ -96,7 +98,7 @@ describe('ReadManyRequestInterceptor', () => {
 
         const InterceptorWithFalseOptions = ReadManyRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { readMany: { relations: false } } },
-            {},
+            { logger: new CrudLogger() },
         );
         const interceptorWithFalseOptions = new InterceptorWithFalseOptions();
         expect(interceptorWithFalseOptions.getRelations({ relations: [] })).toEqual([]);
@@ -105,7 +107,7 @@ describe('ReadManyRequestInterceptor', () => {
     });
 
     it('should be validate pagination query', () => {
-        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, {});
+        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         interceptor.getPaginationRequest(PaginationType.CURSOR, undefined as any);

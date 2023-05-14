@@ -6,6 +6,7 @@ import { IsEmpty, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { BaseEntity } from 'typeorm';
 
 import { UpsertRequestInterceptor } from './upsert-request.interceptor';
+import { CrudLogger } from '../provider/crud-logger';
 
 describe('UpsertRequestInterceptor', () => {
     it('should be not include value of primary key', async () => {
@@ -27,7 +28,10 @@ describe('UpsertRequestInterceptor', () => {
             col3: number;
         }
 
-        const Interceptor = UpsertRequestInterceptor({ entity: BodyDto }, { primaryKeys: [{ name: 'col1', type: 'string' }] });
+        const Interceptor = UpsertRequestInterceptor(
+            { entity: BodyDto },
+            { primaryKeys: [{ name: 'col1', type: 'string' }], logger: new CrudLogger() },
+        );
         const interceptor = new Interceptor();
 
         await expect(interceptor.validateBody({ col1: 1, col2: 2 })).rejects.toThrowError(
@@ -54,7 +58,7 @@ describe('UpsertRequestInterceptor', () => {
             @Type(() => Number)
             col3: number;
         }
-        const Interceptor = UpsertRequestInterceptor({ entity: BodyDto }, { primaryKeys: [] });
+        const Interceptor = UpsertRequestInterceptor({ entity: BodyDto }, { primaryKeys: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
         expect(await interceptor.validateBody({ col1: 1, col2: '2' })).toEqual({
             col1: '1',
@@ -72,7 +76,7 @@ describe('UpsertRequestInterceptor', () => {
     });
 
     it('should throw when body is null or undefined', async () => {
-        const Interceptor = UpsertRequestInterceptor({ entity: {} as typeof BaseEntity }, { primaryKeys: [] });
+        const Interceptor = UpsertRequestInterceptor({ entity: {} as typeof BaseEntity }, { primaryKeys: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         await expect(interceptor.validateBody(null)).rejects.toThrow(UnprocessableEntityException);
@@ -80,7 +84,7 @@ describe('UpsertRequestInterceptor', () => {
     });
 
     it('should throw when body is not object', async () => {
-        const Interceptor = UpsertRequestInterceptor({ entity: {} as typeof BaseEntity }, { primaryKeys: [] });
+        const Interceptor = UpsertRequestInterceptor({ entity: {} as typeof BaseEntity }, { primaryKeys: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         await expect(interceptor.validateBody(1)).rejects.toThrow(UnprocessableEntityException);

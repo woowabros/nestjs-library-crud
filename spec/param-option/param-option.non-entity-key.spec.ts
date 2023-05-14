@@ -6,7 +6,7 @@ import request from 'supertest';
 import { DynamicCrudModule } from '../dynamic-crud.module';
 import { TestHelper } from '../test.helper';
 
-describe('Params Option - entity의 key가 아닌 params으로 사용하는 경우', () => {
+describe('Params Option - used as params instead of key of entity', () => {
     let app: INestApplication;
     const param = 'unknownProperty';
 
@@ -53,13 +53,13 @@ describe('Params Option - entity의 key가 아닌 params으로 사용하는 경�
         const readManyResponse = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
         expect(readManyResponse.body.data).toHaveLength(names.length);
 
-        const readManyResponseFilterdByName = await request(app.getHttpServer())
+        const readManyResponseFilteredByName = await request(app.getHttpServer())
             .get('/base')
             .query({ name: 'name1' })
             .expect(HttpStatus.OK);
-        expect(readManyResponseFilterdByName.body.data).toHaveLength(3);
+        expect(readManyResponseFilteredByName.body.data).toHaveLength(3);
 
-        const id = readManyResponseFilterdByName.body.data[0].id;
+        const id = readManyResponseFilteredByName.body.data[0].id;
         await request(app.getHttpServer()).get(`/base/${id}`).expect(HttpStatus.NOT_FOUND);
         await request(app.getHttpServer()).get('/base/name1').expect(HttpStatus.NOT_FOUND);
 

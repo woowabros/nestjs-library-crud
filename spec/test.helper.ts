@@ -26,13 +26,17 @@ export class TestHelper {
     }
 
     static async dropTypeOrmEntityTables() {
+        let failCount = 0;
         const metadata = getMetadataArgsStorage();
         const tables = [...metadata.tables];
         while (tables.length > 0) {
             const table = tables.shift()!;
             const entity = table.target as typeof BaseEntity;
 
-            await entity.query(`DROP TABLE ${table.name}`).catch(() => {
+            await entity.query(`DROP TABLE ${table.name}`).catch((error) => {
+                if (failCount++ > 10) {
+                    throw error;
+                }
                 tables.push(table);
             });
         }
@@ -60,6 +64,16 @@ export class TestHelper {
             password: process.env.POSTGRESQL_DATABASE_PASSWORD,
             entities,
             synchronize: true,
+            logging: true,
+            logger: 'file',
+        });
+    }
+
+    static async getTypeOrmMongoModule(url: string, entities: MixedList<typeof BaseEntity>) {
+        return TypeOrmModule.forRoot({
+            type: 'mongodb',
+            url,
+            entities,
             logging: true,
             logger: 'file',
         });

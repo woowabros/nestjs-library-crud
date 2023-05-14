@@ -34,11 +34,29 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
         this.relations = this.repository.metadata.relations?.map((relation) => relation.propertyName);
     }
 
+    async getTotalCountByCrudSearchRequest(crudSearchRequest: CrudSearchRequest<T>): Promise<number> {
+        const { requestSearchDto } = crudSearchRequest;
+        const where =
+            Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
+                ? requestSearchDto.where.map((queryFilter, index) =>
+                      TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter, index),
+                  )
+                : undefined;
+
+        return this.repository.count({
+            select: requestSearchDto.select,
+            where,
+            withDeleted: requestSearchDto.withDeleted,
+        });
+    }
+
     async reservedSearch(crudSearchRequest: CrudSearchRequest<T>) {
         const { requestSearchDto, relations } = crudSearchRequest;
         const where =
             Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
-                ? requestSearchDto.where.map((queryFilter) => TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter))
+                ? requestSearchDto.where.map((queryFilter, index) =>
+                      TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter, index),
+                  )
                 : undefined;
 
         const data = await this.repository.find({
@@ -49,14 +67,24 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             order: requestSearchDto.order as FindOptionsOrder<T>,
             relations: this.getRelation(relations),
         });
+        const nextCursor = PaginationHelper.serialize(_.pick(data.at(-1), this.primaryKey));
 
-        return { data };
+        return {
+            data,
+            metadata: { nextCursor, query: PaginationHelper.serialize(requestSearchDto ?? {}) },
+        };
     }
 
     async reservedReadMany(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {
         return crudReadManyRequest.pagination.type === PaginationType.OFFSET
             ? this.paginateOffset(crudReadManyRequest)
             : this.paginateCursor(crudReadManyRequest);
+    }
+
+    async getTotalCountByCrudReadManyRequest(crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> {
+        return crudReadManyRequest.pagination.type === PaginationType.OFFSET
+            ? this.paginateOffsetTotalCount(crudReadManyRequest)
+            : this.paginateCursorTotalCount(crudReadManyRequest);
     }
 
     async reservedReadOne(crudReadOneRequest: CrudReadOneRequest<T>): Promise<T> {
@@ -82,6 +110,12 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             isCrudCreateManyRequest<T>(crudCreateRequest) ? crudCreateRequest.body : [crudCreateRequest.body],
         );
 
+        if (crudCreateRequest.author) {
+            for (const entity of entities) {
+                _.merge(entity, { [crudCreateRequest.author.property]: crudCreateRequest.author.value });
+            }
+        }
+
         return this.repository
             .save(entities)
             .then((result) => {
@@ -104,7 +138,11 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     throw new ConflictException('it has been deleted');
                 }
 
-                return this.repository.save(_.merge(upsertEntity, crudUpsertRequest.body));
+                if (crudUpsertRequest.author) {
+                    _.merge(upsertEntity, { [crudUpsertRequest.author.property]: crudUpsertRequest.author.value });
+                }
+
+                return this.repository.save(_.assign(upsertEntity, crudUpsertRequest.body));
             });
     }
 
@@ -118,7 +156,11 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     throw new BadRequestException('Not Found Entity');
                 }
 
-                return this.repository.save(_.merge(entity, crudUpdateOneRequest.body));
+                if (crudUpdateOneRequest.author) {
+                    _.merge(entity, { [crudUpdateOneRequest.author.property]: crudUpdateOneRequest.author.value });
+                }
+
+                return this.repository.save(_.assign(entity, crudUpdateOneRequest.body));
             });
     }
 
@@ -126,7 +168,6 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
         if (this.primaryKey.length === 0) {
             throw new ConflictException('cannot found primary key from entity');
         }
-        const deleteAction = crudDeleteOneRequest.softDeleted ? 'softDelete' : 'delete';
 
         return this.repository
             .findOne({
@@ -137,9 +178,12 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                     throw new BadRequestException('Not Found Entity');
                 }
 
-                await this.repository[deleteAction](
-                    this.primaryKey.reduce((pre, key) => ({ ...pre, [key]: (entity as Record<string, unknown>)[key] }), {}),
-                );
+                if (crudDeleteOneRequest.author) {
+                    _.merge(entity, { [crudDeleteOneRequest.author.property]: crudDeleteOneRequest.author.value });
+                    await this.repository.save(entity);
+                }
+
+                await (crudDeleteOneRequest.softDeleted ? entity.softRemove() : entity.remove());
                 return entity;
             });
     }
@@ -157,6 +201,19 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 await this.repository.recover(entity);
                 return entity;
             });
+    }
+
+    private async paginateCursorTotalCount(crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> {
+        if (crudReadManyRequest.pagination.type !== PaginationType.CURSOR) {
+            throw new TypeError('use only cursor Pagination Type');
+        }
+        const pagination: PaginationCursorDto = crudReadManyRequest.pagination;
+        return this.repository.count({
+            where: pagination.token
+                ? this.paginateCursorWhereByToken(pagination, crudReadManyRequest.sort)
+                : (crudReadManyRequest.query as FindOptionsWhere<T>),
+            withDeleted: crudReadManyRequest.softDeleted,
+        });
     }
 
     private async paginateCursor(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {
@@ -178,10 +235,9 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             ),
             relations: this.getRelation(crudReadManyRequest.relations),
         });
-        const lastEntity = entities[entities.length - 1];
         const nextCursor = PaginationHelper.serialize(
             _.pick(
-                lastEntity,
+                entities.at(-1),
                 crudReadManyRequest.primaryKeys.map(({ name }) => name),
             ),
         );
@@ -193,14 +249,21 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
     }
 
     private paginateCursorWhereByToken(pagination: PaginationCursorDto, sort: Sort): FindOptionsWhere<T> {
-        const query = PaginationHelper.deserialize(pagination.query);
-        const lastObject = PaginationHelper.deserialize(pagination.token);
+        const query: Record<string, unknown> = PaginationHelper.deserialize(pagination.query);
+        const lastObject: Record<string, unknown> = PaginationHelper.deserialize(pagination.token);
 
         const operator = sort === Sort.DESC ? LessThan : MoreThan;
         for (const [key, value] of Object.entries(lastObject)) {
             query[key] = operator(value);
         }
         return query as FindOptionsWhere<T>;
+    }
+
+    private async paginateOffsetTotalCount(crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> {
+        return this.repository.count({
+            where: crudReadManyRequest.query as FindOptionsWhere<T>,
+            withDeleted: crudReadManyRequest.softDeleted,
+        });
     }
 
     private async paginateOffset(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {

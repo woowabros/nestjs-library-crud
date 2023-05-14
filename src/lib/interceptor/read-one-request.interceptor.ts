@@ -1,5 +1,5 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 
 import { CustomReadOneRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { RequestFieldsDto } from '../dto/request-fields.dto';
 import { CrudOptions, Method, FactoryOption, CrudReadOneRequest } from '../interface';
@@ -16,10 +16,14 @@ import { CrudOptions, Method, FactoryOption, CrudReadOneRequest } from '../inter
 const method = Method.READ_ONE;
 export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
 
-            const customReadOneRequestOptions: CustomReadOneRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+            const customReadOneRequestOptions: CustomReadOneRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
 
             const fieldsByRequest = this.checkFields(req.query?.fields);
 
@@ -35,7 +39,9 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
                 softDeleted,
                 relations: this.getRelations(customReadOneRequestOptions),
             };
-            req[Constants.CRUD_ROUTE_ARGS] = crudReadOneRequest;
+
+            this.crudLogger.logRequest(req, crudReadOneRequest);
+            req[CRUD_ROUTE_ARGS] = crudReadOneRequest;
 
             return next.handle();
         }
@@ -54,9 +60,10 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             if (!fields || (Array.isArray(fields) && fields.length === 0)) {
                 return;
             }
-            const requestFields = plainToClass(RequestFieldsDto, { fields });
+            const requestFields = plainToInstance(RequestFieldsDto, { fields });
             const errorList = validateSync(requestFields);
             if (errorList.length > 0) {
+                this.crudLogger.log(errorList, 'ValidationError');
                 throw new UnprocessableEntityException(errorList);
             }
             const columns = (factoryOption.columns ?? []).map(({ name }) => name);

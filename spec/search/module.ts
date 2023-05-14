@@ -1,21 +1,26 @@
 /* eslint-disable max-classes-per-file */
 import { Controller, Injectable, Module } from '@nestjs/common';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
+import { IsOptional } from 'class-validator';
 import { Entity, BaseEntity, Repository, PrimaryColumn, Column } from 'typeorm';
 
 import { Crud } from '../../src/lib/crud.decorator';
 import { CrudService } from '../../src/lib/crud.service';
+import { GROUP } from '../../src/lib/interface';
 import { CrudController } from '../../src/lib/interface';
 
-@Entity('TestEntity')
+@Entity('test')
 export class TestEntity extends BaseEntity {
     @PrimaryColumn()
+    @IsOptional({ groups: [GROUP.SEARCH] })
     col1: string;
 
     @Column()
+    @IsOptional({ groups: [GROUP.SEARCH] })
     col2: number;
 
     @Column({ nullable: true })
+    @IsOptional({ groups: [GROUP.SEARCH] })
     col3: number;
 }
 
@@ -28,6 +33,12 @@ export class TestService extends CrudService<TestEntity> {
 
 @Crud({
     entity: TestEntity,
+    routes: {
+        search: {
+            numberOfTake: 5,
+            limitOfTake: 100,
+        },
+    },
 })
 @Controller('base')
 export class TestController implements CrudController<TestEntity> {

@@ -3,13 +3,14 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-    globals: {
-        'ts-jest': {
-            tsconfig: '<rootDir>/tsconfig.spec.json',
-        },
-    },
     moduleFileExtensions: ['js', 'json', 'ts'],
     transform: {
+        '^.+\\.spec\\.(t|j)s$': [
+            'ts-jest',
+            {
+                tsconfig: '<rootDir>/tsconfig.spec.json',
+            },
+        ],
         '^.+\\.(t|j)s$': [
             'ts-jest',
             {
@@ -24,8 +25,6 @@ const config: Config = {
     detectOpenHandles: true,
     collectCoverage: true,
     collectCoverageFrom: ['**/*.ts', '!**/*.d.ts'],
-    coverageReporters: ['text'],
-    coverageDirectory: 'coverage',
     coverageThreshold: {
         global: {
             statements: 60,
@@ -34,7 +33,7 @@ const config: Config = {
             lines: 60,
         },
     },
-    coveragePathIgnorePatterns: ['<rootDir>/jest.config.ts', '.mock.ts'],
+    coveragePathIgnorePatterns: ['<rootDir>/jest.config.ts', '.mock.ts', 'spec/'],
     setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 };
 

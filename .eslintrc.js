@@ -96,6 +96,11 @@ module.exports = {
                         selector: 'enumMember',
                         format: ['UPPER_CASE'],
                     },
+                    {
+                        selector: 'classProperty',
+                        format: ['camelCase'],
+                        leadingUnderscore: 'allow',
+                    },
                 ],
                 '@typescript-eslint/prefer-nullish-coalescing': [
                     'error',
@@ -164,6 +169,19 @@ module.exports = {
                 'unicorn/string-content': 'off',
                 'unicorn/throw-new-error': 'error',
                 'unicorn/no-unnecessary-await': 'error',
+                '@typescript-eslint/explicit-member-accessibility': [
+                    'error',
+                    {
+                        accessibility: 'no-public',
+                        overrides: {
+                            accessors: 'no-public',
+                            constructors: 'off',
+                            methods: 'no-public',
+                            properties: 'off',
+                            parameterProperties: 'explicit',
+                        },
+                    },
+                ],
             },
         },
         {

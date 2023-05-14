@@ -1,5 +1,5 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
@@ -8,20 +8,25 @@ import { BaseEntity } from 'typeorm';
 
 import { CustomSearchRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
-import { Constants } from '../constants';
+import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { CreateParamsDto } from '../dto/params.dto';
 import { RequestSearchDto } from '../dto/request-search.dto';
-import { CrudOptions, FactoryOption, GROUP, Method, Sort } from '../interface';
+import { CrudOptions, CrudSearchRequest, FactoryOption, GROUP, Method, Sort } from '../interface';
 import { operatorBetween, operatorIn, operatorNull, operatorList, OperatorUnion } from '../interface/query-operation.interface';
+import { PaginationHelper } from '../provider';
 
 const method = Method.SEARCH;
 export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
 
-            const customSearchRequestOptions: CustomSearchRequestOptions = req[Constants.CUSTOM_REQUEST_OPTIONS];
+            const customSearchRequestOptions: CustomSearchRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
 
             if (req.params && req.body?.where && Array.isArray(req.body.where)) {
                 const paramsCondition = Object.entries(req.params).reduce(
@@ -29,11 +34,17 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     {},
                 );
                 for (const queryFilter of req.body.where) {
-                    Object.assign(queryFilter, paramsCondition);
+                    _.merge(queryFilter, paramsCondition);
                 }
             }
             const requestSearchDto = await this.validateBody(req.body);
-            req[Constants.CRUD_ROUTE_ARGS] = { requestSearchDto, relations: customSearchRequestOptions?.relations };
+            const crudSearchRequest: CrudSearchRequest<typeof crudOptions.entity> = {
+                requestSearchDto,
+                relations: customSearchRequestOptions?.relations,
+            };
+
+            this.crudLogger.logRequest(req, crudSearchRequest);
+            req[CRUD_ROUTE_ARGS] = crudSearchRequest;
 
             return next.handle();
         }
@@ -44,8 +55,12 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 throw new UnprocessableEntityException('body should be object');
             }
 
-            const requestSearchDto = plainToClass(RequestSearchDto<typeof crudOptions.entity>, body);
+            const requestSearchDto = plainToInstance(RequestSearchDto<typeof crudOptions.entity>, body);
             const searchOptions = crudOptions.routes?.[method] ?? {};
+
+            if ('nextCursor' in requestSearchDto) {
+                return this.validatePagination(requestSearchDto);
+            }
 
             if ('select' in requestSearchDto) {
                 this.validateSelect(requestSearchDto.select);
@@ -67,10 +82,37 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             requestSearchDto.take =
                 'take' in requestSearchDto
-                    ? this.validateTake(requestSearchDto.take)
+                    ? this.validateTake(requestSearchDto.take, searchOptions.limitOfTake)
                     : searchOptions.numberOfTake ?? (CRUD_POLICY[method].default?.numberOfTake as number);
 
             return requestSearchDto;
+        }
+
+        validatePagination(requestSearchDto: RequestSearchDto<typeof BaseEntity>): RequestSearchDto<typeof crudOptions.entity> {
+            if (typeof requestSearchDto.nextCursor !== 'string') {
+                throw new UnprocessableEntityException('nextCursor should be String type');
+            }
+            if ('query' in requestSearchDto && typeof requestSearchDto.query !== 'string') {
+                throw new UnprocessableEntityException('query should be String type');
+            }
+            const preCondition = PaginationHelper.deserialize<RequestSearchDto<typeof crudOptions.entity>>(requestSearchDto.query);
+            const lastObject: Record<string, unknown> = PaginationHelper.deserialize(requestSearchDto.nextCursor);
+            preCondition.where = preCondition.where ?? [{}];
+
+            const cursorCondition = Object.entries(lastObject).reduce(
+                (queryFilter, [key, operand]) => ({
+                    ...queryFilter,
+                    [key]: {
+                        operator: _.get(preCondition.order, 'key', CRUD_POLICY[method].default?.sort) === Sort.DESC ? '<' : '>',
+                        operand,
+                    },
+                }),
+                {},
+            );
+            for (const queryFilter of preCondition.where) {
+                _.merge(queryFilter, cursorCondition);
+            }
+            return preCondition;
         }
 
         validateSelect(select: RequestSearchDto<typeof crudOptions.entity>['select']): void {
@@ -145,7 +187,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     }
                 }
 
-                const transformed = plainToClass(
+                const transformed = plainToInstance(
                     CreateParamsDto(crudOptions.entity, Object.keys(query) as unknown as Array<keyof BaseEntity>),
                     query,
                 );
@@ -154,9 +196,11 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     whitelist: true,
                     forbidNonWhitelisted: true,
                     stopAtFirstError: true,
+                    forbidUnknownValues: false,
                 });
 
                 if (errorList.length > 0) {
+                    this.crudLogger.log(errorList, 'ValidationError');
                     throw new UnprocessableEntityException(errorList);
                 }
             }
@@ -172,7 +216,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 if (!factoryOption.columns?.some((column) => column.name === key)) {
                     throw new UnprocessableEntityException(`${key} is unknown key`);
                 }
-                if (!sortOptions.includes(sort)) {
+                if (!sortOptions.includes(sort as Sort)) {
                     throw new UnprocessableEntityException(`${sort} is unknown Order Type`);
                 }
             }
@@ -184,13 +228,16 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             }
         }
 
-        validateTake(take: RequestSearchDto<typeof crudOptions.entity>['take']): number | undefined {
+        validateTake(take: RequestSearchDto<typeof crudOptions.entity>['take'], limitOfTake: number | undefined): number | undefined {
             if (take == null) {
                 throw new UnprocessableEntityException('take must be positive number type');
             }
             const takeNumber = +take;
             if (!Number.isInteger(takeNumber) || takeNumber < 1) {
                 throw new UnprocessableEntityException('take must be positive number type');
+            }
+            if (!!limitOfTake && takeNumber > limitOfTake) {
+                throw new UnprocessableEntityException(`take must be less than ${limitOfTake}`);
             }
             return takeNumber;
         }

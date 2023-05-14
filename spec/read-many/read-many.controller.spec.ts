@@ -38,12 +38,16 @@ describe('ReadMany - Options', () => {
 
             // eslint-disable-next-line unicorn/no-array-for-each
             (response.body.data as BaseEntity[]).forEach((d, idx, arr) => {
-                if (idx === 0) return;
+                if (idx === 0) {
+                    return;
+                }
                 expect(d.id).toBeGreaterThan(arr[idx - 1].id);
             });
 
             (response.body.data as BaseEntity[]).reduce((pre, value) => {
-                if (!pre) return value;
+                if (!pre) {
+                    return value;
+                }
                 expect(value.id).toBeGreaterThan(pre.id);
                 return value;
             });
@@ -69,12 +73,16 @@ describe('ReadMany - Options', () => {
 
             // eslint-disable-next-line unicorn/no-array-for-each
             (nextResponse.body.data as BaseEntity[]).forEach((d, idx, arr) => {
-                if (idx === 0) return;
+                if (idx === 0) {
+                    return;
+                }
                 expect(d.id).toBeGreaterThan(arr[idx - 1].id);
             });
 
             (nextResponse.body.data as BaseEntity[]).reduce((pre, value) => {
-                if (!pre) return value;
+                if (!pre) {
+                    return value;
+                }
                 expect(value.id).toBeGreaterThan(pre.id);
                 return value;
             });
@@ -89,12 +97,16 @@ describe('ReadMany - Options', () => {
 
             // eslint-disable-next-line unicorn/no-array-for-each
             (response.body.data as BaseEntity[]).forEach((d, idx, arr) => {
-                if (idx === 0) return;
+                if (idx === 0) {
+                    return;
+                }
                 expect(d.id).toBeLessThan(arr[idx - 1].id);
             });
 
             (response.body.data as BaseEntity[]).reduce((pre, value) => {
-                if (!pre) return value;
+                if (!pre) {
+                    return value;
+                }
                 expect(value.id).toBeLessThan(pre.id);
                 return value;
             });
@@ -120,12 +132,16 @@ describe('ReadMany - Options', () => {
 
             // eslint-disable-next-line unicorn/no-array-for-each
             (nextResponse.body.data as BaseEntity[]).forEach((d, idx, arr) => {
-                if (idx === 0) return;
+                if (idx === 0) {
+                    return;
+                }
                 expect(d.id).toBeLessThan(arr[idx - 1].id);
             });
 
             (nextResponse.body.data as BaseEntity[]).reduce((pre, value) => {
-                if (!pre) return value;
+                if (!pre) {
+                    return value;
+                }
                 expect(value.id).toBeLessThan(pre.id);
                 return value;
             });

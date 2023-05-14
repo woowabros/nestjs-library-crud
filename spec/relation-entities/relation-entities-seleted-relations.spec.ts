@@ -62,7 +62,7 @@ describe('disable relation option', () => {
 
             const { body: questionBody } = await request(app.getHttpServer()).get(`/question/${questionData.id}`).expect(HttpStatus.OK);
             expect(questionBody.writer).toBeDefined();
-            expect(questionBody.category).not.toBeDefined();
+            expect(questionBody.category).toBeUndefined();
         }
     });
 });

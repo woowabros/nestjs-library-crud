@@ -67,9 +67,9 @@ describe('disable relation option', () => {
             .expect(HttpStatus.OK);
 
         for (const comment of commentListBody.data) {
-            expect(comment.writer).not.toBeDefined();
+            expect(comment.writer).toBeUndefined();
             const { body: commentBody } = await request(app.getHttpServer()).get(`/comment/${comment.id}`).expect(HttpStatus.OK);
-            expect(commentBody.writer).not.toBeDefined();
+            expect(commentBody.writer).toBeUndefined();
         }
     });
 });

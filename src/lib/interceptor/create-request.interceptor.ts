@@ -1,20 +1,24 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { BaseEntity } from 'typeorm';
 
 import { RequestAbstractInterceptor } from '../abstract';
-import { Constants } from '../constants';
-import { CrudOptions, FactoryOption, CrudCreateRequest, GROUP } from '../interface';
+import { CRUD_ROUTE_ARGS } from '../constants';
+import { CrudOptions, FactoryOption, CrudCreateRequest, GROUP, Method } from '../interface';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface NestedBaseEntityArray extends Array<NestedBaseEntityArray | BaseEntity> {}
 type BaseEntityOrArray = BaseEntity | NestedBaseEntityArray;
 
-export function CreateRequestInterceptor(crudOptions: CrudOptions, _factoryOption: FactoryOption) {
+export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+        constructor() {
+            super(factoryOption.logger);
+        }
+
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req = context.switchToHttp().getRequest<Request>();
 
@@ -25,8 +29,11 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, _factoryOptio
 
             const crudCreateRequest: CrudCreateRequest<typeof crudOptions.entity> = {
                 body,
+                author: this.getAuthor(req, crudOptions, Method.CREATE),
             };
-            (req as Record<string, any>)[Constants.CRUD_ROUTE_ARGS] = crudCreateRequest;
+
+            this.crudLogger.logRequest(req, crudCreateRequest);
+            (req as Record<string, any>)[CRUD_ROUTE_ARGS] = crudCreateRequest;
             return next.handle();
         }
 
@@ -34,9 +41,10 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, _factoryOptio
             if (Array.isArray(body)) {
                 return Promise.all(body.map((b) => this.validateBody(b)));
             }
-            const transformed = plainToClass(crudOptions.entity, body, { groups: [GROUP.CREATE] });
+            const transformed = plainToInstance(crudOptions.entity, body, { groups: [GROUP.CREATE] });
             const errorList = await validate(transformed, { groups: [GROUP.CREATE], whitelist: true, forbidNonWhitelisted: true });
             if (errorList.length > 0) {
+                this.crudLogger.log(errorList, 'ValidationError');
                 throw new UnprocessableEntityException(errorList);
             }
             return transformed;

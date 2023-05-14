@@ -71,7 +71,7 @@ describe('BaseController Swagger Decorator', () => {
         expect(routeSet[readMany].root?.parameters).toEqual(
             expect.arrayContaining([
                 {
-                    name: 'token',
+                    name: 'nextCursor',
                     in: 'query',
                     required: false,
                     description: 'Query parameters for Cursor Pagination',

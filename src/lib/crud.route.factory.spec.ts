@@ -4,8 +4,8 @@ import { CrudRouteFactory } from './crud.route.factory';
 import { PaginationType } from './interface';
 
 describe('CrudRouteFactory', () => {
-    @Entity('TestEntity')
-    class TestEnity extends BaseEntity {}
+    @Entity('test')
+    class TestEntity extends BaseEntity {}
 
     it('should check tableName in TypeORM', () => {
         expect(() => new CrudRouteFactory({ prototype: {} }, { entity: {} as typeof BaseEntity })).toThrow(Error);
@@ -17,7 +17,7 @@ describe('CrudRouteFactory', () => {
                 new CrudRouteFactory(
                     { prototype: {} },
                     {
-                        entity: TestEnity,
+                        entity: TestEntity,
                         routes: { readMany: { paginationType: 'wrong' as unknown as PaginationType } },
                     },
                 ),

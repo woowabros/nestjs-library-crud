@@ -1,3 +1,4 @@
 {
-    "cSpell.words": ["denormalized", "ILIKE", "metatype", "nestjs", "Pgsql", "precommit", "typeorm"]
+    "cSpell.words": ["Denormalized", "ILIKE", "nestjs", "Pgsql", "typeorm"],
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

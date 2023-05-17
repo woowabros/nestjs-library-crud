@@ -1547,9 +1547,9 @@
     tar "^6.1.11"
 
 "@nestjs/common@^9.4.0":
-  version "9.4.0"
-  resolved "https://registry.yarnpkg.com/@nestjs/common/-/common-9.4.0.tgz#3597e4f3a1278486fc2e015c94e58bcbbb4f72ca"
-  integrity sha512-RUcVAQsEF4WPrmzFXEOUfZnPwrLTe1UVlzXTlSyfqfqbdWDPKDGlIPVelBLfc5/+RRUQ0I5iE4+CQvpCmkqldw==
+  version "9.4.1"
+  resolved "https://registry.yarnpkg.com/@nestjs/common/-/common-9.4.1.tgz#3588f3ec3b46d59302096a75c00cc1cd7f5452ea"
+  integrity sha512-VA5XXLAvXG3vY4GqvvuevL7Ooi5RRsov+ydMlgc1rPswgxkSVWaPTqNibsP4C6y5XJtKfc4Ol+zoe2w/LeYJTQ==
   dependencies:
     uid "2.0.2"
     iterare "1.2.1"

@@ -302,10 +302,11 @@ export class CrudRouteFactory {
             if (!overrodeCrudMethodName) {
                 continue;
             }
-            if (overrideMap.has(overrodeCrudMethodName)) {
+            const overrodeCrudMethod = Method[overrodeCrudMethodName];
+            if (overrideMap.has(overrodeCrudMethod)) {
                 throw new Error(`duplicated ${overrodeCrudMethodName} method on ${name}`);
             }
-            overrideMap.set(overrodeCrudMethodName, name);
+            overrideMap.set(overrodeCrudMethod, name);
         }
 
         return overrideMap;

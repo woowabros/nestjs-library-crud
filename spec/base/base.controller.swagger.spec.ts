@@ -67,7 +67,7 @@ describe('BaseController Swagger Decorator', () => {
         expect(routeSet[readMany].root?.method).toEqual('get');
         expect(routeSet[readMany].root?.summary).toEqual("read many from 'Base' Table");
         expect(routeSet[readMany].root?.description).toEqual("Fetch multiple entities in 'Base' Table");
-        expect(routeSet[readMany].root?.parameters).toHaveLength(2);
+        expect(routeSet[readMany].root?.parameters).toHaveLength(4);
         expect(routeSet[readMany].root?.parameters).toEqual(
             expect.arrayContaining([
                 {
@@ -77,6 +77,31 @@ describe('BaseController Swagger Decorator', () => {
                     description: 'Query parameters for Cursor Pagination',
                     schema: { type: 'string' },
                 },
+                {
+                    name: 'name',
+                    in: 'query',
+                    required: false,
+                    description: 'Query string filter by BaseEntity.name',
+                    schema: { type: 'string' },
+                },
+                {
+                    name: 'type',
+                    in: 'query',
+                    required: false,
+                    description: 'Query string filter by BaseEntity.type',
+                    schema: { type: 'string' },
+                },
+                {
+                    name: 'description',
+                    in: 'query',
+                    required: false,
+                    description: 'Query string filter by BaseEntity.description',
+                    schema: { type: 'string' },
+                },
+            ]),
+        );
+        expect(routeSet[readMany].root?.parameters).not.toEqual(
+            expect.arrayContaining([
                 {
                     name: 'query',
                     in: 'query',

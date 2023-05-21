@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { ExecutionContext, HttpStatus, Type } from '@nestjs/common';
 import {
-    INTERCEPTORS_METADATA,
     CUSTOM_ROUTE_ARGS_METADATA,
-    PATH_METADATA,
-    METHOD_METADATA,
-    ROUTE_ARGS_METADATA,
-    PARAMTYPES_METADATA,
     HTTP_CODE_METADATA,
+    INTERCEPTORS_METADATA,
+    METHOD_METADATA,
+    PARAMTYPES_METADATA,
+    PATH_METADATA,
+    ROUTE_ARGS_METADATA,
 } from '@nestjs/common/constants';
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
 import { BaseEntity, getMetadataArgsStorage } from 'typeorm';
@@ -16,22 +16,22 @@ import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 import { CRUD_ROUTE_ARGS, OVERRIDE_METHOD_METADATA } from './constants';
 import { CRUD_POLICY } from './crud.policy';
 import { RequestSearchDto } from './dto/request-search.dto';
-import { CreateRequestDto } from './dto/request.dto';
+import { CreateRequestDto, getPropertyNamesFromMetadata } from './dto/request.dto';
 import {
-    CrudOptions,
-    Method,
-    CrudReadManyRequest,
-    CrudReadOneRequest,
-    CrudSearchRequest,
-    CrudUpdateOneRequest,
+    Column,
     CrudCreateRequest,
     CrudDeleteOneRequest,
-    PrimaryKey,
-    Column,
+    CrudOptions,
+    CrudReadManyRequest,
+    CrudReadOneRequest,
     CrudRecoverRequest,
+    CrudSearchRequest,
+    CrudUpdateOneRequest,
+    FactoryOption,
+    Method,
     PaginationType,
     PAGINATION_SWAGGER_QUERY,
-    FactoryOption,
+    PrimaryKey,
 } from './interface';
 import { CrudLogger } from './provider/crud-logger';
 import { capitalizeFirstLetter, isSomeEnum } from './util';
@@ -257,6 +257,13 @@ export class CrudRouteFactory {
                     in: 'query',
                     required: false,
                     description: `Query parameters for ${capitalizeFirstLetter(this.paginationType)} Pagination`,
+                })),
+                ...getPropertyNamesFromMetadata(this.crudOptions.entity, method).map((property) => ({
+                    name: property,
+                    type: 'string',
+                    in: 'query',
+                    required: false,
+                    description: `Query string filter by ${this.crudOptions.entity.name}.${property}`,
                 })),
             );
         }

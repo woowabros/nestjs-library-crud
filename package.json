@@ -80,7 +80,7 @@
         "commitlint": "^17.4.2",
         "cz-conventional-changelog": "^3.3.0",
         "dotenv": "^16.0.3",
-        "eslint": "~8.39.0",
+        "eslint": "~8.41.0",
         "eslint-config-prettier": "8.8.0",
         "eslint-import-resolver-typescript": "^3.5.2",
         "eslint-import-resolver-webpack": "^0.13.2",

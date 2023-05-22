@@ -42,15 +42,15 @@ export abstract class RequestAbstractInterceptor {
         crudOptions: CrudOptions,
         method: Exclude<Method, Method.READ_MANY | Method.READ_ONE | Method.SEARCH>,
     ): Author | undefined {
-        if (!crudOptions.routes || !crudOptions.routes[method] || !crudOptions.routes[method]?.author) {
+        const author = crudOptions?.routes?.[method]?.author;
+
+        if (!author) {
             return;
         }
 
         return {
-            ...crudOptions.routes[method]!.author!,
-            value:
-                crudOptions.routes[method]!.author?.value ??
-                _.get(request, crudOptions.routes[method]!.author!.filter!, crudOptions.routes[method]!.author?.value),
+            ...author,
+            value: author.value ?? _.get(request, author.filter!, author.value),
         };
     }
 }

@@ -1,7 +1,7 @@
 export interface Author {
     /**
-     * Name of property(field) to update after operation completed.
-     * For example, 'createdBy', 'updatedBy', 'lastModifiedBy','deletedBy' etc.
+     * The name of property(field) to be updated after the operation completed.
+     * For example, 'createdBy', 'updatedBy', 'lastModifiedBy', 'deletedBy' etc.
      */
     property: string;
     /**

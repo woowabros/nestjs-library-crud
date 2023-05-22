@@ -48,9 +48,6 @@ export abstract class RequestAbstractInterceptor {
             return;
         }
 
-        return {
-            ...author,
-            value: author.value ?? _.get(request, author.filter!, author.value),
-        };
+        return { ...author, value: author.value ?? _.get(request, author.filter ?? '', author.value) };
     }
 }

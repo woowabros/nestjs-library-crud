@@ -103,49 +103,81 @@ export class CrudRouteFactory {
     }
 
     protected readOne<T>(controllerMethodName: string) {
+        const serviceMethod = this.crudOptions.routes?.[Method.READ_ONE]?.serviceMethod;
         this.targetPrototype[controllerMethodName] = function reservedReadOne(crudReadOneRequest: CrudReadOneRequest<T>) {
+            if (serviceMethod && this.crudService[serviceMethod] && typeof this.crudService[serviceMethod] === 'function') {
+                return this.crudService[serviceMethod](crudReadOneRequest);
+            }
             return this.crudService.reservedReadOne(crudReadOneRequest);
         };
     }
 
     protected readMany<T>(controllerMethodName: string) {
+        const serviceMethod = this.crudOptions.routes?.[Method.READ_MANY]?.serviceMethod;
         this.targetPrototype[controllerMethodName] = function reservedReadMany(crudReadManyRequest: CrudReadManyRequest<T>) {
+            if (serviceMethod && this.crudService[serviceMethod] && typeof this.crudService[serviceMethod] === 'function') {
+                return this.crudService[serviceMethod](crudReadManyRequest);
+            }
             return this.crudService.reservedReadMany(crudReadManyRequest);
         };
     }
 
     protected search<T>(controllerMethodName: string) {
+        const serviceMethod = this.crudOptions.routes?.[Method.SEARCH]?.serviceMethod;
         this.targetPrototype[controllerMethodName] = function reservedSearch(crudSearchRequest: CrudSearchRequest<T>) {
+            if (serviceMethod && this.crudService[serviceMethod] && typeof this.crudService[serviceMethod] === 'function') {
+                return this.crudService[serviceMethod](crudSearchRequest);
+            }
             return this.crudService.reservedSearch(crudSearchRequest);
         };
     }
 
     protected create<T>(controllerMethodName: string) {
+        const serviceMethod = this.crudOptions.routes?.[Method.CREATE]?.serviceMethod;
         this.targetPrototype[controllerMethodName] = function reservedCreate(crudCreateRequest: CrudCreateRequest<T>) {
+            if (serviceMethod && this.crudService[serviceMethod] && typeof this.crudService[serviceMethod] === 'function') {
+                return this.crudService[serviceMethod](crudCreateRequest);
+            }
             return this.crudService.reservedCreate(crudCreateRequest);
         };
     }
 
     protected upsert<T>(controllerMethodName: string) {
+        const serviceMethod = this.crudOptions.routes?.[Method.UPSERT]?.serviceMethod;
         this.targetPrototype[controllerMethodName] = function reservedUpsert(crudCreateRequest: CrudCreateRequest<T>) {
+            if (serviceMethod && this.crudService[serviceMethod] && typeof this.crudService[serviceMethod] === 'function') {
+                return this.crudService[serviceMethod](crudCreateRequest);
+            }
             return this.crudService.reservedUpsert(crudCreateRequest);
         };
     }
 
     protected update<T>(controllerMethodName: string) {
+        const serviceMethod = this.crudOptions.routes?.[Method.UPDATE]?.serviceMethod;
         this.targetPrototype[controllerMethodName] = function reservedUpdate(crudUpdateOneRequest: CrudUpdateOneRequest<T>) {
+            if (serviceMethod && this.crudService[serviceMethod] && typeof this.crudService[serviceMethod] === 'function') {
+                return this.crudService[serviceMethod](crudUpdateOneRequest);
+            }
             return this.crudService.reservedUpdate(crudUpdateOneRequest);
         };
     }
 
     protected delete<T>(controllerMethodName: string) {
+        const serviceMethod = this.crudOptions.routes?.[Method.DELETE]?.serviceMethod;
         this.targetPrototype[controllerMethodName] = function reservedDelete(crudDeleteOneRequest: CrudDeleteOneRequest<T>) {
+            if (serviceMethod && this.crudService[serviceMethod] && typeof this.crudService[serviceMethod] === 'function') {
+                return this.crudService[serviceMethod](crudDeleteOneRequest);
+            }
             return this.crudService.reservedDelete(crudDeleteOneRequest);
         };
     }
 
     protected recover<T>(controllerMethodName: string) {
+        const serviceMethod = this.crudOptions.routes?.[Method.RECOVER]?.serviceMethod;
         this.targetPrototype[controllerMethodName] = function reservedRecover(crudRecoverRequest: CrudRecoverRequest<T>) {
+            if (serviceMethod && this.crudService[serviceMethod] && typeof this.crudService[serviceMethod] === 'function') {
+                return this.crudService[serviceMethod](crudRecoverRequest);
+            }
             return this.crudService.reservedRecover(crudRecoverRequest);
         };
     }

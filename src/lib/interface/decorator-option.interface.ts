@@ -25,6 +25,11 @@ interface RouteBaseOption {
          */
         response?: Type<unknown>;
     };
+    /**
+     * Configure the service's method will be executed in controller's logic.
+     * If omitted or set to non-existed method, default method will be used.
+     */
+    serviceMethod?: string;
 }
 
 export interface PrimaryKey {

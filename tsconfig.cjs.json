@@ -2,8 +2,9 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "rootDir": "src",
-        "declaration": true,
         "types": ["node"],
+        "outDir": "dist/cjs",
+        "module": "CommonJS",
         "target": "ES2015"
     },
     "exclude": ["jest.config.ts", "jest.setup.ts", "spec", "**/*.spec.ts", "**/*.test.ts"]

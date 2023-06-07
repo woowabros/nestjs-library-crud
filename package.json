@@ -43,7 +43,7 @@
     "scripts": {
         "prepare": "husky install",
         "precommit": "lint-staged",
-        "type-check": "tsc -p tsconfig.lib.json --noEmit && tsc -p tsconfig.spec.json",
+        "type-check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.spec.json",
         "format-check": "prettier --check --ignore-path .gitignore \"**/*.+(ts|json|js)\"",
         "format": "prettier --write --ignore-path .gitignore \"**/*.+(ts|json|js)\"",
         "format:all": "prettier -w -l .",

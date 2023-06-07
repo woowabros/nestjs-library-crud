@@ -1,0 +1,11 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "src",
+        "types": ["node"],
+        "outDir": "dist/mjs",
+        "module": "esnext",
+        "target": "esnext"
+    },
+    "exclude": ["jest.config.ts", "jest.setup.ts", "spec", "**/*.spec.ts", "**/*.test.ts"]
+}

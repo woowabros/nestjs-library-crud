@@ -1,5 +1,6 @@
 {
     "name": "@nestjs-library/crud",
+    "type": "module",
     "version": "0.4.5",
     "description": "Automatically generate CRUD Rest API based on NestJS and TypeOrm",
     "homepage": "https://github.com/woowabros/nestjs-library-crud",
@@ -7,8 +8,20 @@
         "type": "git",
         "url": "https://github.com/woowabros/nestjs-library-crud"
     },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "dist/cjs/index.js",
+    "module": "dist/mjs/index.js",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/mjs/index.d.ts",
+                "default": "./dist/mjs/index.js"
+            },
+            "require": {
+                "types": "./dist/cjs/index.d.ts",
+                "default": "./dist/cjs/index.js"
+            }
+        }
+    },
     "engines": {},
     "license": "MIT",
     "keywords": [
@@ -39,7 +52,7 @@
         "docker-compose-down:test": "docker-compose -f docker-compose.test.yml --env-file .env.test down",
         "test": "jest --runInBand --forceExit",
         "test:ci": "yarn docker-compose-up:test && yarn test && yarn docker-compose-down:test",
-        "build": "tsc -p tsconfig.lib.json",
+        "build": "rm -rf dist/* && tsc -p tsconfig.cjs.json && tsc -p tsconfig.mjs.json",
         "release": "release-it"
     },
     "config": {

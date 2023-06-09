@@ -10,6 +10,7 @@ import {
     ROUTE_ARGS_METADATA,
 } from '@nestjs/common/constants';
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
+import _ from 'lodash';
 import { BaseEntity, getMetadataArgsStorage } from 'typeorm';
 import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 
@@ -176,7 +177,11 @@ export class CrudRouteFactory {
         Reflect.defineMetadata(
             INTERCEPTORS_METADATA,
             [
-                ...(this.crudOptions.routes?.[crudMethod]?.interceptors ?? []),
+                ...(this.crudOptions.routes?.[crudMethod]?.interceptors ?? []).map((interceptor) =>
+                    _.isFunction(interceptor) && !interceptor.toString().startsWith('class ')
+                        ? interceptor(this.crudOptions, factoryOption)
+                        : interceptor,
+                ),
                 isOverride ? undefined : CRUD_POLICY[crudMethod].interceptor(this.crudOptions, factoryOption),
             ].filter(Boolean),
             targetMethod,

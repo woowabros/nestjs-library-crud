@@ -1,7 +1,7 @@
 import { NestInterceptor, Type } from '@nestjs/common';
 import { BaseEntity, ColumnType } from 'typeorm';
 
-import { Method, Sort, PaginationType, Author } from '.';
+import { Method, Sort, PaginationType, Author, FactoryOption } from '.';
 
 interface RouteBaseOption {
     /**
@@ -11,7 +11,7 @@ interface RouteBaseOption {
     /**
      * An array of interceptors to apply to the route handler
      */
-    interceptors?: Array<Type<NestInterceptor>>;
+    interceptors?: Array<Type<NestInterceptor> | ((crudOptions: CrudOptions, factoryOption: FactoryOption) => Type<NestInterceptor>)>;
     /**
      * Configures the Swagger documentation for the route
      */

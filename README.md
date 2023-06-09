@@ -13,17 +13,17 @@
     </a>
     <a href="https://www.npmjs.com/package/@nestjs-library/crud">
         <img src="https://img.shields.io/npm/dw/@nestjs-library/crud">
-    </a>        
+    </a>
 </p>
 
 <p align="center">
     <a href="./README.md">
         <span>English<span>
-    </a> 
+    </a>
     <span>|</span>
     <a href="./README.ko.md">
         <span>한국어<span>
-    </a> 
+    </a>
 </p>
 
 This is a Typescript library that provides a NestJS decorator which automatically generates CRUD routes of a controller for given TypeORM entity. The decorator generates endpoints for not only create, retrieve one, retrieve many, update, delete but also upsert, recover and search operations for the entity.
@@ -158,7 +158,7 @@ import { NestInterceptor, Type } from '@nestjs/common';
 
 interface RouteBaseOption {
     decorators?: Array<PropertyDecorator | MethodDecorator>;
-    interceptors?: Array<Type<NestInterceptor>>;
+    interceptors?: Array<Type<NestInterceptor> | ((crudOptions: CrudOptions, factoryOption: FactoryOption) => Type<NestInterceptor>)>;
     swagger?: {
         hide?: boolean;
         response?: Type<unknown>;

@@ -6472,9 +6472,9 @@ mute-stream@1.0.0:
   integrity sha512-avsJQhyd+680gKXyG/sQc0nXaC6rBkPOfyHYcFb9+hdkqQkR9bdnkJ0AMZhke0oesPqIO+mFFJ+IdBc7mst4IA==
 
 mysql2@^3.1.2:
-  version "3.3.4"
-  resolved "https://registry.yarnpkg.com/mysql2/-/mysql2-3.3.4.tgz#b4168cac5e4dafb398734ff52ea008f1cea6e9f5"
-  integrity sha512-66K70s503WCweXmC8rKZ6oFpo+1qd96bx1QloaoYcSABwxvDzjGlqAHSxiDoXgBIv6YSTSZd6lvgWteYhBz7WA==
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/mysql2/-/mysql2-3.3.5.tgz#1c26f279516f3aa784f6ec9c7ec50ab0c55c6039"
+  integrity sha512-ZTQGAzxGeaX1PyeSiZFCgQ34uiXguaEpn3aTFN9Enm9JDnbwWo+4/CJnDdQZ3n0NaMeysi8vwtW/jNUb9VqVDw==
   dependencies:
     denque "^2.1.0"
     generate-function "^2.3.1"

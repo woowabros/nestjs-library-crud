@@ -1,6 +1,5 @@
 {
     "name": "@nestjs-library/crud",
-    "type": "module",
     "version": "0.4.5",
     "description": "Automatically generate CRUD Rest API based on NestJS and TypeOrm",
     "homepage": "https://github.com/woowabros/nestjs-library-crud",

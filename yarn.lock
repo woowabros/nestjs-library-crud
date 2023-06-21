@@ -1567,10 +1567,10 @@
     path-to-regexp "3.2.0"
     tslib "2.5.3"
 
-"@nestjs/mapped-types@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@nestjs/mapped-types/-/mapped-types-2.0.0.tgz#1d65f4c1a16af30080153e9c05b86e2f5d56cf65"
-  integrity sha512-JyIOY1OE4x2t8Z2ImWLQJnHVqLCBHJZXm6RqcOG3+4rIsqMQxm5smHbb7H5C6tLAdDcRYd/fG2gYK1J1GiqKLw==
+"@nestjs/mapped-types@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@nestjs/mapped-types/-/mapped-types-2.0.1.tgz#0209dd900ca42b5e78a24add08148f1ec8b8fa82"
+  integrity sha512-wPk94x5GmAdrfmrfsmUJkLh0eQbHOvZX1shDRiN23vQGVsw+wSH03ot+FxS7PwqQcZ53Vb5TCtO0ck9Jd1bStg==
 
 "@nestjs/platform-express@^9.4.0":
   version "9.4.3"
@@ -1584,11 +1584,11 @@
     tslib "2.5.3"
 
 "@nestjs/swagger@^7.0.0":
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/@nestjs/swagger/-/swagger-7.0.2.tgz#825947cc350e1708015102e16165cf537200c756"
-  integrity sha512-aNwDUT/1Dpbm5Ze+YGdPOJx2+c0YQoYPc9nr+3GLr9AFiC0M8AMAJBZXEIxeS44tyvNx/EVLPVg139P4sxO3yA==
+  version "7.0.3"
+  resolved "https://registry.yarnpkg.com/@nestjs/swagger/-/swagger-7.0.3.tgz#3840ee0c36a81c2af220025f9b670c3ed704e75a"
+  integrity sha512-rrWjWiKacBok0FQJOzdjRacpibrjDm751EpO0NqhEiAt51NtyA51DomcqtLHY4N7x3xgRNUyX1P9bXgbp/Xskg==
   dependencies:
-    "@nestjs/mapped-types" "2.0.0"
+    "@nestjs/mapped-types" "2.0.1"
     js-yaml "4.1.0"
     lodash "4.17.21"
     path-to-regexp "3.2.0"

@@ -1033,7 +1033,7 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@commitlint/cli@^17.4.2", "@commitlint/cli@^17.6.5":
+"@commitlint/cli@^17.4.2", "@commitlint/cli@^17.6.6":
   version "17.6.6"
   resolved "https://registry.yarnpkg.com/@commitlint/cli/-/cli-17.6.6.tgz#416da9c45901323e5bf931aa1eac5995a3aa251c"
   integrity sha512-sTKpr2i/Fjs9OmhU+beBxjPavpnLSqZaO6CzwKVq2Tc4UYVTMFgpKOslDhUBVlfAUBfjVO8ParxC/MXkIOevEA==
@@ -3123,11 +3123,11 @@ commitizen@^4.0.3, commitizen@^4.3.0:
     strip-json-comments "3.1.1"
 
 commitlint@^17.4.2:
-  version "17.6.5"
-  resolved "https://registry.yarnpkg.com/commitlint/-/commitlint-17.6.5.tgz#ecafcc2b7c823bff1a1ad7026d9dd5c0c7989c99"
-  integrity sha512-YRpFI8ABdvh0TbR6T72HaJFDn0TQdMVGgKnv6/GFkTdYTqzGo3ItTKn2bh/sxSVy/5ziOrVVAXtCy3PEq5Vs8w==
+  version "17.6.6"
+  resolved "https://registry.yarnpkg.com/commitlint/-/commitlint-17.6.6.tgz#39535c407c515286900aad110d62798d507c3aa0"
+  integrity sha512-Q5M+w1nqGQSEkEW43EtPNrU+uKL2pENrJl6QigFupZ0v4AfvI8k5Q6uFgWmxlEOrSkgCYaN436Q9c9pydqyJqg==
   dependencies:
-    "@commitlint/cli" "^17.6.5"
+    "@commitlint/cli" "^17.6.6"
     "@commitlint/types" "^17.4.4"
 
 commondir@^1.0.1:

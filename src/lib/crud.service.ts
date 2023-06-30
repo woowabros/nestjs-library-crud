@@ -2,7 +2,6 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
 import { BaseEntity, DeepPartial, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
 
-import { CrudAbstractService } from './abstract/crud.abstract.service';
 import { PaginationCursorDto } from './dto/pagination-cursor.dto';
 import { PaginationOffsetDto } from './dto/pagination-offset.dto';
 import {
@@ -19,22 +18,21 @@ import {
     isCrudCreateManyRequest,
     CrudCreateOneRequest,
     CrudCreateManyRequest,
+    CursorPaginationResponse,
 } from './interface';
 import { PaginationHelper } from './provider/pagination.helper';
 import { TypeOrmQueryBuilderHelper } from './provider/typeorm-query-builder.helper';
 
-export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
+export class CrudService<T extends BaseEntity> {
     private primaryKey: string[];
     private relations: string[];
 
     constructor(public readonly repository: Repository<T>) {
-        super();
-
         this.primaryKey = this.repository.metadata.primaryColumns?.map((columnMetadata) => columnMetadata.propertyName) ?? [];
         this.relations = this.repository.metadata.relations?.map((relation) => relation.propertyName);
     }
 
-    async getTotalCountByCrudSearchRequest(crudSearchRequest: CrudSearchRequest<T>): Promise<number> {
+    readonly getTotalCountByCrudSearchRequest = async (crudSearchRequest: CrudSearchRequest<T>): Promise<number> => {
         const { requestSearchDto } = crudSearchRequest;
         const where =
             Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
@@ -48,9 +46,9 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             where,
             withDeleted: requestSearchDto.withDeleted,
         });
-    }
+    };
 
-    async reservedSearch(crudSearchRequest: CrudSearchRequest<T>) {
+    readonly reservedSearch = async (crudSearchRequest: CrudSearchRequest<T>): Promise<CursorPaginationResponse<T>> => {
         const { requestSearchDto, relations } = crudSearchRequest;
         const where =
             Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
@@ -58,12 +56,12 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                       TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter, index),
                   )
                 : undefined;
-
+        const limit = requestSearchDto.take;
         const data = await this.repository.find({
             select: requestSearchDto.select,
             where,
             withDeleted: requestSearchDto.withDeleted,
-            take: requestSearchDto.take,
+            take: limit,
             order: requestSearchDto.order as FindOptionsOrder<T>,
             relations: this.getRelation(relations),
         });
@@ -71,23 +69,23 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
 
         return {
             data,
-            metadata: { nextCursor, query: PaginationHelper.serialize(requestSearchDto ?? {}) },
+            metadata: { nextCursor, limit: limit!, query: PaginationHelper.serialize(requestSearchDto ?? {}) },
         };
-    }
+    };
 
-    async reservedReadMany(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {
+    readonly reservedReadMany = async (crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> => {
         return crudReadManyRequest.pagination.type === PaginationType.OFFSET
             ? this.paginateOffset(crudReadManyRequest)
             : this.paginateCursor(crudReadManyRequest);
-    }
+    };
 
-    async getTotalCountByCrudReadManyRequest(crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> {
+    readonly getTotalCountByCrudReadManyRequest = async (crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> => {
         return crudReadManyRequest.pagination.type === PaginationType.OFFSET
             ? this.paginateOffsetTotalCount(crudReadManyRequest)
             : this.paginateCursorTotalCount(crudReadManyRequest);
-    }
+    };
 
-    async reservedReadOne(crudReadOneRequest: CrudReadOneRequest<T>): Promise<T> {
+    readonly reservedReadOne = async (crudReadOneRequest: CrudReadOneRequest<T>): Promise<T> => {
         return this.repository
             .findOne({
                 select: crudReadOneRequest.fields as unknown as FindOptionsSelect<T>,
@@ -101,11 +99,9 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 }
                 return entity;
             });
-    }
+    };
 
-    reservedCreate(req: CrudCreateOneRequest<T>): Promise<T>;
-    reservedCreate(req: CrudCreateManyRequest<T>): Promise<T[]>;
-    async reservedCreate(crudCreateRequest: CrudCreateOneRequest<T> | CrudCreateManyRequest<T>): Promise<T | T[]> {
+    readonly reservedCreate = async (crudCreateRequest: CrudCreateOneRequest<T> | CrudCreateManyRequest<T>): Promise<T | T[]> => {
         const entities = this.repository.create(
             isCrudCreateManyRequest<T>(crudCreateRequest) ? crudCreateRequest.body : [crudCreateRequest.body],
         );
@@ -124,9 +120,9 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
             .catch((error) => {
                 throw new ConflictException(error);
             });
-    }
+    };
 
-    async reservedUpsert(crudUpsertRequest: CrudUpsertRequest<T>): Promise<T> {
+    readonly reservedUpsert = async (crudUpsertRequest: CrudUpsertRequest<T>): Promise<T> => {
         return this.repository
             .findOne({
                 where: crudUpsertRequest.params as unknown as FindOptionsWhere<T>,
@@ -144,9 +140,9 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
 
                 return this.repository.save(_.assign(upsertEntity, crudUpsertRequest.body));
             });
-    }
+    };
 
-    async reservedUpdate(crudUpdateOneRequest: CrudUpdateOneRequest<T>): Promise<T> {
+    readonly reservedUpdate = async (crudUpdateOneRequest: CrudUpdateOneRequest<T>): Promise<T> => {
         return this.repository
             .findOne({
                 where: crudUpdateOneRequest.params as unknown as FindOptionsWhere<T>,
@@ -162,9 +158,9 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
 
                 return this.repository.save(_.assign(entity, crudUpdateOneRequest.body));
             });
-    }
+    };
 
-    async reservedDelete(crudDeleteOneRequest: CrudDeleteOneRequest<T>): Promise<T> {
+    readonly reservedDelete = async (crudDeleteOneRequest: CrudDeleteOneRequest<T>): Promise<T> => {
         if (this.primaryKey.length === 0) {
             throw new ConflictException('cannot found primary key from entity');
         }
@@ -186,9 +182,9 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 await (crudDeleteOneRequest.softDeleted ? entity.softRemove() : entity.remove());
                 return entity;
             });
-    }
+    };
 
-    async reservedRecover(crudRecoverRequest: CrudRecoverRequest<T>): Promise<T> {
+    readonly reservedRecover = async (crudRecoverRequest: CrudRecoverRequest<T>): Promise<T> => {
         return this.repository
             .findOne({
                 where: crudRecoverRequest.params as unknown as FindOptionsWhere<T>,
@@ -201,7 +197,7 @@ export class CrudService<T extends BaseEntity> extends CrudAbstractService<T> {
                 await this.repository.recover(entity);
                 return entity;
             });
-    }
+    };
 
     private async paginateCursorTotalCount(crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> {
         if (crudReadManyRequest.pagination.type !== PaginationType.CURSOR) {

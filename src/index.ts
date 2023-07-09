@@ -4,5 +4,4 @@ export * from './lib/interface';
 export * from './lib/abstract';
 export * from './lib/interceptor';
 export * from './lib/provider';
-export * from './lib/override.decorator';
 export * from './lib/constants';

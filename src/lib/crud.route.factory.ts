@@ -13,7 +13,7 @@ import { DECORATORS } from '@nestjs/swagger/dist/constants';
 import { BaseEntity, getMetadataArgsStorage } from 'typeorm';
 import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 
-import { CRUD_ROUTE_ARGS, OVERRIDE_METHOD_METADATA } from './constants';
+import { CRUD_ROUTE_ARGS } from './constants';
 import { CRUD_POLICY } from './crud.policy';
 import { RequestSearchDto } from './dto/request-search.dto';
 import { CreateRequestDto, getPropertyNamesFromMetadata } from './dto/request.dto';
@@ -45,7 +45,6 @@ export class CrudRouteFactory {
     } = {
         tableName: '',
     };
-    private overrideMap: Map<string, string>;
     private paginationType: PaginationType;
 
     constructor(protected target: any, protected crudOptions: CrudOptions) {
@@ -58,7 +57,6 @@ export class CrudRouteFactory {
         }
         this.paginationType = paginationType;
 
-        this.overrideMap = this.getOverrideMap();
         this.crudLogger = new CrudLogger(crudOptions.logging);
     }
 
@@ -158,8 +156,7 @@ export class CrudRouteFactory {
             }
         }
 
-        const isOverride = this.overrideMap.has(crudMethod);
-        const methodName = isOverride ? this.overrideMap.get(crudMethod) : this.writeMethodOnController(crudMethod);
+        const methodName = this.writeMethodOnController(crudMethod);
         if (!methodName) {
             throw new Error(`Required Method Name of ${crudMethod}`);
         }
@@ -177,7 +174,7 @@ export class CrudRouteFactory {
             INTERCEPTORS_METADATA,
             [
                 ...(this.crudOptions.routes?.[crudMethod]?.interceptors ?? []),
-                isOverride ? undefined : CRUD_POLICY[crudMethod].interceptor(this.crudOptions, factoryOption),
+                CRUD_POLICY[crudMethod].interceptor(this.crudOptions, factoryOption),
             ].filter(Boolean),
             targetMethod,
         );
@@ -299,24 +296,6 @@ export class CrudRouteFactory {
             });
         }
         Reflect.defineMetadata(DECORATORS.API_PARAMETERS, parameterDecorators, target);
-    }
-
-    private getOverrideMap(): Map<string, string> {
-        const overrideMap = new Map<string, string>();
-
-        for (const name of Object.getOwnPropertyNames(this.targetPrototype)) {
-            const overrodeCrudMethodName: keyof typeof Method = Reflect.getMetadata(OVERRIDE_METHOD_METADATA, this.targetPrototype[name]);
-            if (!overrodeCrudMethodName) {
-                continue;
-            }
-            const overrodeCrudMethod = Method[overrodeCrudMethodName];
-            if (overrideMap.has(overrodeCrudMethod)) {
-                throw new Error(`duplicated ${overrodeCrudMethodName} method on ${name}`);
-            }
-            overrideMap.set(overrodeCrudMethod, name);
-        }
-
-        return overrideMap;
     }
 
     private enabledMethod(crudMethod: Method): boolean {

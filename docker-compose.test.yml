@@ -26,7 +26,6 @@ services:
             - '5432:5432'
         volumes:
             - postgresql_data:/var/lib/postgresql/data
-
 volumes:
     mysql_data:
         driver: local

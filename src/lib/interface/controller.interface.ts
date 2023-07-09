@@ -1,7 +1,7 @@
 import { BaseEntity } from 'typeorm';
 
-import { CrudAbstractService } from '../abstract/crud.abstract.service';
+import { CrudService } from '../crud.service';
 
 export interface CrudController<T extends BaseEntity> {
-    crudService: CrudAbstractService<T>;
+    crudService: CrudService<T>;
 }

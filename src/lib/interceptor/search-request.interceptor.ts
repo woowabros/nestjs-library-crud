@@ -103,7 +103,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 (queryFilter, [key, operand]) => ({
                     ...queryFilter,
                     [key]: {
-                        operator: _.get(preCondition.order, 'key', CRUD_POLICY[method].default?.sort) === Sort.DESC ? '<' : '>',
+                        operator: _.get(preCondition.order, key, CRUD_POLICY[method].default?.sort) === Sort.DESC ? '<' : '>',
                         operand,
                     },
                 }),

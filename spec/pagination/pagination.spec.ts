@@ -4,13 +4,14 @@ import _ from 'lodash';
 import request from 'supertest';
 
 import { PaginationModule } from './pagination.module';
-import { PaginationType, Sort } from '../../src';
+import { PaginationType } from '../../src';
 import { BaseService } from '../base/base.service';
 import { TestHelper } from '../test.helper';
 
 describe('Pagination', () => {
     let app: INestApplication;
     let service: BaseService;
+    const totalCount = 100;
     const defaultLimit = 20;
 
     beforeEach(async () => {
@@ -25,7 +26,9 @@ describe('Pagination', () => {
         app = moduleFixture.createNestApplication();
 
         service = moduleFixture.get<BaseService>(BaseService);
-        await Promise.all(_.range(100).map((number) => service.repository.save(service.repository.create({ name: `name-${number}` }))));
+        await Promise.all(
+            _.range(totalCount).map((number) => service.repository.save(service.repository.create({ name: `name-${number}` }))),
+        );
         await app.init();
     });
 
@@ -61,6 +64,7 @@ describe('Pagination', () => {
             nextCursor: expect.any(String),
             limit: defaultLimit,
             query: expect.any(String),
+            total: 1,
         });
         expect(offsetResponseBody.metadata).toEqual({ page: 1, pages: 1, total: 1, offset: 1, query: expect.any(String) });
 
@@ -96,6 +100,7 @@ describe('Pagination', () => {
                 nextCursor: expect.any(String),
                 limit: defaultLimit,
                 query: expect.any(String),
+                total: totalCount,
             });
         });
 
@@ -117,6 +122,7 @@ describe('Pagination', () => {
                 nextCursor: expect.any(String),
                 limit: defaultLimit,
                 query: expect.any(String),
+                total: totalCount - defaultLimit,
             });
 
             const lastOneOfFirstResponse = firstResponseBody.data.pop();
@@ -144,6 +150,7 @@ describe('Pagination', () => {
                 nextCursor: expect.any(String),
                 limit: defaultLimit,
                 query: expect.any(String),
+                total: totalCount,
             });
 
             const { body: nextResponseBody } = await request(app.getHttpServer())
@@ -159,6 +166,7 @@ describe('Pagination', () => {
                 nextCursor: expect.any(String),
                 limit: defaultLimit,
                 query: responseBody.metadata.query,
+                total: totalCount - defaultLimit,
             });
             expect(nextResponseBody.metadata.nextCursor).not.toEqual(responseBody.metadata.nextCursor);
 
@@ -183,24 +191,20 @@ describe('Pagination', () => {
         });
 
         it('should be calculate the number of entities', async () => {
-            expect(
-                await service.getTotalCountByCrudReadManyRequest({
-                    pagination: { type: PaginationType.CURSOR },
-                    numberOfTake: 15,
-                    sort: Sort.ASC,
-                    primaryKeys: [],
-                }),
-            ).toEqual(100);
+            const {
+                body: { metadata: metadataAll },
+            } = await request(app.getHttpServer()).get(`/${PaginationType.CURSOR}`).query({}).expect(HttpStatus.OK);
+            expect(metadataAll.total).toEqual(totalCount);
 
-            expect(
-                await service.getTotalCountByCrudReadManyRequest({
-                    pagination: { type: PaginationType.CURSOR },
-                    numberOfTake: 15,
-                    sort: Sort.ASC,
-                    primaryKeys: [],
-                    query: { name: 'name-1' },
-                }),
-            ).toEqual(1);
+            const {
+                body: { metadata },
+            } = await request(app.getHttpServer())
+                .get(`/${PaginationType.CURSOR}`)
+                .query({
+                    name: 'name-1',
+                })
+                .expect(HttpStatus.OK);
+            expect(metadata.total).toEqual(1);
         });
     });
 
@@ -320,24 +324,15 @@ describe('Pagination', () => {
         });
 
         it('should be calculate the number of entities', async () => {
-            expect(
-                await service.getTotalCountByCrudReadManyRequest({
-                    pagination: { type: PaginationType.OFFSET },
-                    numberOfTake: 15,
-                    sort: Sort.ASC,
-                    primaryKeys: [],
-                }),
-            ).toEqual(100);
+            const {
+                body: { metadata: metadataAll },
+            } = await request(app.getHttpServer()).get(`/${PaginationType.OFFSET}`).query({ limit: 15 }).expect(HttpStatus.OK);
+            expect(metadataAll.total).toEqual(totalCount);
 
-            expect(
-                await service.getTotalCountByCrudReadManyRequest({
-                    pagination: { type: PaginationType.OFFSET },
-                    numberOfTake: 15,
-                    sort: Sort.ASC,
-                    primaryKeys: [],
-                    query: { name: 'name-1' },
-                }),
-            ).toEqual(1);
+            const {
+                body: { metadata },
+            } = await request(app.getHttpServer()).get(`/${PaginationType.OFFSET}`).query({ name: 'name-1' }).expect(HttpStatus.OK);
+            expect(metadata.total).toEqual(1);
         });
     });
 });

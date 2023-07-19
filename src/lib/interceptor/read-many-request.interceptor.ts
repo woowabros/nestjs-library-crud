@@ -35,7 +35,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
 
             const query = await (async () => {
                 if (
-                    (pagination.type === PaginationType.CURSOR && !_.isNil(pagination['token'])) ||
+                    (pagination.type === PaginationType.CURSOR && !_.isNil(pagination['nextCursor'])) ||
                     (pagination.type === PaginationType.OFFSET && (!_.isNil(pagination['offset']) || !_.isNil(pagination['limit'])))
                 ) {
                     return;
@@ -81,6 +81,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             if (_.isNil(query)) {
                 return;
             }
+
             const transformed = plainToInstance(crudOptions.entity, query, { groups: [GROUP.READ_MANY] });
             const errorList = await validate(transformed, {
                 groups: [GROUP.READ_MANY],

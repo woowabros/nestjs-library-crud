@@ -37,7 +37,7 @@ describe('ReadManyRequestInterceptor', () => {
         const interceptor = new Interceptor();
 
         expect(interceptor.getPaginationRequest(PaginationType.CURSOR, { key: 'value', nextCursor: 'token' })).toEqual({
-            token: 'token',
+            nextCursor: 'token',
             type: 'cursor',
         });
     });

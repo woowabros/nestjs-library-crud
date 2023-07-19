@@ -2,5 +2,5 @@ export const capitalizeFirstLetter = (raw: string) => `${raw.charAt(0).toUpperCa
 
 export const isSomeEnum =
     <TEnum extends Record<string, unknown>>(enumType: TEnum) =>
-    (token: unknown): token is TEnum[keyof TEnum] =>
-        Object.values(enumType).includes(token as TEnum[keyof TEnum]);
+    (nextCursor: unknown): nextCursor is TEnum[keyof TEnum] =>
+        Object.values(enumType).includes(nextCursor as TEnum[keyof TEnum]);

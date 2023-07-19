@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { INestApplication, Logger } from '@nestjs/common';
+import { ConsoleLogger, INestApplication } from '@nestjs/common';
 import { Controller, Injectable, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
@@ -13,7 +13,8 @@ import { CrudService } from '../../src/lib/crud.service';
 import { CrudController } from '../../src/lib/interface';
 import { TestHelper } from '../test.helper';
 
-const logger = new Logger();
+const logger = new ConsoleLogger();
+logger.setLogLevels(['error']);
 @Entity('test')
 class TestEntity extends BaseEntity {
     @PrimaryColumn()

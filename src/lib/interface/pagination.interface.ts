@@ -26,6 +26,7 @@ export interface CursorPaginationResponse<T> extends PaginationAbstractResponse<
     metadata: {
         query: string;
         limit: number;
+        total: number;
         nextCursor: string;
     };
 }

@@ -5,12 +5,12 @@ export class PaginationHelper {
         return Buffer.from(JSON.stringify(entity)).toString(encoding);
     }
 
-    static deserialize<T>(token?: string): T {
-        if (!token) {
+    static deserialize<T>(nextCursor?: string): T {
+        if (!nextCursor) {
             return {} as T;
         }
         try {
-            return JSON.parse(Buffer.from(token, encoding).toString());
+            return JSON.parse(Buffer.from(nextCursor, encoding).toString());
         } catch {
             return {} as T;
         }

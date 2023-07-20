@@ -23,6 +23,22 @@ interface CrudMethodPolicy {
     };
     default?: Record<string, unknown>;
 }
+
+const metaProperties = (paginationType: PaginationType) =>
+    paginationType === PaginationType.OFFSET
+        ? {
+              page: { type: 'number', example: 1 },
+              pages: { type: 'number', example: 1 },
+              total: { type: 'number', example: 100 },
+              offset: { type: 'number', example: 20 },
+              query: { type: 'string', example: 'queryToken' },
+          }
+        : {
+              total: { type: 'number', example: 100 },
+              limit: { type: 'number', example: 20 },
+              query: { type: 'string', example: 'queryToken' },
+              nextCursor: { type: 'string', example: 'cursorToken' },
+          };
 /**
  * Basic Policy by method
  */
@@ -110,20 +126,6 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 description: `Fetch multiple entities in '${capitalizeFirstLetter(tableName)}' Table`,
             }),
             responseMetadata: ({ type, tableName, paginationType }) => {
-                const metaProperties =
-                    paginationType === PaginationType.OFFSET
-                        ? {
-                              page: { type: 'number', example: 1 },
-                              pages: { type: 'number', example: 1 },
-                              total: { type: 'number', example: 100 },
-                              offset: { type: 'number', example: 20 },
-                              query: { type: 'string', example: 'queryToken' },
-                          }
-                        : {
-                              limit: { type: 'number', example: 20 },
-                              query: { type: 'string', example: 'queryToken' },
-                              nextCursor: { type: 'string', example: 'cursorToken' },
-                          };
                 return {
                     [HttpStatus.OK]: {
                         description: `Fetch many entities from ${capitalizeFirstLetter(tableName)} table`,
@@ -139,7 +141,7 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                                         },
                                         metadata: {
                                             type: 'object',
-                                            properties: metaProperties,
+                                            properties: metaProperties(paginationType),
                                         },
                                     },
                                 },

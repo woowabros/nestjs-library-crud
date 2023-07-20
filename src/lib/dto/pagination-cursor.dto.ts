@@ -9,7 +9,7 @@ export class PaginationCursorDto implements PaginationRequestAbstract {
     @Expose({ name: 'nextCursor' })
     @IsString()
     @IsOptional()
-    token?: string;
+    nextCursor?: string;
 
     @Expose({ name: 'query' })
     @IsString()

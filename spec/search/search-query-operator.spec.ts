@@ -69,8 +69,7 @@ describe('Search Query Operator', () => {
 
             expect(metadata.nextCursor).toBeDefined();
             expect(metadata.query).toBeDefined();
-
-            expect(await service.getTotalCountByCrudSearchRequest({ requestSearchDto })).toEqual(10);
+            expect(metadata.total).toEqual(10);
         }
     });
 

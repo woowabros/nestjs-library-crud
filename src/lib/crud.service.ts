@@ -1,6 +1,16 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
-import { BaseEntity, DeepPartial, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
+import {
+    BaseEntity,
+    DeepPartial,
+    FindManyOptions,
+    FindOptionsOrder,
+    FindOptionsSelect,
+    FindOptionsWhere,
+    LessThan,
+    MoreThan,
+    Repository,
+} from 'typeorm';
 
 import { PaginationCursorDto } from './dto/pagination-cursor.dto';
 import { PaginationOffsetDto } from './dto/pagination-offset.dto';
@@ -32,44 +42,36 @@ export class CrudService<T extends BaseEntity> {
         this.relations = this.repository.metadata.relations?.map((relation) => relation.propertyName);
     }
 
-    readonly getTotalCountByCrudSearchRequest = async (crudSearchRequest: CrudSearchRequest<T>): Promise<number> => {
-        const { requestSearchDto } = crudSearchRequest;
-        const where =
-            Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
-                ? requestSearchDto.where.map((queryFilter, index) =>
-                      TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter, index),
-                  )
-                : undefined;
-
-        return this.repository.count({
-            select: requestSearchDto.select,
-            where,
-            withDeleted: requestSearchDto.withDeleted,
-        });
-    };
-
     readonly reservedSearch = async (crudSearchRequest: CrudSearchRequest<T>): Promise<CursorPaginationResponse<T>> => {
         const { requestSearchDto, relations } = crudSearchRequest;
-        const where =
-            Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
-                ? requestSearchDto.where.map((queryFilter, index) =>
-                      TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter, index),
-                  )
-                : undefined;
+
         const limit = requestSearchDto.take;
-        const data = await this.repository.find({
+        const findManyOptions: FindManyOptions<T> = {
             select: requestSearchDto.select,
-            where,
+            where:
+                Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
+                    ? requestSearchDto.where.map((queryFilter, index) =>
+                          TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter, index),
+                      )
+                    : undefined,
             withDeleted: requestSearchDto.withDeleted,
             take: limit,
             order: requestSearchDto.order as FindOptionsOrder<T>,
             relations: this.getRelation(relations),
-        });
+        };
+        const [data, total] = await Promise.all([
+            this.repository.find({ ...findManyOptions }),
+            this.repository.count({
+                select: findManyOptions.select,
+                where: findManyOptions.where,
+                withDeleted: findManyOptions.withDeleted,
+            }),
+        ]);
         const nextCursor = PaginationHelper.serialize(_.pick(data.at(-1), this.primaryKey));
 
         return {
             data,
-            metadata: { nextCursor, limit: limit!, query: PaginationHelper.serialize(requestSearchDto ?? {}) },
+            metadata: { nextCursor, limit: limit!, total, query: PaginationHelper.serialize(requestSearchDto ?? {}) },
         };
     };
 
@@ -77,12 +79,6 @@ export class CrudService<T extends BaseEntity> {
         return crudReadManyRequest.pagination.type === PaginationType.OFFSET
             ? this.paginateOffset(crudReadManyRequest)
             : this.paginateCursor(crudReadManyRequest);
-    };
-
-    readonly getTotalCountByCrudReadManyRequest = async (crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> => {
-        return crudReadManyRequest.pagination.type === PaginationType.OFFSET
-            ? this.paginateOffsetTotalCount(crudReadManyRequest)
-            : this.paginateCursorTotalCount(crudReadManyRequest);
     };
 
     readonly reservedReadOne = async (crudReadOneRequest: CrudReadOneRequest<T>): Promise<T> => {
@@ -199,29 +195,15 @@ export class CrudService<T extends BaseEntity> {
             });
     };
 
-    private async paginateCursorTotalCount(crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> {
-        if (crudReadManyRequest.pagination.type !== PaginationType.CURSOR) {
-            throw new TypeError('use only cursor Pagination Type');
-        }
-        const pagination: PaginationCursorDto = crudReadManyRequest.pagination;
-        return this.repository.count({
-            where: pagination.token
-                ? this.paginateCursorWhereByToken(pagination, crudReadManyRequest.sort)
-                : (crudReadManyRequest.query as FindOptionsWhere<T>),
-            withDeleted: crudReadManyRequest.softDeleted,
-        });
-    }
-
     private async paginateCursor(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {
         if (crudReadManyRequest.pagination.type !== PaginationType.CURSOR) {
             throw new TypeError('use only cursor Pagination Type');
         }
         const pagination: PaginationCursorDto = crudReadManyRequest.pagination;
         const limit = crudReadManyRequest.numberOfTake;
-
-        const entities = await this.repository.find({
-            where: pagination.token
-                ? this.paginateCursorWhereByToken(pagination, crudReadManyRequest.sort)
+        const findOptions: FindManyOptions<T> = {
+            where: pagination.nextCursor
+                ? this.paginateCursorWhereByNextCursor(pagination, crudReadManyRequest.sort)
                 : (crudReadManyRequest.query as FindOptionsWhere<T>),
             withDeleted: crudReadManyRequest.softDeleted,
             take: limit,
@@ -230,7 +212,12 @@ export class CrudService<T extends BaseEntity> {
                 {},
             ),
             relations: this.getRelation(crudReadManyRequest.relations),
-        });
+        };
+
+        const [entities, total] = await Promise.all([
+            this.repository.find({ ...findOptions }),
+            this.repository.count({ where: findOptions.where, withDeleted: findOptions.withDeleted }),
+        ]);
         const nextCursor = PaginationHelper.serialize(
             _.pick(
                 entities.at(-1),
@@ -240,26 +227,24 @@ export class CrudService<T extends BaseEntity> {
 
         return {
             data: entities,
-            metadata: { nextCursor, limit, query: pagination.query ?? PaginationHelper.serialize(crudReadManyRequest.query ?? {}) },
+            metadata: {
+                nextCursor,
+                limit,
+                total,
+                query: pagination.query ?? PaginationHelper.serialize(crudReadManyRequest.query ?? {}),
+            },
         };
     }
 
-    private paginateCursorWhereByToken(pagination: PaginationCursorDto, sort: Sort): FindOptionsWhere<T> {
+    private paginateCursorWhereByNextCursor(pagination: PaginationCursorDto, sort: Sort): FindOptionsWhere<T> {
         const query: Record<string, unknown> = PaginationHelper.deserialize(pagination.query);
-        const lastObject: Record<string, unknown> = PaginationHelper.deserialize(pagination.token);
+        const lastObject: Record<string, unknown> = PaginationHelper.deserialize(pagination.nextCursor);
 
         const operator = sort === Sort.DESC ? LessThan : MoreThan;
         for (const [key, value] of Object.entries(lastObject)) {
             query[key] = operator(value);
         }
         return query as FindOptionsWhere<T>;
-    }
-
-    private async paginateOffsetTotalCount(crudReadManyRequest: CrudReadManyRequest<T>): Promise<number> {
-        return this.repository.count({
-            where: crudReadManyRequest.query as FindOptionsWhere<T>,
-            withDeleted: crudReadManyRequest.softDeleted,
-        });
     }
 
     private async paginateOffset(crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> {

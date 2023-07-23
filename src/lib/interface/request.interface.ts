@@ -1,6 +1,6 @@
 import { DeepPartial } from 'typeorm';
 
-import { Author, PaginationRequest, PrimaryKey, Sort } from '.';
+import { Author } from '.';
 import { RequestSearchDto } from '../dto/request-search.dto';
 
 export type CrudRequestId<T> = keyof T | Array<keyof T>;
@@ -11,15 +11,7 @@ export interface CrudRequestBase {
 
 export interface CrudReadRequestBase extends CrudRequestBase {
     softDeleted?: boolean;
-    relations?: string[];
-}
-
-export interface CrudReadManyRequest<T> extends CrudReadRequestBase {
-    query?: Partial<Record<keyof T, unknown>>;
-    sort: Sort;
-    primaryKeys: PrimaryKey[];
-    pagination: PaginationRequest;
-    numberOfTake: number;
+    relations: string[];
 }
 
 export interface CrudReadOneRequest<T> extends CrudReadRequestBase {
@@ -29,7 +21,7 @@ export interface CrudReadOneRequest<T> extends CrudReadRequestBase {
 
 export interface CrudSearchRequest<T> extends CrudRequestBase {
     requestSearchDto: RequestSearchDto<T>;
-    relations?: string[];
+    relations: string[];
 }
 
 export interface CrudCreateOneRequest<T> extends CrudRequestBase {

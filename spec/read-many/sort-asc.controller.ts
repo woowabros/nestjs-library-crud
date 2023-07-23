@@ -8,6 +8,7 @@ import { BaseService } from '../base/base.service';
 @Crud({
     entity: BaseEntity,
     routes: { readMany: { sort: Sort.ASC } },
+    logging: true,
 })
 @Controller('sort-asc')
 export class SortAscController implements CrudController<BaseEntity> {

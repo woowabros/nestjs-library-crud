@@ -30,7 +30,7 @@ describe('UpdateRequestInterceptor', () => {
 
         const Interceptor = UpdateRequestInterceptor(
             { entity: BodyDto },
-            { primaryKeys: [{ name: 'col1', type: 'string' }], logger: new CrudLogger() },
+            { primaryKeys: [{ name: 'col1', type: 'string' }], relations: [], logger: new CrudLogger() },
         );
         const interceptor = new Interceptor();
 
@@ -57,7 +57,7 @@ describe('UpdateRequestInterceptor', () => {
             @Type(() => Number)
             col3: number;
         }
-        const Interceptor = UpdateRequestInterceptor({ entity: BodyDto }, { primaryKeys: [], logger: new CrudLogger() });
+        const Interceptor = UpdateRequestInterceptor({ entity: BodyDto }, { primaryKeys: [], relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
         expect(await interceptor.validateBody({ col1: 1, col2: '2' })).toEqual({
             col1: '1',
@@ -75,7 +75,10 @@ describe('UpdateRequestInterceptor', () => {
     });
 
     it('should throw when body is null or undefined', async () => {
-        const Interceptor = UpdateRequestInterceptor({ entity: {} as typeof BaseEntity }, { primaryKeys: [], logger: new CrudLogger() });
+        const Interceptor = UpdateRequestInterceptor(
+            { entity: {} as typeof BaseEntity },
+            { primaryKeys: [], relations: [], logger: new CrudLogger() },
+        );
         const interceptor = new Interceptor();
 
         await expect(interceptor.validateBody(null)).rejects.toThrow(UnprocessableEntityException);
@@ -83,7 +86,10 @@ describe('UpdateRequestInterceptor', () => {
     });
 
     it('should throw when body is not object', async () => {
-        const Interceptor = UpdateRequestInterceptor({ entity: {} as typeof BaseEntity }, { primaryKeys: [], logger: new CrudLogger() });
+        const Interceptor = UpdateRequestInterceptor(
+            { entity: {} as typeof BaseEntity },
+            { primaryKeys: [], relations: [], logger: new CrudLogger() },
+        );
         const interceptor = new Interceptor();
 
         await expect(interceptor.validateBody(1)).rejects.toThrow(UnprocessableEntityException);

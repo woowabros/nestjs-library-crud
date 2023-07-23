@@ -40,7 +40,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const requestSearchDto = await this.validateBody(req.body);
             const crudSearchRequest: CrudSearchRequest<typeof crudOptions.entity> = {
                 requestSearchDto,
-                relations: customSearchRequestOptions?.relations,
+                relations: customSearchRequestOptions?.relations ?? factoryOption.relations,
             };
 
             this.crudLogger.logRequest(req, crudSearchRequest);
@@ -77,13 +77,13 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             if ('withDeleted' in requestSearchDto) {
                 this.validateWithDeleted(requestSearchDto.withDeleted);
             } else {
-                requestSearchDto.withDeleted = searchOptions.softDelete ?? (CRUD_POLICY[method].default?.softDeleted as boolean);
+                requestSearchDto.withDeleted = searchOptions.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean);
             }
 
             requestSearchDto.take =
                 'take' in requestSearchDto
                     ? this.validateTake(requestSearchDto.take, searchOptions.limitOfTake)
-                    : searchOptions.numberOfTake ?? (CRUD_POLICY[method].default?.numberOfTake as number);
+                    : searchOptions.numberOfTake ?? (CRUD_POLICY[method].default.numberOfTake as number);
 
             return requestSearchDto;
         }
@@ -103,7 +103,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 (queryFilter, [key, operand]) => ({
                     ...queryFilter,
                     [key]: {
-                        operator: _.get(preCondition.order, key, CRUD_POLICY[method].default?.sort) === Sort.DESC ? '<' : '>',
+                        operator: _.get(preCondition.order, key, CRUD_POLICY[method].default.sort) === Sort.DESC ? '<' : '>',
                         operand,
                     },
                 }),

@@ -14,5 +14,5 @@ export class PaginationCursorDto implements PaginationRequestAbstract {
     @Expose({ name: 'query' })
     @IsString()
     @IsOptional()
-    query?: string;
+    query: string;
 }

@@ -8,6 +8,7 @@ import { BaseService } from '../base/base.service';
 @Crud({
     entity: BaseEntity,
     routes: { readMany: { sort: 'DESC' } },
+    logging: true,
 })
 @Controller('sort-desc')
 export class SortDescController implements CrudController<BaseEntity> {

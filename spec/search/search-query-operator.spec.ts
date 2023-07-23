@@ -63,7 +63,10 @@ describe('Search Query Operator', () => {
         ];
 
         for (const requestSearchDto of requestSearchDtoList) {
-            const { data, metadata } = await service.reservedSearch({ requestSearchDto });
+            const { data, metadata } = await service.reservedSearch({
+                requestSearchDto,
+                relations: [],
+            });
             expect(data).toHaveLength(5);
             expect(Object.keys(data[0])).toEqual(expect.arrayContaining(requestSearchDto.select as unknown[]));
 
@@ -109,7 +112,7 @@ describe('Search Query Operator', () => {
             [{ where: [{ col3: { operator: 'NULL', not: true } }] }, [0, 1, 2, 3, 4]],
         ];
         for (const [requestSearchDto, expected] of fixtures) {
-            const { data, metadata } = await service.reservedSearch({ requestSearchDto });
+            const { data, metadata } = await service.reservedSearch({ requestSearchDto, relations: [] });
             const col2Values = data.map((d) => d.col2);
             expect(col2Values).toHaveLength(expected.length);
             expect(col2Values).toEqual(expect.arrayContaining(expected));
@@ -164,7 +167,7 @@ describe('Search Query Operator', () => {
             ],
         ];
         for (const [requestSearchDto, expected] of fixtures) {
-            const { data, metadata } = await service.reservedSearch({ requestSearchDto });
+            const { data, metadata } = await service.reservedSearch({ requestSearchDto, relations: [] });
             const col2Values = data.map((d) => d.col2);
             expect(col2Values).toHaveLength(expected.length);
             expect(col2Values).toEqual(expect.arrayContaining(expected));

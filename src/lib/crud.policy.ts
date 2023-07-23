@@ -10,7 +10,17 @@ import { UpsertRequestInterceptor } from './interceptor/upsert-request.intercept
 import { CrudOptions, Method, PrimaryKey, FactoryOption, Sort, PaginationType } from './interface';
 import { capitalizeFirstLetter } from './util';
 
-interface CrudMethodPolicy {
+type CrudMethodPolicy = {
+    [Method.READ_ONE]: MethodPolicy<Method.READ_ONE>;
+    [Method.SEARCH]: MethodPolicy<Method.SEARCH>;
+    [Method.READ_MANY]: MethodPolicy<Method.READ_MANY>;
+    [Method.CREATE]: MethodPolicy<Method.CREATE>;
+    [Method.UPDATE]: MethodPolicy<Method.UPDATE>;
+    [Method.DELETE]: MethodPolicy<Method.DELETE>;
+    [Method.UPSERT]: MethodPolicy<Method.UPSERT>;
+    [Method.RECOVER]: MethodPolicy<Method.RECOVER>;
+};
+type MethodPolicy<T extends Method> = {
     method: RequestMethod; // Method (Get, Post, Patch ...)
     useBody: boolean; // included body
     interceptor: (crudOptions: CrudOptions, factoryOption: FactoryOption) => Type<NestInterceptor>;
@@ -21,7 +31,20 @@ interface CrudMethodPolicy {
             [key in HttpStatus]?: { description: string; type?: Type<unknown>; schema?: unknown };
         };
     };
-    default?: Record<string, unknown>;
+    default: T extends Method.READ_ONE | Method.DELETE
+        ? DefaultOptionsReadOne
+        : T extends Method.READ_MANY | Method.SEARCH
+        ? DefaultOptionsReadMany
+        : DefaultOptions;
+};
+interface DefaultOptions {}
+interface DefaultOptionsReadOne extends DefaultOptions {
+    softDeleted: boolean;
+}
+interface DefaultOptionsReadMany extends DefaultOptionsReadOne {
+    paginationType: PaginationType;
+    numberOfTake: number;
+    sort: Sort;
 }
 
 const metaProperties = (paginationType: PaginationType) =>
@@ -42,7 +65,7 @@ const metaProperties = (paginationType: PaginationType) =>
 /**
  * Basic Policy by method
  */
-export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
+export const CRUD_POLICY: CrudMethodPolicy = {
     [Method.READ_ONE]: {
         method: RequestMethod.GET,
         useBody: false,
@@ -107,6 +130,7 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
             }),
         },
         default: {
+            paginationType: PaginationType.CURSOR,
             numberOfTake: 20,
             softDeleted: false,
             sort: Sort.DESC,
@@ -187,6 +211,7 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 },
             }),
         },
+        default: {},
     },
     [Method.UPSERT]: {
         method: RequestMethod.PUT,
@@ -211,6 +236,7 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 },
             }),
         },
+        default: {},
     },
     [Method.UPDATE]: {
         method: RequestMethod.PATCH,
@@ -238,6 +264,7 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 },
             }),
         },
+        default: {},
     },
     [Method.DELETE]: {
         method: RequestMethod.DELETE,
@@ -301,5 +328,6 @@ export const CRUD_POLICY: Record<Method, CrudMethodPolicy> = {
                 },
             }),
         },
+        default: {},
     },
 };

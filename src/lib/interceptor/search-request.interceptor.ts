@@ -232,11 +232,11 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             if (take == null) {
                 throw new UnprocessableEntityException('take must be positive number type');
             }
-            const takeNumber = +take;
+            const takeNumber = Number(take);
             if (!Number.isInteger(takeNumber) || takeNumber < 1) {
                 throw new UnprocessableEntityException('take must be positive number type');
             }
-            if (!!limitOfTake && takeNumber > limitOfTake) {
+            if (limitOfTake !== undefined && takeNumber > limitOfTake) {
                 throw new UnprocessableEntityException(`take must be less than ${limitOfTake}`);
             }
             return takeNumber;

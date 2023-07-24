@@ -6,7 +6,7 @@ import { CustomRequestInterceptor, CustomDeleteRequestOptions } from '../../src'
 @Injectable()
 export class DeleteRequestInterceptor extends CustomRequestInterceptor {
     async overrideOptions(req: Request): Promise<CustomDeleteRequestOptions> {
-        const softDeleted = +req.params.id > 2 ? undefined : false;
+        const softDeleted = Number(req.params.id) > 2 ? undefined : false;
 
         return new Promise((resolve, _reject) => {
             resolve({

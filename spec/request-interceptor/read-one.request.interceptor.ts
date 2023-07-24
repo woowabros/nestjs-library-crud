@@ -9,7 +9,7 @@ export class ReadOneRequestInterceptor extends CustomRequestInterceptor {
         return new Promise((resolve, _reject) => {
             resolve({
                 fields: req.params.id === '1' ? ['name', 'createdAt'] : undefined,
-                softDeleted: +req.params.id % 2 === 0,
+                softDeleted: Number(req.params.id) % 2 === 0,
             });
         });
     }

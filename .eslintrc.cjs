@@ -33,6 +33,7 @@ module.exports = {
                 project: ['./tsconfig.json'],
             },
             rules: {
+                'no-implicit-coercion': 'error',
                 'max-classes-per-file': ['error', { ignoreExpressions: true }],
                 '@typescript-eslint/no-floating-promises': 'error',
                 '@typescript-eslint/no-unused-vars': [

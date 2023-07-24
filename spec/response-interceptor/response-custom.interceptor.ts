@@ -14,7 +14,7 @@ export class ResponseCustomInterceptor implements NestInterceptor {
                     ? data
                     : {
                           ..._.omit(data, ['deletedAt', 'lastModifiedAt']),
-                          createdAt: +data.createdAt,
+                          createdAt: Number(data.createdAt),
                           custom: Date.now(),
                       };
             }),

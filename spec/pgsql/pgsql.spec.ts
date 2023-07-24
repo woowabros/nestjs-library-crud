@@ -103,9 +103,9 @@ describe('Search complex conditions', () => {
         expect(updateBody.id).toEqual(createBody.id);
         expect(updateBody.name).toBe('changed');
 
-        const newId = +createBody.id + 1;
+        const newId = Number(createBody.id) + 1;
         const { body: upsertBody } = await request(app.getHttpServer()).put(`/base/${newId}`).send({ name: 'name2' }).expect(HttpStatus.OK);
-        expect(+upsertBody.id).toEqual(newId);
+        expect(Number(upsertBody.id)).toEqual(newId);
         expect(upsertBody.name).toEqual('name2');
 
         const { body: deleteBody } = await request(app.getHttpServer()).delete(`/base/${createBody.id}`).expect(HttpStatus.OK);

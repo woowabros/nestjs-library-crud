@@ -81,7 +81,7 @@ export class CrudRouteFactory {
         const entityColumns = columnList.map(({ propertyName, options }) => ({
             name: propertyName,
             type: options.type,
-            isPrimary: !!options.primary,
+            isPrimary: Boolean(options.primary),
         }));
 
         this.entity.columns = entityColumns;

@@ -62,7 +62,7 @@ export class CrudReadManyRequest<T> {
 
     generate(): this {
         if (this.pagination.type === PaginationType.OFFSET) {
-            if (!!this.pagination.limit) {
+            if (this.pagination.limit != null) {
                 this._findOptions.take = this.pagination.limit;
             }
             if (Number.isFinite(this.pagination.offset)) {

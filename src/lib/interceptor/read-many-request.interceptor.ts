@@ -76,7 +76,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             }
 
             if (transformed.type === PaginationType.CURSOR && transformed.nextCursor && !transformed.query) {
-                transformed.query = 'e30=';
+                transformed.query = btoa('{}');
             }
 
             return transformed;

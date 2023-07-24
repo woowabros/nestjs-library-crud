@@ -39,7 +39,7 @@ describe('ReadManyRequestInterceptor', () => {
 
         expect(interceptor.getPaginationRequest(PaginationType.CURSOR, { key: 'value', nextCursor: 'token' })).toEqual({
             nextCursor: 'token',
-            query: 'e30=',
+            query: btoa('{}'),
             type: 'cursor',
         });
     });

@@ -8,6 +8,7 @@ import { BaseService } from '../base/base.service';
 @Crud({
     entity: BaseEntity,
     routes: { readMany: { numberOfTake: 10 } },
+    logging: true,
 })
 @Controller('take')
 export class NumberOfTakeController implements CrudController<BaseEntity> {

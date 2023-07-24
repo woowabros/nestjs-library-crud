@@ -9,7 +9,7 @@ import { TestHelper } from '../test.helper';
 
 export function PaginationModule(crudOptions?: Record<PaginationType, CrudOptions['routes']>) {
     function offsetController() {
-        @Crud({ entity: BaseEntity, routes: crudOptions?.[PaginationType.OFFSET] })
+        @Crud({ entity: BaseEntity, routes: crudOptions?.[PaginationType.OFFSET], logging: true })
         @Controller(`${PaginationType.OFFSET}`)
         class OffsetController implements CrudController<BaseEntity> {
             constructor(public readonly crudService: BaseService) {}
@@ -18,7 +18,7 @@ export function PaginationModule(crudOptions?: Record<PaginationType, CrudOption
     }
 
     function cursorController() {
-        @Crud({ entity: BaseEntity, routes: crudOptions?.[PaginationType.CURSOR] })
+        @Crud({ entity: BaseEntity, routes: crudOptions?.[PaginationType.CURSOR], logging: true })
         @Controller(`${PaginationType.CURSOR}`)
         class CursorController implements CrudController<BaseEntity> {
             constructor(public readonly crudService: BaseService) {}

@@ -23,7 +23,7 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             const softDeleted = _.isBoolean(customDeleteRequestOptions?.softDeleted)
                 ? customDeleteRequestOptions.softDeleted
-                : deleteOptions.softDelete ?? (CRUD_POLICY[method].default?.softDeleted as boolean);
+                : deleteOptions.softDelete ?? CRUD_POLICY[method].default.softDeleted;
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);
             const crudDeleteOneRequest: CrudDeleteOneRequest<typeof crudOptions.entity> = {

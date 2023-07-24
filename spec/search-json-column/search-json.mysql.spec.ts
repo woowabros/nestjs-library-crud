@@ -33,11 +33,13 @@ describe('Search JSON column - MySQL', () => {
         it('should search entities that meets operation for array column', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ friends: { operator: 'JSON_CONTAINS', operand: '{ "firstName": "Taylor" }' } }] },
+                relations: [],
             });
             expect(data).toHaveLength(1);
 
             const { data: data2 } = await service.reservedSearch({
                 requestSearchDto: { where: [{ friends: { operator: 'JSON_CONTAINS', operand: '{ "gender": "Male" }' } }] },
+                relations: [],
             });
             expect(data2).toHaveLength(2);
 
@@ -52,6 +54,7 @@ describe('Search JSON column - MySQL', () => {
                         },
                     ],
                 },
+                relations: [],
             });
             expect(data3).toHaveLength(1);
         });
@@ -59,6 +62,7 @@ describe('Search JSON column - MySQL', () => {
         it('should search entities that meets operation for object column', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ address: { operator: 'JSON_CONTAINS', operand: '{ "city": "Bali" }' } }] },
+                relations: [],
             });
             expect(data).toHaveLength(1);
         });
@@ -66,6 +70,7 @@ describe('Search JSON column - MySQL', () => {
         it('should return empty array when no record matches', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ friends: { operator: 'JSON_CONTAINS', operand: '{ "firstName": "Donghyuk" }' } }] },
+                relations: [],
             });
             expect(data).toHaveLength(0);
         });

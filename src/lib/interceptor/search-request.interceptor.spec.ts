@@ -32,6 +32,7 @@ describe('SearchRequestInterceptor', () => {
                     { name: 'col2', type: 'number', isPrimary: false },
                     { name: 'col3', type: 'number', isPrimary: false },
                 ],
+                relations: [],
                 logger: new CrudLogger(),
             },
         );

@@ -27,7 +27,7 @@ describe('CreateRequestInterceptor', () => {
 
     it('should intercepts and validate body', async () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const Interceptor = CreateRequestInterceptor({ entity: BodyDto }, { logger: new CrudLogger() });
+        const Interceptor = CreateRequestInterceptor({ entity: BodyDto }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
         expect(await interceptor.validateBody({ col1: 1, col2: '2' })).toEqual({ col1: '1', col2: 2 });
         expect(await interceptor.validateBody({ col1: 1, col2: 2 })).toEqual({ col1: '1', col2: 2 });
@@ -39,7 +39,7 @@ describe('CreateRequestInterceptor', () => {
 
     it('should intercepts and validate body which is array', async () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const Interceptor = CreateRequestInterceptor({ entity: BodyDto }, { logger: new CrudLogger() });
+        const Interceptor = CreateRequestInterceptor({ entity: BodyDto }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
         expect(
             await interceptor.validateBody([

@@ -33,6 +33,7 @@ describe('Search JSONB column - PostgreSQL', () => {
         it('should search entities that meets operation', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ colors: { operator: '?', operand: 'Orange' } }] },
+                relations: [],
             });
             expect(data).toHaveLength(2);
         });
@@ -40,6 +41,7 @@ describe('Search JSONB column - PostgreSQL', () => {
         it('should return empty array when no record matches', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ colors: { operator: '?', operand: 'Gold' } }] },
+                relations: [],
             });
             expect(data).toHaveLength(0);
         });
@@ -49,11 +51,13 @@ describe('Search JSONB column - PostgreSQL', () => {
         it('should search entities that meets operation', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ friends: { operator: '@>', operand: '[{ "firstName": "Taylor" }]' } }] },
+                relations: [],
             });
             expect(data).toHaveLength(1);
 
             const { data: data2 } = await service.reservedSearch({
                 requestSearchDto: { where: [{ friends: { operator: '@>', operand: '[{ "gender": "Male" }]' } }] },
+                relations: [],
             });
             expect(data2).toHaveLength(2);
 
@@ -61,6 +65,7 @@ describe('Search JSONB column - PostgreSQL', () => {
                 requestSearchDto: {
                     where: [{ friends: { operator: '@>', operand: '[{ "lastName": "Bon", "email": "mbon2@pagesperso-orange.fr"}]' } }],
                 },
+                relations: [],
             });
             expect(data3).toHaveLength(1);
         });
@@ -68,6 +73,7 @@ describe('Search JSONB column - PostgreSQL', () => {
         it('should return empty array when no record matches', async () => {
             const { data } = await service.reservedSearch({
                 requestSearchDto: { where: [{ friends: { operator: '@>', operand: '[{ "firstName": "Donghyuk" }]' } }] },
+                relations: [],
             });
             expect(data).toHaveLength(0);
         });

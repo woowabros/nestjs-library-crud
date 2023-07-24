@@ -11,7 +11,8 @@ import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { PaginationCursorDto } from '../dto/pagination-cursor.dto';
 import { PaginationOffsetDto } from '../dto/pagination-offset.dto';
-import { CrudOptions, CrudReadManyRequest, FactoryOption, Method, Sort, GROUP, PaginationType, PaginationRequest } from '../interface';
+import { CrudOptions, FactoryOption, Method, Sort, GROUP, PaginationType, PaginationRequest } from '../interface';
+import { CrudReadManyRequest } from '../request';
 
 const method = Method.READ_MANY;
 export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
@@ -38,26 +39,25 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                     (pagination.type === PaginationType.CURSOR && !_.isNil(pagination['nextCursor'])) ||
                     (pagination.type === PaginationType.OFFSET && (!_.isNil(pagination['offset']) || !_.isNil(pagination['limit'])))
                 ) {
-                    return;
+                    return {};
                 }
                 return this.validateQuery(req.query);
             })();
+            const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
+                .setPrimaryKey(factoryOption.primaryKeys ?? [])
+                .setPagination(pagination)
+                .setWithDeleted(
+                    _.isBoolean(customReadManyRequestOptions?.softDeleted)
+                        ? customReadManyRequestOptions.softDeleted
+                        : crudOptions.routes?.[method]?.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean),
+                )
+                .setWhere(query)
+                .setTake(readManyOptions.numberOfTake ?? CRUD_POLICY[method].default.numberOfTake)
+                .setSort(readManyOptions.sort ? Sort[readManyOptions.sort] : (CRUD_POLICY[method].default.sort as Sort))
+                .setRelations(this.getRelations(customReadManyRequestOptions))
+                .generate();
 
-            const softDeleted = _.isBoolean(customReadManyRequestOptions?.softDeleted)
-                ? customReadManyRequestOptions.softDeleted
-                : crudOptions.routes?.[method]?.softDelete ?? (CRUD_POLICY[method].default?.softDelete as boolean);
-
-            const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = {
-                sort: readManyOptions.sort ? Sort[readManyOptions.sort] : (CRUD_POLICY[method].default?.sort as Sort),
-                pagination,
-                numberOfTake: readManyOptions.numberOfTake ?? (CRUD_POLICY[method].default?.numberOfTake as number),
-                query,
-                primaryKeys: factoryOption.primaryKeys ?? [],
-                relations: this.getRelations(customReadManyRequestOptions),
-                softDeleted,
-            };
-
-            this.crudLogger.logRequest(req, crudReadManyRequest);
+            this.crudLogger.logRequest(req, crudReadManyRequest.toString());
             req[CRUD_ROUTE_ARGS] = crudReadManyRequest;
 
             return next.handle();
@@ -74,12 +74,17 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             if (error) {
                 throw new UnprocessableEntityException(error);
             }
+
+            if (transformed.type === PaginationType.CURSOR && transformed.nextCursor && !transformed.query) {
+                transformed.query = btoa('{}');
+            }
+
             return transformed;
         }
 
         async validateQuery(query: Record<string, unknown>) {
             if (_.isNil(query)) {
-                return;
+                return {};
             }
 
             const transformed = plainToInstance(crudOptions.entity, query, { groups: [GROUP.READ_MANY] });
@@ -98,7 +103,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             return transformed;
         }
 
-        getRelations(customReadManyRequestOptions: CustomReadManyRequestOptions): string[] | undefined {
+        getRelations(customReadManyRequestOptions: CustomReadManyRequestOptions): string[] {
             if (Array.isArray(customReadManyRequestOptions?.relations)) {
                 return customReadManyRequestOptions.relations;
             }
@@ -108,6 +113,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             if (crudOptions.routes?.[method] && Array.isArray(crudOptions.routes?.[method]?.relations)) {
                 return crudOptions.routes[method].relations;
             }
+            return factoryOption.relations;
         }
     }
 

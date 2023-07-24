@@ -1,4 +1,4 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { ConsoleLogger, HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import _ from 'lodash';
 import request from 'supertest';
@@ -14,9 +14,13 @@ describe('ReadMany - Options', () => {
     const defaultLimit = 20;
 
     beforeEach(async () => {
+        const logger = new ConsoleLogger();
+        logger.setLogLevels(['error']);
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [ReadManyModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
-        }).compile();
+        })
+            .setLogger(logger)
+            .compile();
         app = moduleFixture.createNestApplication();
 
         service = moduleFixture.get<BaseService>(BaseService);
@@ -35,14 +39,6 @@ describe('ReadMany - Options', () => {
             const response = await request(app.getHttpServer()).get('/sort-asc');
             expect(response.statusCode).toEqual(HttpStatus.OK);
             expect(response.body.data).toHaveLength(defaultLimit);
-
-            // eslint-disable-next-line unicorn/no-array-for-each
-            (response.body.data as BaseEntity[]).forEach((d, idx, arr) => {
-                if (idx === 0) {
-                    return;
-                }
-                expect(d.id).toBeGreaterThan(arr[idx - 1].id);
-            });
 
             (response.body.data as BaseEntity[]).reduce((pre, value) => {
                 if (!pre) {
@@ -71,14 +67,6 @@ describe('ReadMany - Options', () => {
             expect(lastOneOfFirstResponse.id + 1).toEqual(firstOneOfNextResponse.id);
             expect(lastOneOfFirstResponse.name).not.toEqual(firstOneOfNextResponse.name);
 
-            // eslint-disable-next-line unicorn/no-array-for-each
-            (nextResponse.body.data as BaseEntity[]).forEach((d, idx, arr) => {
-                if (idx === 0) {
-                    return;
-                }
-                expect(d.id).toBeGreaterThan(arr[idx - 1].id);
-            });
-
             (nextResponse.body.data as BaseEntity[]).reduce((pre, value) => {
                 if (!pre) {
                     return value;
@@ -95,14 +83,6 @@ describe('ReadMany - Options', () => {
             expect(response.statusCode).toEqual(HttpStatus.OK);
             expect(response.body.data).toHaveLength(defaultLimit);
 
-            // eslint-disable-next-line unicorn/no-array-for-each
-            (response.body.data as BaseEntity[]).forEach((d, idx, arr) => {
-                if (idx === 0) {
-                    return;
-                }
-                expect(d.id).toBeLessThan(arr[idx - 1].id);
-            });
-
             (response.body.data as BaseEntity[]).reduce((pre, value) => {
                 if (!pre) {
                     return value;
@@ -113,32 +93,41 @@ describe('ReadMany - Options', () => {
         });
 
         it('should return next 20 entities after cursor in descending order', async () => {
-            const firstResponse = await request(app.getHttpServer()).get('/sort-desc').expect(HttpStatus.OK);
-            const nextResponse = await request(app.getHttpServer()).get('/sort-desc').query({
-                nextCursor: firstResponse.body.metadata.nextCursor,
-            });
+            const { body: firstResponse } = await request(app.getHttpServer()).get('/sort-desc').expect(HttpStatus.OK);
+            const { body: nextResponse } = await request(app.getHttpServer())
+                .get('/sort-desc')
+                .query({
+                    nextCursor: firstResponse.metadata.nextCursor,
+                })
+                .expect(HttpStatus.OK);
+            const { body: secondNextResponse } = await request(app.getHttpServer())
+                .get('/sort-desc')
+                .query({
+                    nextCursor: nextResponse.metadata.nextCursor,
+                })
+                .expect(HttpStatus.OK);
 
-            expect(nextResponse.statusCode).toEqual(HttpStatus.OK);
-            expect(nextResponse.body.data).toHaveLength(defaultLimit);
-            expect(nextResponse.body.metadata.nextCursor).toBeDefined();
-            expect(nextResponse.body.metadata.limit).toEqual(defaultLimit);
+            expect(nextResponse.metadata.query).toEqual(firstResponse.metadata.query);
+            expect(secondNextResponse.metadata.query).toEqual(firstResponse.metadata.query);
 
-            expect(firstResponse.body.metadata.nextCursor).not.toEqual(nextResponse.body.metadata.nextCursor);
+            expect(nextResponse.metadata.nextCursor).not.toEqual(firstResponse.metadata.nextCursor);
+            expect(secondNextResponse.metadata.nextCursor).not.toEqual(nextResponse.metadata.nextCursor);
 
-            const lastOneOfFirstResponse = firstResponse.body.data.pop();
-            const firstOneOfNextResponse = nextResponse.body.data.shift();
+            expect(nextResponse.metadata.total).toEqual(firstResponse.metadata.total - nextResponse.metadata.limit);
+            expect(secondNextResponse.metadata.total).toEqual(nextResponse.metadata.total - secondNextResponse.metadata.limit);
+
+            expect(nextResponse.data).toHaveLength(defaultLimit);
+            expect(nextResponse.metadata.nextCursor).toBeDefined();
+            expect(nextResponse.metadata.limit).toEqual(defaultLimit);
+
+            expect(firstResponse.metadata.nextCursor).not.toEqual(nextResponse.metadata.nextCursor);
+
+            const lastOneOfFirstResponse = firstResponse.data.pop();
+            const firstOneOfNextResponse = nextResponse.data.shift();
             expect(lastOneOfFirstResponse.id - 1).toEqual(firstOneOfNextResponse.id);
             expect(lastOneOfFirstResponse.name).not.toEqual(firstOneOfNextResponse.name);
 
-            // eslint-disable-next-line unicorn/no-array-for-each
-            (nextResponse.body.data as BaseEntity[]).forEach((d, idx, arr) => {
-                if (idx === 0) {
-                    return;
-                }
-                expect(d.id).toBeLessThan(arr[idx - 1].id);
-            });
-
-            (nextResponse.body.data as BaseEntity[]).reduce((pre, value) => {
+            (nextResponse.data as BaseEntity[]).reduce((pre, value) => {
                 if (!pre) {
                     return value;
                 }

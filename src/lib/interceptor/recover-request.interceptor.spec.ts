@@ -13,7 +13,7 @@ describe('RecoverRequestInterceptor', () => {
             col1: string;
         }
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const Interceptor = RecoverRequestInterceptor({ entity: BodyDto }, { logger: new CrudLogger() });
+        const Interceptor = RecoverRequestInterceptor({ entity: BodyDto }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
         const handler: CallHandler = {
             handle: () => of('test'),

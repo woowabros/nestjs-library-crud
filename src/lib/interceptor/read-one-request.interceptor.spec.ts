@@ -17,7 +17,7 @@ describe('ReadOneRequestInterceptor', () => {
     it('should intercept and pass CrudReadOneRequest', async () => {
         const Interceptor = ReadOneRequestInterceptor(
             { entity: {} as typeof BaseEntity },
-            { columns: [{ name: 'col1', type: 'string', isPrimary: false }], logger: new CrudLogger() },
+            { columns: [{ name: 'col1', type: 'string', isPrimary: false }], relations: [], logger: new CrudLogger() },
         );
         const interceptor = new Interceptor();
 
@@ -28,7 +28,7 @@ describe('ReadOneRequestInterceptor', () => {
     });
 
     it('should get fields from interceptor fields and request fields', () => {
-        const Interceptor = ReadOneRequestInterceptor({ entity: {} as typeof BaseEntity }, { logger: new CrudLogger() });
+        const Interceptor = ReadOneRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         expect(interceptor.getFields(undefined, undefined)).toEqual([]);
@@ -48,6 +48,7 @@ describe('ReadOneRequestInterceptor', () => {
                     { name: 'col2', type: 'string', isPrimary: false },
                     { name: 'col3', type: 'string', isPrimary: false },
                 ],
+                relations: [],
                 logger: new CrudLogger(),
             },
         );
@@ -70,7 +71,10 @@ describe('ReadOneRequestInterceptor', () => {
     });
 
     it('should throw when fields are invalid', () => {
-        const Interceptor = ReadOneRequestInterceptor({ entity: {} as typeof BaseEntity }, { columns: [], logger: new CrudLogger() });
+        const Interceptor = ReadOneRequestInterceptor(
+            { entity: {} as typeof BaseEntity },
+            { columns: [], relations: [], logger: new CrudLogger() },
+        );
         const interceptor = new Interceptor();
 
         const invalidFieldsList = [1, [1, 2], [['col1', 'col2']], {}, [undefined], [null]];
@@ -82,7 +86,7 @@ describe('ReadOneRequestInterceptor', () => {
     });
 
     it('should get relations from custom request options and crudOption', async () => {
-        const Interceptor = ReadOneRequestInterceptor({ entity: {} as typeof BaseEntity }, { logger: new CrudLogger() });
+        const Interceptor = ReadOneRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         const mockRequest: any = jest.fn();
@@ -93,7 +97,7 @@ describe('ReadOneRequestInterceptor', () => {
 
         const InterceptorNoRelations = ReadOneRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { [Method.READ_ONE]: { relations: false } } },
-            { logger: new CrudLogger() },
+            { relations: [], logger: new CrudLogger() },
         );
         const interceptorNoRelations = new InterceptorNoRelations();
 
@@ -105,7 +109,7 @@ describe('ReadOneRequestInterceptor', () => {
 
         const InterceptorWithRelations = ReadOneRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { [Method.READ_ONE]: { relations: ['bar'] } } },
-            { logger: new CrudLogger() },
+            { relations: [], logger: new CrudLogger() },
         );
         const interceptorWithRelations = new InterceptorWithRelations();
 

@@ -22,7 +22,6 @@ import {
     CrudCreateRequest,
     CrudDeleteOneRequest,
     CrudOptions,
-    CrudReadManyRequest,
     CrudReadOneRequest,
     CrudRecoverRequest,
     CrudSearchRequest,
@@ -34,12 +33,14 @@ import {
     PrimaryKey,
 } from './interface';
 import { CrudLogger } from './provider/crud-logger';
+import { CrudReadManyRequest } from './request';
 import { capitalizeFirstLetter, isSomeEnum } from './util';
 
 export class CrudRouteFactory {
     private crudLogger: CrudLogger;
     private entity: {
         tableName: string;
+        relations?: string[];
         primaryKeys?: PrimaryKey[];
         columns?: Column[];
     } = {
@@ -50,13 +51,12 @@ export class CrudRouteFactory {
     constructor(protected target: any, protected crudOptions: CrudOptions) {
         this.entityInformation(crudOptions.entity);
 
-        const paginationType = crudOptions.routes?.readMany?.paginationType ?? CRUD_POLICY[Method.READ_MANY].default?.paginationType;
+        const paginationType = crudOptions.routes?.readMany?.paginationType ?? CRUD_POLICY[Method.READ_MANY].default.paginationType;
         const isPaginationType = isSomeEnum(PaginationType);
         if (!isPaginationType(paginationType)) {
             throw new TypeError(`invalid PaginationType ${paginationType}`);
         }
         this.paginationType = paginationType;
-
         this.crudLogger = new CrudLogger(crudOptions.logging);
     }
 
@@ -85,11 +85,15 @@ export class CrudRouteFactory {
         }));
 
         this.entity.columns = entityColumns;
-        const primaryKeys = entityColumns.filter(({ isPrimary }) => isPrimary);
 
+        const primaryKeys = entityColumns.filter(({ isPrimary }) => isPrimary);
         if (!(primaryKeys.length === 1 && primaryKeys[0].name === 'id')) {
             this.entity.primaryKeys = primaryKeys;
         }
+
+        this.entity.relations = getMetadataArgsStorage().relations.flatMap(({ target, propertyName }) =>
+            inheritanceTree.includes(target as Function) ? [propertyName] : [],
+        );
     }
 
     protected get tableName(): string {
@@ -150,7 +154,7 @@ export class CrudRouteFactory {
 
     private createMethod(crudMethod: Method): void {
         if (crudMethod === Method.RECOVER) {
-            const enableRecover = this.crudOptions.routes?.[Method.DELETE]?.softDelete ?? CRUD_POLICY[Method.DELETE].default?.softDeleted;
+            const enableRecover = this.crudOptions.routes?.[Method.DELETE]?.softDelete ?? CRUD_POLICY[Method.DELETE].default.softDeleted;
             if (!enableRecover) {
                 return;
             }
@@ -166,6 +170,7 @@ export class CrudRouteFactory {
         const methodNameOnController = this.controllerMethodName(crudMethod);
         const factoryOption: FactoryOption = {
             columns: this.entity.columns,
+            relations: this.entity.relations ?? [],
             primaryKeys: this.entity.primaryKeys ?? [{ name: 'id', type: 'number' }],
             logger: this.crudLogger,
         };

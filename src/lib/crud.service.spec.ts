@@ -23,9 +23,9 @@ describe('CrudService', () => {
         });
 
         it('should return entity', async () => {
-            await expect(crudService.reservedReadOne({ params: { id: mockEntity.id } as Partial<BaseEntity> })).resolves.toEqual(
-                mockEntity,
-            );
+            await expect(
+                crudService.reservedReadOne({ params: { id: mockEntity.id } as Partial<BaseEntity>, relations: [] }),
+            ).resolves.toEqual(mockEntity);
         });
     });
 

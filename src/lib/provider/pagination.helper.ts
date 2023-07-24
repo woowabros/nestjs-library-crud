@@ -1,7 +1,9 @@
+import { FindOptionsWhere } from 'typeorm';
+
 const encoding = 'base64';
 
 export class PaginationHelper {
-    static serialize<T>(entity: Partial<T>): string {
+    static serialize<T>(entity: FindOptionsWhere<T>): string {
         return Buffer.from(JSON.stringify(entity)).toString(encoding);
     }
 

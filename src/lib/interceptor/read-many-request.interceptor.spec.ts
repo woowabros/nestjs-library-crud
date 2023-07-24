@@ -20,6 +20,7 @@ describe('ReadManyRequestInterceptor', () => {
             { entity: {} as typeof BaseEntity },
             {
                 columns: [{ name: 'col1', type: 'string', isPrimary: false }],
+                relations: [],
                 primaryKeys: [{ name: 'col1', type: 'string' }],
                 logger: new CrudLogger(),
             },
@@ -33,11 +34,12 @@ describe('ReadManyRequestInterceptor', () => {
     });
 
     it('should be able to return pagination for GET_MORE type', () => {
-        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { logger: new CrudLogger() });
+        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         expect(interceptor.getPaginationRequest(PaginationType.CURSOR, { key: 'value', nextCursor: 'token' })).toEqual({
             nextCursor: 'token',
+            query: btoa('{}'),
             type: 'cursor',
         });
     });
@@ -61,10 +63,10 @@ describe('ReadManyRequestInterceptor', () => {
             col3: number;
         }
 
-        const Interceptor = ReadManyRequestInterceptor({ entity: QueryDto }, { logger: new CrudLogger() });
+        const Interceptor = ReadManyRequestInterceptor({ entity: QueryDto }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        expect(await interceptor.validateQuery(undefined as any)).toBeUndefined();
+        expect(await interceptor.validateQuery(undefined as any)).toEqual({});
         expect(await interceptor.validateQuery({ col1: 1, col2: '2' })).toEqual({
             col1: '1',
             col2: 2,
@@ -80,16 +82,16 @@ describe('ReadManyRequestInterceptor', () => {
     });
 
     it('should be get relation values per each condition', () => {
-        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { logger: new CrudLogger() });
+        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         expect(interceptor.getRelations({ relations: [] })).toEqual([]);
         expect(interceptor.getRelations({ relations: ['table'] })).toEqual(['table']);
-        expect(interceptor.getRelations({})).toBeUndefined();
+        expect(interceptor.getRelations({})).toEqual([]);
 
         const InterceptorWithOptions = ReadManyRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { readMany: { relations: ['option'] } } },
-            { logger: new CrudLogger() },
+            { relations: [], logger: new CrudLogger() },
         );
         const interceptorWithOptions = new InterceptorWithOptions();
         expect(interceptorWithOptions.getRelations({ relations: [] })).toEqual([]);
@@ -98,7 +100,7 @@ describe('ReadManyRequestInterceptor', () => {
 
         const InterceptorWithFalseOptions = ReadManyRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { readMany: { relations: false } } },
-            { logger: new CrudLogger() },
+            { relations: [], logger: new CrudLogger() },
         );
         const interceptorWithFalseOptions = new InterceptorWithFalseOptions();
         expect(interceptorWithFalseOptions.getRelations({ relations: [] })).toEqual([]);
@@ -107,7 +109,7 @@ describe('ReadManyRequestInterceptor', () => {
     });
 
     it('should be validate pagination query', () => {
-        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { logger: new CrudLogger() });
+        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
         interceptor.getPaginationRequest(PaginationType.CURSOR, undefined as any);

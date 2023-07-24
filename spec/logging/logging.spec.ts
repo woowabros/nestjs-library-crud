@@ -79,21 +79,18 @@ describe('Logging', () => {
         await request(app.getHttpServer()).get('/base');
         expect(loggerSpy).toHaveBeenNthCalledWith(
             2,
-            {
-                sort: 'DESC',
-                pagination: {
-                    type: 'cursor',
+            JSON.stringify({
+                _primaryKeys: [{ name: 'col1', isPrimary: true }],
+                _findOptions: {
+                    where: {},
+                    take: 20,
+                    withDeleted: false,
+                    order: { col1: 'DESC' },
+                    relations: [],
                 },
-                numberOfTake: 20,
-                query: {},
-                primaryKeys: [
-                    {
-                        name: 'col1',
-                        isPrimary: true,
-                        type: expect.any(Function),
-                    },
-                ],
-            },
+                _pagination: { type: 'cursor' },
+                _sort: 'DESC',
+            }),
             'CRUD GET /base',
         );
 
@@ -105,6 +102,8 @@ describe('Logging', () => {
                     col1: '1',
                 },
                 fields: [],
+                relations: [],
+                softDeleted: expect.any(Boolean),
             },
             'CRUD GET /base/1',
         );

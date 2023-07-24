@@ -29,7 +29,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
 
             const softDeleted = _.isBoolean(customReadOneRequestOptions?.softDeleted)
                 ? customReadOneRequestOptions.softDeleted
-                : crudOptions.routes?.[method]?.softDelete ?? (CRUD_POLICY[method].default?.softDelete as boolean);
+                : crudOptions.routes?.[method]?.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean);
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);
 
@@ -75,7 +75,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             return requestFields.fields;
         }
 
-        getRelations(customReadOneRequestOptions: CustomReadOneRequestOptions): string[] | undefined {
+        getRelations(customReadOneRequestOptions: CustomReadOneRequestOptions): string[] {
             if (Array.isArray(customReadOneRequestOptions?.relations)) {
                 return customReadOneRequestOptions.relations;
             }
@@ -85,6 +85,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             if (crudOptions.routes?.[method] && Array.isArray(crudOptions.routes?.[method]?.relations)) {
                 return crudOptions.routes[method].relations;
             }
+            return factoryOption.relations;
         }
     }
     return mixin(MixinInterceptor);

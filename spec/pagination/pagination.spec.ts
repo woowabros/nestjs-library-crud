@@ -1,4 +1,4 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { ConsoleLogger, HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import _ from 'lodash';
 import request from 'supertest';
@@ -15,6 +15,8 @@ describe('Pagination', () => {
     const defaultLimit = 20;
 
     beforeEach(async () => {
+        const logger = new ConsoleLogger();
+        logger.setLogLevels(['error']);
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [
                 PaginationModule({
@@ -22,7 +24,9 @@ describe('Pagination', () => {
                     offset: { readMany: { paginationType: 'offset' } },
                 }),
             ],
-        }).compile();
+        })
+            .setLogger(logger)
+            .compile();
         app = moduleFixture.createNestApplication();
 
         service = moduleFixture.get<BaseService>(BaseService);

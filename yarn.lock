@@ -1589,9 +1589,9 @@
     tslib "2.6.0"
 
 "@nestjs/swagger@^7.0.11":
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/swagger/-/swagger-7.1.1.tgz#67285035a58a32059f219532b449addf81f8e513"
-  integrity sha512-gIG1aVCegZlIppXZizKHqWkqZvQkvptTBR1C5CzZoDwGoVVKJBmJ2i9FAcsnzzb0j7hncFKhcBuWYOBJOsCvug==
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/@nestjs/swagger/-/swagger-7.1.2.tgz#09eed4483521e0a9b87a14eab35547253dcdbc28"
+  integrity sha512-/eWlV3YuMpvEAGi3FcP0SbRGI+gqIJ93mxXaRc/GRKAOHLj5UzQ22jsUVqmSLmNMCSmp6PTLNcRGoLW++SExJA==
   dependencies:
     "@nestjs/mapped-types" "2.0.2"
     js-yaml "4.1.0"

@@ -1601,9 +1601,9 @@
     tslib "2.6.0"
 
 "@nestjs/core@^10.0.3":
-  version "10.0.5"
-  resolved "https://registry.yarnpkg.com/@nestjs/core/-/core-10.0.5.tgz#d9f0c1ccdab0aafda8d810d11538b727f01557e2"
-  integrity sha512-9A8nixBfE33TWAmmWvNoxdmHrRmHJY0oO3O4Iue0FVkawWJc0YOhSqdNs87McwvKE4InJMI7GVv01NYMEROdPA==
+  version "10.1.1"
+  resolved "https://registry.yarnpkg.com/@nestjs/core/-/core-10.1.1.tgz#5fa3db59a7052a331eb650e92a5957e1055e5628"
+  integrity sha512-1Mp1ucKBQ3QGlK5lUHh2K0uRCQG9GY0q36Qd0Kym/wAKT+Y2DnaaVJLPElgem1o5fDMk8eYgHNa+qjLtwfPSYw==
   dependencies:
     uid "2.0.2"
     "@nuxtjs/opencollective" "0.3.2"

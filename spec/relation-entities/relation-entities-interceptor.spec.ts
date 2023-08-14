@@ -9,7 +9,7 @@ import { TestHelper } from '../test.helper';
 describe('relation interceptor', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [
                 RelationEntitiesModule({
@@ -28,7 +28,7 @@ describe('relation interceptor', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

@@ -1,6 +1,5 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
 
 import { SubPathModule } from './sub-path.module';
 import { TestHelper } from '../test.helper';
@@ -8,7 +7,7 @@ import { TestHelper } from '../test.helper';
 describe('Subpath', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [SubPathModule()],
         }).compile();
@@ -16,7 +15,7 @@ describe('Subpath', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

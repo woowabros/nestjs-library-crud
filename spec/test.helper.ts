@@ -88,7 +88,7 @@ export class TestHelper {
             if (!route.root?.operationId) {
                 return summary;
             }
-            summary[route.root.operationId] = route;
+            summary[`${route.root.method} ${route.root.path}`] = route;
             return summary;
         }, {} as Record<string, DenormalizedDoc>);
     }

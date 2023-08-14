@@ -1,6 +1,5 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
 import request from 'supertest';
 
 import { CustomEntity } from './custom-entity.entity';
@@ -12,7 +11,7 @@ describe('CustomEntity - Search', () => {
     let app: INestApplication;
     let service: CustomEntityService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [CustomEntityModule, TestHelper.getTypeOrmMysqlModule([CustomEntity])],
         }).compile();
@@ -20,14 +19,16 @@ describe('CustomEntity - Search', () => {
 
         service = moduleFixture.get<CustomEntityService>(CustomEntityService);
         await Promise.all(
-            _.range(100).map((number) => service.repository.save(service.repository.create({ uuid: `${number}`, name: `name-${number}` }))),
+            Array.from({ length: 100 }, (_, index) => index).map((number) =>
+                service.repository.save(service.repository.create({ uuid: `${number}`, name: `name-${number}` })),
+            ),
         );
 
         await service.repository.save(service.repository.create({ uuid: 'test' }));
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

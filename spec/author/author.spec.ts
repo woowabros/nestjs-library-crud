@@ -8,7 +8,7 @@ import { TestHelper } from '../test.helper';
 describe('Author', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [TestModule, TestHelper.getTypeOrmMysqlModule([TestEntity])],
         }).compile();
@@ -16,7 +16,7 @@ describe('Author', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

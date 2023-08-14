@@ -11,7 +11,7 @@ describe('Response Interceptor', () => {
     let app: INestApplication;
     let service: BaseService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [BaseModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
@@ -23,7 +23,7 @@ describe('Response Interceptor', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

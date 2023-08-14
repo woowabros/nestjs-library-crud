@@ -1,6 +1,5 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
 import request from 'supertest';
 
 import { PaginationModule } from './pagination.module';
@@ -14,7 +13,7 @@ describe('Pagination with interceptor', () => {
     describe('with ReadMany Interceptor', () => {
         let app: INestApplication;
 
-        beforeEach(async () => {
+        beforeAll(async () => {
             const moduleFixture: TestingModule = await Test.createTestingModule({
                 imports: [
                     PaginationModule({
@@ -36,17 +35,21 @@ describe('Pagination with interceptor', () => {
             app = moduleFixture.createNestApplication();
 
             const service: BaseService = moduleFixture.get<BaseService>(BaseService);
-            await Promise.all(_.range(100).map((number) => service.repository.save(service.repository.create({ name: `name-${number}` }))));
+            await Promise.all(
+                Array.from({ length: 100 }, (_, index) => index).map((number) =>
+                    service.repository.save(service.repository.create({ name: `name-${number}` })),
+                ),
+            );
             await app.init();
         });
 
-        afterEach(async () => {
+        afterAll(async () => {
             await TestHelper.dropTypeOrmEntityTables();
             await app?.close();
         });
 
         it('should be returned deleted entities each interceptor soft-deleted option', async () => {
-            const deleteIdList: number[] = _.range(1, 101).filter((number) => number % 2 === 0);
+            const deleteIdList: number[] = Array.from({ length: 100 }, (_, index) => index + 1).filter((number) => number % 2 === 0);
             const { body: responseBodyBeforeDelete } = await request(app.getHttpServer())
                 .get(`/${PaginationType.CURSOR}`)
                 .expect(HttpStatus.OK);
@@ -114,7 +117,7 @@ describe('Pagination with interceptor', () => {
     describe('without ReadMany Interceptor', () => {
         let app: INestApplication;
 
-        beforeEach(async () => {
+        beforeAll(async () => {
             const moduleFixture: TestingModule = await Test.createTestingModule({
                 imports: [
                     PaginationModule({
@@ -136,11 +139,15 @@ describe('Pagination with interceptor', () => {
             app = moduleFixture.createNestApplication();
 
             const service: BaseService = moduleFixture.get<BaseService>(BaseService);
-            await Promise.all(_.range(100).map((number) => service.repository.save(service.repository.create({ name: `name-${number}` }))));
+            await Promise.all(
+                Array.from({ length: 100 }, (_, index) => index).map((number) =>
+                    service.repository.save(service.repository.create({ name: `name-${number}` })),
+                ),
+            );
             await app.init();
         });
 
-        afterEach(async () => {
+        afterAll(async () => {
             await TestHelper.dropTypeOrmEntityTables();
             await app?.close();
         });

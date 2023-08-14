@@ -66,7 +66,7 @@ describe('mongodb', () => {
     let mongod: MongoMemoryServer;
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         mongod = await MongoMemoryServer.create();
         const mongoUri = mongod.getUri();
 
@@ -77,7 +77,7 @@ describe('mongodb', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await mongod?.stop();
         await app?.close();
     });

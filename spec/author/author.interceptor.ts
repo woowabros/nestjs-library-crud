@@ -1,6 +1,5 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Request } from 'express';
-import _ from 'lodash';
 
 @Injectable()
 export class AuthorInterceptor implements NestInterceptor {

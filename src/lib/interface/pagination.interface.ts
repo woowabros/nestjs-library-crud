@@ -14,10 +14,6 @@ export const PAGINATION_SWAGGER_QUERY: Record<PaginationType, Array<{ name: stri
     [PaginationType.CURSOR]: [{ name: 'nextCursor', type: 'string' }],
 };
 
-export interface PaginationRequestAbstract {
-    type: PaginationType;
-}
-
 export interface PaginationAbstractResponse<T> {
     data: T[];
 }

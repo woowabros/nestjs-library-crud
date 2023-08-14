@@ -23,7 +23,7 @@ describe('SearchRequestInterceptor', () => {
     }
 
     let interceptor: any;
-    beforeEach(() => {
+    beforeAll(() => {
         const Interceptor = SearchRequestInterceptor(
             { entity: TestEntity },
             {

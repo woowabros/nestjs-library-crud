@@ -1,17 +1,17 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { validate, validateSync } from 'class-validator';
+import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
 import { Observable } from 'rxjs';
+import { FindOptionsWhere, LessThan, MoreThan } from 'typeorm';
 
 import { CustomReadManyRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
-import { PaginationCursorDto } from '../dto/pagination-cursor.dto';
-import { PaginationOffsetDto } from '../dto/pagination-offset.dto';
-import { CrudOptions, FactoryOption, Method, Sort, GROUP, PaginationType, PaginationRequest } from '../interface';
+import { CrudOptions, FactoryOption, Method, Sort, GROUP, PaginationType } from '../interface';
+import { PaginationHelper } from '../provider';
 import { CrudReadManyRequest } from '../request';
 
 const method = Method.READ_MANY;
@@ -26,60 +26,43 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             const readManyOptions = crudOptions.routes?.[method] ?? {};
 
             const customReadManyRequestOptions: CustomReadManyRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
-            const paginationType = (readManyOptions.paginationType ?? CRUD_POLICY[method].default?.paginationType) as PaginationType;
+            const paginationType = (readManyOptions.paginationType ?? CRUD_POLICY[method].default.paginationType) as PaginationType;
 
             if (req.params) {
                 Object.assign(req.query, req.params);
             }
 
-            const pagination = this.getPaginationRequest(paginationType, req.query);
+            const pagination = PaginationHelper.getPaginationRequest(paginationType, req.query);
 
             const query = await (async () => {
-                if (
-                    (pagination.type === PaginationType.CURSOR && !_.isNil(pagination['nextCursor'])) ||
-                    (pagination.type === PaginationType.OFFSET && (!_.isNil(pagination['offset']) || !_.isNil(pagination['limit'])))
-                ) {
+                if (PaginationHelper.isNextPage(pagination)) {
+                    pagination.setQuery(pagination.query ?? btoa('{}'));
                     return {};
                 }
-                return this.validateQuery(req.query);
+                const query = await this.validateQuery(req.query);
+                pagination.setWhere(PaginationHelper.serialize(query));
+                return query;
             })();
+
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
                 .setPrimaryKey(factoryOption.primaryKeys ?? [])
                 .setPagination(pagination)
                 .setWithDeleted(
                     _.isBoolean(customReadManyRequestOptions?.softDeleted)
                         ? customReadManyRequestOptions.softDeleted
-                        : crudOptions.routes?.[method]?.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean),
+                        : crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted,
                 )
                 .setWhere(query)
                 .setTake(readManyOptions.numberOfTake ?? CRUD_POLICY[method].default.numberOfTake)
-                .setSort(readManyOptions.sort ? Sort[readManyOptions.sort] : (CRUD_POLICY[method].default.sort as Sort))
+                .setSort(readManyOptions.sort ? Sort[readManyOptions.sort] : CRUD_POLICY[method].default.sort)
                 .setRelations(this.getRelations(customReadManyRequestOptions))
+                .setDeserialize(this.deserialize)
                 .generate();
 
             this.crudLogger.logRequest(req, crudReadManyRequest.toString());
             req[CRUD_ROUTE_ARGS] = crudReadManyRequest;
 
             return next.handle();
-        }
-
-        getPaginationRequest(paginationType: PaginationType, query: Record<string, unknown>): PaginationRequest {
-            const plain = query ?? {};
-            const transformed =
-                paginationType === PaginationType.OFFSET
-                    ? plainToInstance(PaginationOffsetDto, plain, { excludeExtraneousValues: true })
-                    : plainToInstance(PaginationCursorDto, plain, { excludeExtraneousValues: true });
-            const [error] = validateSync(transformed, { stopAtFirstError: true });
-
-            if (error) {
-                throw new UnprocessableEntityException(error);
-            }
-
-            if (transformed.type === PaginationType.CURSOR && transformed.nextCursor && !transformed.query) {
-                transformed.query = btoa('{}');
-            }
-
-            return transformed;
         }
 
         async validateQuery(query: Record<string, unknown>) {
@@ -114,6 +97,21 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 return crudOptions.routes[method].relations;
             }
             return factoryOption.relations;
+        }
+
+        deserialize<T>({ pagination, findOptions, sort }: CrudReadManyRequest<T>): FindOptionsWhere<T> {
+            if (pagination.type === PaginationType.OFFSET) {
+                return PaginationHelper.deserialize(pagination.where);
+            }
+            const query: Record<string, unknown> = PaginationHelper.deserialize(pagination.where);
+            const lastObject: Record<string, unknown> = PaginationHelper.deserialize(pagination.nextCursor);
+
+            const operator = (key: keyof T) => ((findOptions.order?.[key] ?? sort) === Sort.DESC ? LessThan : MoreThan);
+
+            for (const [key, value] of Object.entries(lastObject)) {
+                query[key] = operator(key as keyof T)(value);
+            }
+            return query as FindOptionsWhere<T>;
         }
     }
 

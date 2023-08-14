@@ -14,7 +14,7 @@ describe('CrudService', () => {
         const crudService = new CrudService<BaseEntity>(mockRepository as unknown as Repository<BaseEntity>);
         const mockEntity = { id: 1, name: 'name1' };
 
-        beforeEach(() => {
+        beforeAll(() => {
             mockRepository.findOne.mockResolvedValueOnce(mockEntity);
         });
 

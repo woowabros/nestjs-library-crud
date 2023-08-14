@@ -11,7 +11,7 @@ describe('BaseController', () => {
     let app: INestApplication;
     let service: BaseService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [BaseModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
@@ -23,7 +23,7 @@ describe('BaseController', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -36,14 +36,14 @@ describe('BaseController', () => {
         });
 
         it('should be returned only one entity', async () => {
-            const response = await request(app.getHttpServer())
+            const { body } = await request(app.getHttpServer())
                 .get(`/base/${id}`)
-                .query({ fields: ['id', 'name', 'createdAt'] });
+                .query({ fields: ['id', 'name', 'createdAt'] })
+                .expect(HttpStatus.OK);
 
-            expect(response.statusCode).toEqual(HttpStatus.OK);
-            expect(response.body.id).toEqual(id);
-            expect(response.body.name).toEqual(expect.any(String));
-            expect(response.body.lastModifiedAt).toBeUndefined();
+            expect(body.id).toEqual(id);
+            expect(body.name).toEqual(expect.any(String));
+            expect(body.lastModifiedAt).toBeUndefined();
         });
 
         it('should be fields feature with multiple options', async () => {

@@ -4,26 +4,25 @@ import request from 'supertest';
 
 import { BaseEntity } from './base.entity';
 import { BaseModule } from './base.module';
-import { BaseService } from './base.service';
 import { TestHelper } from '../test.helper';
 
 describe('BaseController', () => {
     let app: INestApplication;
-    let service: BaseService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [BaseModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
 
-        service = moduleFixture.get<BaseService>(BaseService);
-        await Promise.all(['name1', 'name2'].map((name: string) => service.repository.save(service.repository.create({ name }))));
-
         await app.init();
     });
 
-    afterEach(async () => {
+    beforeEach(async () => {
+        await BaseEntity.delete({});
+    });
+
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

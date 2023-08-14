@@ -1,6 +1,5 @@
-import { INestApplication, HttpStatus } from '@nestjs/common';
+import { INestApplication, HttpStatus, ConsoleLogger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
 import request from 'supertest';
 
 import { TestEntity, TestModule, TestService } from './module';
@@ -11,10 +10,14 @@ describe('Search Cursor Pagination', () => {
     let app: INestApplication;
     let service: TestService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
+        const logger = new ConsoleLogger();
+        logger.setLogLevels(['error']);
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [TestModule, TestHelper.getTypeOrmMysqlModule([TestEntity])],
-        }).compile();
+        })
+            .setLogger(logger)
+            .compile();
         app = moduleFixture.createNestApplication();
         service = moduleFixture.get<TestService>(TestService);
 
@@ -34,22 +37,23 @@ describe('Search Cursor Pagination', () => {
          * - when index is [25-49], is has null
          */
         await Promise.all(
-            _.range(25).map((no: number) =>
+            Array.from({ length: 25 }, (_, index) => index).map((no: number) =>
                 service.repository.save(
                     service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no, col3: 50 - no }),
                 ),
             ),
         );
         await Promise.all(
-            _.range(25, 50).map((no: number) =>
+            Array.from({ length: 25 }, (_, index) => index + 25).map((no: number) =>
                 service.repository.save(service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no })),
             ),
         );
+        expect(await TestEntity.count()).toEqual(50);
 
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -57,33 +61,56 @@ describe('Search Cursor Pagination', () => {
     it('should fetch with nextCursor', async () => {
         const searchRequestBody = { where: [{ col2: { operator: '<', operand: 40 } }], order: { col1: 'DESC' }, take: 10 };
 
-        const firstResponse = await request(app.getHttpServer()).post('/base/search').send(searchRequestBody);
-        expect(firstResponse.statusCode).toEqual(HttpStatus.OK);
-        expect(firstResponse.body.data).toHaveLength(10);
-
-        const lastEntity = PaginationHelper.deserialize<TestEntity>(firstResponse.body.metadata.nextCursor);
-        expect(lastEntity).toEqual({ col1: 'col1_29' });
-        const preCondition = PaginationHelper.deserialize(firstResponse.body.metadata.query);
-        expect(preCondition).toEqual({ ...searchRequestBody, withDeleted: false });
-
-        const secondResponse = await request(app.getHttpServer())
+        const { body: firstResponse } = await request(app.getHttpServer())
             .post('/base/search')
-            .send({ nextCursor: firstResponse.body.metadata.nextCursor, query: firstResponse.body.metadata.query });
+            .send(searchRequestBody)
+            .expect(HttpStatus.OK);
+        expect(firstResponse.data).toHaveLength(10);
 
-        expect(secondResponse.statusCode).toEqual(HttpStatus.OK);
-        expect(secondResponse.body.data).toHaveLength(10);
-        const firstDataCol1: Set<string> = new Set(firstResponse.body.data.map((d: { col1: string }) => d.col1));
+        const lastEntity = PaginationHelper.deserialize<TestEntity>(firstResponse.metadata.nextCursor);
+        expect(lastEntity).toEqual({ col1: 'col1_29' });
+        const preCondition: Record<string, unknown> = PaginationHelper.deserialize(firstResponse.metadata.query);
+        expect(preCondition).toEqual({
+            where: expect.any(String),
+            nextCursor: expect.any(String),
+            total: expect.any(Number),
+        });
+        expect(PaginationHelper.deserialize(preCondition.where as string)).toEqual({
+            where: [
+                {
+                    col2: { operator: '<', operand: 40 },
+                },
+            ],
+            order: { col1: 'DESC' },
+            take: 10,
+            withDeleted: false,
+        });
 
-        for (const nextData of secondResponse.body.data) {
+        const { body: secondResponse } = await request(app.getHttpServer())
+            .post('/base/search')
+            .send({ nextCursor: firstResponse.metadata.nextCursor, query: firstResponse.metadata.query })
+            .expect(HttpStatus.OK);
+
+        expect(secondResponse.data).toHaveLength(10);
+        const firstDataCol1: Set<string> = new Set(firstResponse.data.map((d: { col1: string }) => d.col1));
+
+        for (const nextData of secondResponse.data) {
             expect(firstDataCol1.has(nextData.col1)).not.toBeTruthy();
         }
 
-        const nextLastEntity = PaginationHelper.deserialize(secondResponse.body.metadata.nextCursor);
+        const nextLastEntity = PaginationHelper.deserialize(secondResponse.metadata.nextCursor);
         expect(nextLastEntity).toEqual({ col1: 'col1_1' });
-        const nextPreCondition = PaginationHelper.deserialize(secondResponse.body.metadata.query);
-        expect(nextPreCondition).toEqual(
-            _.merge(searchRequestBody, { where: [{ col1: { operand: lastEntity.col1, operator: '<' } }] }, { withDeleted: false }),
-        );
+
+        const nextPreCondition: Record<string, unknown> = PaginationHelper.deserialize(secondResponse.metadata.query);
+        expect(nextPreCondition).toEqual({
+            where: expect.any(String),
+            nextCursor: expect.any(String),
+            total: expect.any(Number),
+        });
+        expect(PaginationHelper.deserialize(nextPreCondition.where as string)).toEqual({
+            ...searchRequestBody,
+            withDeleted: false,
+        });
     });
 
     it('should be less than limitOfTake', async () => {

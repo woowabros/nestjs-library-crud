@@ -4,7 +4,6 @@ import { Controller, Injectable, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsOptional } from 'class-validator';
-import _ from 'lodash';
 import request from 'supertest';
 import { Entity, BaseEntity, Repository, PrimaryColumn, Column, DeleteDateColumn } from 'typeorm';
 
@@ -53,7 +52,7 @@ describe('Logging', () => {
     let app: INestApplication;
     let loggerSpy: jest.SpyInstance;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [TestModule, TestHelper.getTypeOrmPgsqlModule([TestEntity])],
         })
@@ -65,7 +64,7 @@ describe('Logging', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -84,11 +83,11 @@ describe('Logging', () => {
                 _findOptions: {
                     where: {},
                     take: 20,
-                    withDeleted: false,
                     order: { col1: 'DESC' },
+                    withDeleted: false,
                     relations: [],
                 },
-                _pagination: { type: 'cursor' },
+                _pagination: { _isNext: false, type: 'cursor', _where: btoa('{}') },
                 _sort: 'DESC',
             }),
             'CRUD GET /base',

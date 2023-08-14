@@ -4,7 +4,7 @@ import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
 import { Observable } from 'rxjs';
-import { BaseEntity } from 'typeorm';
+import { BaseEntity, FindOptionsOrder, FindOptionsWhere, LessThan, MoreThan } from 'typeorm';
 
 import { CustomSearchRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
@@ -12,9 +12,10 @@ import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { CreateParamsDto } from '../dto/params.dto';
 import { RequestSearchDto } from '../dto/request-search.dto';
-import { CrudOptions, CrudSearchRequest, FactoryOption, GROUP, Method, Sort } from '../interface';
+import { CrudOptions, FactoryOption, GROUP, Method, PaginationType, Sort } from '../interface';
 import { operatorBetween, operatorIn, operatorNull, operatorList, OperatorUnion } from '../interface/query-operation.interface';
-import { PaginationHelper } from '../provider';
+import { PaginationHelper, TypeOrmQueryBuilderHelper } from '../provider';
+import { CrudReadManyRequest } from '../request';
 
 const method = Method.SEARCH;
 export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
@@ -25,7 +26,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
-
+            const searchOptions = crudOptions.routes?.[method] ?? {};
             const customSearchRequestOptions: CustomSearchRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
 
             if (req.params && req.body?.where && Array.isArray(req.body.where)) {
@@ -37,14 +38,48 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     _.merge(queryFilter, paramsCondition);
                 }
             }
-            const requestSearchDto = await this.validateBody(req.body);
-            const crudSearchRequest: CrudSearchRequest<typeof crudOptions.entity> = {
-                requestSearchDto,
-                relations: customSearchRequestOptions?.relations ?? factoryOption.relations,
-            };
+            const paginationType = (searchOptions.paginationType ?? CRUD_POLICY[method].default.paginationType) as PaginationType;
+            const pagination = PaginationHelper.getPaginationRequest(paginationType, req.body);
+            const isNextPage = PaginationHelper.isNextPage(pagination);
 
-            this.crudLogger.logRequest(req, crudSearchRequest);
-            req[CRUD_ROUTE_ARGS] = crudSearchRequest;
+            const requestSearchDto = await (async () => {
+                if (isNextPage) {
+                    pagination.setQuery(pagination.query ?? btoa('{}'));
+                    return PaginationHelper.deserialize<RequestSearchDto<typeof BaseEntity>>(pagination.where);
+                }
+                const searchBody = await this.validateBody(req.body);
+                pagination.setWhere(PaginationHelper.serialize((searchBody ?? {}) as FindOptionsWhere<typeof crudOptions.entity>));
+                return searchBody;
+            })();
+
+            pagination.query =
+                pagination.query ??
+                PaginationHelper.serialize((requestSearchDto.where ?? {}) as FindOptionsWhere<typeof crudOptions.entity>);
+            const where:
+                | Array<FindOptionsWhere<typeof crudOptions.entity>>
+                | (FindOptionsWhere<typeof crudOptions.entity> & Partial<typeof crudOptions.entity>) =
+                Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
+                    ? requestSearchDto.where.map((queryFilter, index) =>
+                          TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter, index),
+                      )
+                    : {};
+
+            const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
+                .setPrimaryKey(factoryOption.primaryKeys ?? [])
+                .setPagination(pagination)
+                .setSelect(requestSearchDto.select)
+                .setWhere(where)
+                .setTake(requestSearchDto.take ?? CRUD_POLICY[method].default.numberOfTake)
+                .setOrder(requestSearchDto.order as FindOptionsOrder<typeof crudOptions.entity>, CRUD_POLICY[method].default.sort)
+                .setWithDeleted(
+                    requestSearchDto.withDeleted ?? crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted,
+                )
+                .setRelations(customSearchRequestOptions?.relations ?? factoryOption.relations)
+                .setDeserialize(this.deserialize)
+                .generate();
+
+            this.crudLogger.logRequest(req, crudReadManyRequest.toString());
+            req[CRUD_ROUTE_ARGS] = crudReadManyRequest;
 
             return next.handle();
         }
@@ -57,10 +92,6 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             const requestSearchDto = plainToInstance(RequestSearchDto<typeof crudOptions.entity>, body);
             const searchOptions = crudOptions.routes?.[method] ?? {};
-
-            if ('nextCursor' in requestSearchDto) {
-                return this.validatePagination(requestSearchDto);
-            }
 
             if ('select' in requestSearchDto) {
                 this.validateSelect(requestSearchDto.select);
@@ -78,6 +109,10 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 this.validateWithDeleted(requestSearchDto.withDeleted);
             } else {
                 requestSearchDto.withDeleted = searchOptions.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean);
+            }
+
+            if ('take' in requestSearchDto) {
+                this.validateTake(requestSearchDto.take, searchOptions.limitOfTake);
             }
 
             requestSearchDto.take =
@@ -240,6 +275,29 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 throw new UnprocessableEntityException(`take must be less than ${limitOfTake}`);
             }
             return takeNumber;
+        }
+
+        deserialize<T>({ pagination, findOptions, sort }: CrudReadManyRequest<T>): Array<FindOptionsWhere<T>> {
+            const where = findOptions.where as Array<FindOptionsWhere<BaseEntity>>;
+            if (pagination.type === PaginationType.OFFSET) {
+                return where;
+            }
+
+            const lastObject: Record<string, unknown> = PaginationHelper.deserialize(pagination.nextCursor);
+
+            const operator = (key: keyof T) => ((findOptions.order?.[key] ?? sort) === Sort.DESC ? LessThan : MoreThan);
+
+            const cursorCondition = Object.entries(lastObject).reduce(
+                (queryFilter, [key, operand]) => ({
+                    ...queryFilter,
+                    [key]: operator(key as keyof T)(operand),
+                }),
+                {},
+            );
+            for (const queryFilter of where) {
+                _.merge(queryFilter, cursorCondition);
+            }
+            return where;
         }
     }
 

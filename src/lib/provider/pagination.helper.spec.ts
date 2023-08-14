@@ -1,4 +1,7 @@
+import { UnprocessableEntityException } from '@nestjs/common';
+
 import { PaginationHelper } from './pagination.helper';
+import { PaginationType } from '../interface';
 
 describe('Pagination Helper', () => {
     it('should serialize entity', () => {
@@ -13,5 +16,37 @@ describe('Pagination Helper', () => {
     it('should return empty object when cursor is malformed', () => {
         const cursor = 'malformed';
         expect(PaginationHelper.deserialize(cursor)).toEqual({});
+    });
+
+    it('should be able to return pagination for GET_MORE type', () => {
+        expect(PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { key: 'value', nextCursor: 'token' })).toEqual({
+            nextCursor: 'token',
+            query: btoa('{}'),
+            type: 'cursor',
+            _isNext: false,
+        });
+    });
+
+    it('should be validate pagination query', () => {
+        expect(PaginationHelper.getPaginationRequest(PaginationType.CURSOR, undefined as any)).toEqual({
+            type: 'cursor',
+            nextCursor: undefined,
+            query: undefined,
+            _isNext: false,
+        });
+        expect(() => PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { nextCursor: 3 })).toThrowError(
+            UnprocessableEntityException,
+        );
+
+        expect(PaginationHelper.getPaginationRequest(PaginationType.OFFSET, undefined as any)).toEqual({
+            type: 'offset',
+            limit: undefined,
+            offset: undefined,
+            query: undefined,
+            _isNext: false,
+        });
+        expect(() => PaginationHelper.getPaginationRequest(PaginationType.OFFSET, { limit: 200 })).toThrowError(
+            UnprocessableEntityException,
+        );
     });
 });

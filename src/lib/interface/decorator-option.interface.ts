@@ -102,6 +102,11 @@ export interface CrudOptions {
         } & Omit<RouteBaseOption, 'response'>;
         [Method.SEARCH]?: {
             /**
+             * Type of pagination to use. Currently 'offset' and 'cursor' are supported.
+             * @default PaginationType.CURSOR
+             */
+            paginationType?: PaginationType | `${PaginationType}`;
+            /**
              * Default number of entities should be taken. See `crud.policy.ts` for more details.
              * @default 20
              */

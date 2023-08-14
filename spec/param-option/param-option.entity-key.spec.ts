@@ -1,16 +1,15 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
 import request from 'supertest';
 
 import { DynamicCrudModule } from '../dynamic-crud.module';
 import { TestHelper } from '../test.helper';
 
-describe('Params Option - entity의 key를 params으로 사용하는 경우', () => {
+describe('Params Option - When using the entity`s key as params', () => {
     let app: INestApplication;
     const param = 'name';
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [
                 DynamicCrudModule({
@@ -26,7 +25,7 @@ describe('Params Option - entity의 key를 params으로 사용하는 경우', ()
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -45,7 +44,7 @@ describe('Params Option - entity의 key를 params으로 사용하는 경우', ()
         const names = ['name1', 'name1', 'name2', 'name2', 'name3', 'name1'];
 
         await Promise.all(
-            _.range(0, names.length).map((index) =>
+            Array.from({ length: names.length }, (_, index) => index).map((index) =>
                 request(app.getHttpServer()).post('/base').send({ name: names[index] }).expect(HttpStatus.CREATED),
             ),
         );

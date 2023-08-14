@@ -4,26 +4,21 @@ import request from 'supertest';
 
 import { CustomEntity } from './custom-entity.entity';
 import { CustomEntityModule } from './custom-entity.module';
-import { CustomEntityService } from './custom-entity.service';
 import { TestHelper } from '../test.helper';
 
 describe('CustomEntity - Update', () => {
     let app: INestApplication;
-    let service: CustomEntityService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [CustomEntityModule, TestHelper.getTypeOrmMysqlModule([CustomEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
 
-        service = moduleFixture.get<CustomEntityService>(CustomEntityService);
-        await Promise.all(['name1', 'name2'].map((name: string) => service.repository.save(service.repository.create({ name }))));
-
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

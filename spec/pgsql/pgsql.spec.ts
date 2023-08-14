@@ -59,7 +59,7 @@ class TestModule {}
 describe('Search complex conditions', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [TestModule, TestHelper.getTypeOrmPgsqlModule([TestEntity])],
         }).compile();
@@ -79,7 +79,7 @@ describe('Search complex conditions', () => {
         );
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

@@ -1,6 +1,5 @@
 import { ConsoleLogger, HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
 import request from 'supertest';
 
 import { ReadManyModule } from './read-many.module';
@@ -13,7 +12,7 @@ describe('ReadMany - Options', () => {
     let service: BaseService;
     const defaultLimit = 20;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const logger = new ConsoleLogger();
         logger.setLogLevels(['error']);
         const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -24,12 +23,16 @@ describe('ReadMany - Options', () => {
         app = moduleFixture.createNestApplication();
 
         service = moduleFixture.get<BaseService>(BaseService);
-        await Promise.all(_.range(100).map((number) => service.repository.save(service.repository.create({ name: `name-${number}` }))));
+        await Promise.all(
+            Array.from({ length: 100 }, (_, index) => index).map((number) =>
+                service.repository.save(service.repository.create({ name: `name-${number}` })),
+            ),
+        );
 
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -107,8 +110,10 @@ describe('ReadMany - Options', () => {
                 })
                 .expect(HttpStatus.OK);
 
-            expect(nextResponse.metadata.query).toEqual(firstResponse.metadata.query);
-            expect(secondNextResponse.metadata.query).toEqual(firstResponse.metadata.query);
+            expect(nextResponse.metadata.query).toEqual(expect.any(String));
+            expect(nextResponse.metadata.query).not.toEqual(firstResponse.metadata.query);
+            expect(secondNextResponse.metadata.query).toEqual(expect.any(String));
+            expect(secondNextResponse.metadata.query).not.toEqual(firstResponse.metadata.query);
 
             expect(nextResponse.metadata.nextCursor).not.toEqual(firstResponse.metadata.nextCursor);
             expect(secondNextResponse.metadata.nextCursor).not.toEqual(nextResponse.metadata.nextCursor);

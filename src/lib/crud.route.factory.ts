@@ -24,7 +24,6 @@ import {
     CrudOptions,
     CrudReadOneRequest,
     CrudRecoverRequest,
-    CrudSearchRequest,
     CrudUpdateOneRequest,
     FactoryOption,
     Method,
@@ -117,8 +116,8 @@ export class CrudRouteFactory {
     }
 
     protected search<T>(controllerMethodName: string) {
-        this.targetPrototype[controllerMethodName] = function reservedSearch(crudSearchRequest: CrudSearchRequest<T>) {
-            return this.crudService.reservedSearch(crudSearchRequest);
+        this.targetPrototype[controllerMethodName] = function reservedReadMany(crudReadManyRequest: CrudReadManyRequest<T>) {
+            return this.crudService.reservedReadMany(crudReadManyRequest);
         };
     }
 

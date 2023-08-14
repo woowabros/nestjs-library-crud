@@ -1,6 +1,6 @@
 import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
-import { BaseEntity, DeepPartial, FindManyOptions, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere, Repository } from 'typeorm';
+import { BaseEntity, DeepPartial, FindOptionsSelect, FindOptionsWhere, Repository } from 'typeorm';
 
 import {
     CrudReadOneRequest,
@@ -9,14 +9,10 @@ import {
     CrudUpsertRequest,
     CrudRecoverRequest,
     PaginationResponse,
-    CrudSearchRequest,
     isCrudCreateManyRequest,
     CrudCreateOneRequest,
     CrudCreateManyRequest,
-    CursorPaginationResponse,
 } from './interface';
-import { PaginationHelper } from './provider/pagination.helper';
-import { TypeOrmQueryBuilderHelper } from './provider/typeorm-query-builder.helper';
 import { CrudReadManyRequest } from './request';
 
 export class CrudService<T extends BaseEntity> {
@@ -26,53 +22,24 @@ export class CrudService<T extends BaseEntity> {
         this.primaryKey = this.repository.metadata.primaryColumns?.map((columnMetadata) => columnMetadata.propertyName) ?? [];
     }
 
-    readonly reservedSearch = async (crudSearchRequest: CrudSearchRequest<T>): Promise<CursorPaginationResponse<T>> => {
-        const { requestSearchDto, relations } = crudSearchRequest;
-
-        const limit = requestSearchDto.take;
-        const findManyOptions: FindManyOptions<T> = {
-            select: requestSearchDto.select,
-            where:
-                Array.isArray(requestSearchDto.where) && requestSearchDto.where.length > 0
-                    ? requestSearchDto.where.map((queryFilter, index) =>
-                          TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter, index),
-                      )
-                    : undefined,
-            withDeleted: requestSearchDto.withDeleted,
-            take: limit,
-            order: requestSearchDto.order as FindOptionsOrder<T>,
-            relations,
-        };
-        const [data, total] = await Promise.all([
-            this.repository.find({ ...findManyOptions }),
-            this.repository.count({
-                select: findManyOptions.select,
-                where: findManyOptions.where,
-                withDeleted: findManyOptions.withDeleted,
-            }),
-        ]);
-        const nextCursor = PaginationHelper.serialize(_.pick(data.at(-1), this.primaryKey) as FindOptionsWhere<T>);
-
-        return {
-            data,
-            metadata: {
-                nextCursor,
-                limit: limit!,
-                total,
-                query: PaginationHelper.serialize((requestSearchDto ?? {}) as FindOptionsWhere<T>),
-            },
-        };
-    };
-
     readonly reservedReadMany = async (crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> => {
         try {
-            const [entities, total] = await Promise.all([
-                this.repository.find({ ...crudReadManyRequest.findOptions }),
-                this.repository.count({
-                    where: crudReadManyRequest.findOptions.where,
-                    withDeleted: crudReadManyRequest.findOptions.withDeleted,
-                }),
-            ]);
+            const { entities, total } = await (async () => {
+                const findEntities = this.repository.find({ ...crudReadManyRequest.findOptions });
+
+                if (crudReadManyRequest.pagination.isNext) {
+                    const entities = await findEntities;
+                    return { entities, total: crudReadManyRequest.pagination.nextTotal(entities.length) };
+                }
+                const [entities, total] = await Promise.all([
+                    findEntities,
+                    this.repository.count({
+                        where: crudReadManyRequest.findOptions.where,
+                        withDeleted: crudReadManyRequest.findOptions.withDeleted,
+                    }),
+                ]);
+                return { entities, total };
+            })();
             return crudReadManyRequest.toResponse(entities, total);
         } catch (error) {
             Logger.error(crudReadManyRequest.toString());
@@ -126,7 +93,7 @@ export class CrudService<T extends BaseEntity> {
             })
             .then(async (entity: T | null) => {
                 const upsertEntity = entity ?? this.repository.create(crudUpsertRequest.params as unknown as DeepPartial<T>);
-                if (!_.isNil(_.get(upsertEntity, 'deletedAt'))) {
+                if ('deletedAt' in upsertEntity && upsertEntity.deletedAt != null) {
                     throw new ConflictException('it has been deleted');
                 }
 

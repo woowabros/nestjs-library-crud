@@ -9,7 +9,7 @@ import { TestHelper } from '../test.helper';
 describe('SwaggerDecorator', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [SwaggerDecoratorModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
@@ -19,7 +19,7 @@ describe('SwaggerDecorator', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

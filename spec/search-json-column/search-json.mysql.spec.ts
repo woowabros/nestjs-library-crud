@@ -1,7 +1,8 @@
 import 'mysql2';
 
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import request from 'supertest';
 
 import { fixtures } from './fixture';
 import { JsonColumnEntity, JsonColumnModule, JsonColumnService } from './json.module';
@@ -11,7 +12,7 @@ describe('Search JSON column - MySQL', () => {
     let app: INestApplication;
     let service: JsonColumnService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [JsonColumnModule, TestHelper.getTypeOrmMysqlModule([JsonColumnEntity])],
         }).compile();
@@ -24,27 +25,34 @@ describe('Search JSON column - MySQL', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
 
     describe('[JSON_CONTAINS operator] Whether JSON document contains specific object at path', () => {
         it('should search entities that meets operation for array column', async () => {
-            const { data } = await service.reservedSearch({
-                requestSearchDto: { where: [{ friends: { operator: 'JSON_CONTAINS', operand: '{ "firstName": "Taylor" }' } }] },
-                relations: [],
-            });
+            const {
+                body: { data },
+            } = await request(app.getHttpServer())
+                .post('/json/search')
+                .send({ where: [{ friends: { operator: 'JSON_CONTAINS', operand: '{ "firstName": "Taylor" }' } }] })
+                .expect(HttpStatus.OK);
             expect(data).toHaveLength(1);
 
-            const { data: data2 } = await service.reservedSearch({
-                requestSearchDto: { where: [{ friends: { operator: 'JSON_CONTAINS', operand: '{ "gender": "Male" }' } }] },
-                relations: [],
-            });
+            const {
+                body: { data: data2 },
+            } = await request(app.getHttpServer())
+                .post('/json/search')
+                .send({ where: [{ friends: { operator: 'JSON_CONTAINS', operand: '{ "gender": "Male" }' } }] })
+                .expect(HttpStatus.OK);
             expect(data2).toHaveLength(2);
 
-            const { data: data3 } = await service.reservedSearch({
-                requestSearchDto: {
+            const {
+                body: { data: data3 },
+            } = await request(app.getHttpServer())
+                .post('/json/search')
+                .send({
                     where: [
                         {
                             friends: {
@@ -53,25 +61,28 @@ describe('Search JSON column - MySQL', () => {
                             },
                         },
                     ],
-                },
-                relations: [],
-            });
+                })
+                .expect(HttpStatus.OK);
             expect(data3).toHaveLength(1);
         });
 
         it('should search entities that meets operation for object column', async () => {
-            const { data } = await service.reservedSearch({
-                requestSearchDto: { where: [{ address: { operator: 'JSON_CONTAINS', operand: '{ "city": "Bali" }' } }] },
-                relations: [],
-            });
+            const {
+                body: { data },
+            } = await request(app.getHttpServer())
+                .post('/json/search')
+                .send({ where: [{ address: { operator: 'JSON_CONTAINS', operand: '{ "city": "Bali" }' } }] })
+                .expect(HttpStatus.OK);
             expect(data).toHaveLength(1);
         });
 
         it('should return empty array when no record matches', async () => {
-            const { data } = await service.reservedSearch({
-                requestSearchDto: { where: [{ friends: { operator: 'JSON_CONTAINS', operand: '{ "firstName": "Donghyuk" }' } }] },
-                relations: [],
-            });
+            const {
+                body: { data },
+            } = await request(app.getHttpServer())
+                .post('/json/search')
+                .send({ where: [{ friends: { operator: 'JSON_CONTAINS', operand: '{ "firstName": "Donghyuk" }' } }] })
+                .expect(HttpStatus.OK);
             expect(data).toHaveLength(0);
         });
     });

@@ -18,7 +18,7 @@ describe('RequestAbstractInterceptor', () => {
         id: number;
     }
 
-    beforeEach(() => {
+    beforeAll(() => {
         class FooInterceptor extends RequestAbstractInterceptor {
             constructor(crudLogger: CrudLogger) {
                 super(crudLogger);

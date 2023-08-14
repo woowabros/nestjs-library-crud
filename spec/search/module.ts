@@ -39,6 +39,7 @@ export class TestService extends CrudService<TestEntity> {
             limitOfTake: 100,
         },
     },
+    logging: true,
 })
 @Controller('base')
 export class TestController implements CrudController<TestEntity> {

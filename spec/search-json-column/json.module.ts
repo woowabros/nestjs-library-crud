@@ -1,10 +1,11 @@
 /* eslint-disable max-classes-per-file */
 import { Controller, Injectable, Module } from '@nestjs/common';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
+import { IsOptional } from 'class-validator';
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, Repository } from 'typeorm';
 
 import { Address, Person } from './interface';
-import { Crud, CrudService, CrudController } from '../../src';
+import { Crud, CrudService, CrudController, GROUP } from '../../src';
 
 @Entity('json_column_entity')
 export class JsonColumnEntity extends BaseEntity {
@@ -15,9 +16,11 @@ export class JsonColumnEntity extends BaseEntity {
     colors: string[];
 
     @Column({ type: 'json', nullable: true })
+    @IsOptional({ groups: [GROUP.SEARCH] })
     friends: Person[];
 
     @Column({ type: 'json' })
+    @IsOptional({ groups: [GROUP.SEARCH] })
     address: Address;
 }
 

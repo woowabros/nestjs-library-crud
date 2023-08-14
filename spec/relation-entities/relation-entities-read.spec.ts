@@ -190,7 +190,7 @@ describe('Relation Entities Read', () => {
 
         const { body: commentListBodyNext } = await request(app.getHttpServer())
             .get('/comment')
-            .query({ nextCursor: commentListBody.metadata.nextCursor })
+            .query({ query: commentListBody.metadata.query })
             .expect(HttpStatus.OK);
 
         expect(commentListBodyNext.data).toHaveLength(1);

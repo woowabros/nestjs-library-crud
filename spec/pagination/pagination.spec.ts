@@ -185,19 +185,6 @@ describe('Pagination', () => {
             expect((responseBody.data as Array<{ id: string }>).some(({ id }) => nextDataIds.has(id))).not.toBeTruthy();
         });
 
-        it('should throw when offset pagination query provided', async () => {
-            const { body: responseBody } = await request(app.getHttpServer()).get(`/${PaginationType.OFFSET}`).expect(HttpStatus.OK);
-
-            await request(app.getHttpServer())
-                .get(`/${PaginationType.CURSOR}`)
-                .query({
-                    query: responseBody.metadata.query,
-                    offset: responseBody.metadata.offset,
-                    limit: 15,
-                })
-                .expect(HttpStatus.UNPROCESSABLE_ENTITY);
-        });
-
         it('should be calculate the number of entities', async () => {
             const {
                 body: { metadata: metadataAll },

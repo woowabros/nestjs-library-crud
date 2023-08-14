@@ -11,6 +11,7 @@ export abstract class AbstractPaginationRequest {
     private _isNext: boolean = false;
     private _where: string;
     private _total: number;
+    private _nextCursor: string;
 
     type: PaginationType;
 
@@ -36,7 +37,7 @@ export abstract class AbstractPaginationRequest {
             const paginationType: PaginationQuery = JSON.parse(Buffer.from(query, encoding).toString());
             this._where = paginationType.where;
             this._total = paginationType.total;
-            // this._nextCursor = paginationType.nextCursor;
+            this._nextCursor = paginationType.nextCursor;
 
             this._isNext = true;
         } catch {
@@ -54,6 +55,10 @@ export abstract class AbstractPaginationRequest {
 
     get isNext() {
         return this._isNext && this.total != null;
+    }
+
+    get nextCursor() {
+        return this._nextCursor;
     }
 
     abstract nextTotal(dataLength?: number): number;

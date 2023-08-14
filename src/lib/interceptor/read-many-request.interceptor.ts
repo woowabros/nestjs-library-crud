@@ -70,6 +70,13 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 return {};
             }
 
+            if ('limit' in query) {
+                delete query.limit;
+            }
+            if ('offset' in query) {
+                delete query.offset;
+            }
+
             const transformed = plainToInstance(crudOptions.entity, query, { groups: [GROUP.READ_MANY] });
             const errorList = await validate(transformed, {
                 groups: [GROUP.READ_MANY],

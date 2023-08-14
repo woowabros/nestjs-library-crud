@@ -20,8 +20,19 @@ describe('Pagination Helper', () => {
 
     it('should be able to return pagination for GET_MORE type', () => {
         expect(PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { key: 'value', nextCursor: 'token' })).toEqual({
-            nextCursor: 'token',
-            query: btoa('{}'),
+            query: undefined,
+            type: 'cursor',
+            _isNext: false,
+        });
+
+        expect(PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { key: 'value' })).toEqual({
+            query: undefined,
+            type: 'cursor',
+            _isNext: false,
+        });
+
+        expect(PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { query: 'query' })).toEqual({
+            query: 'query',
             type: 'cursor',
             _isNext: false,
         });
@@ -30,13 +41,11 @@ describe('Pagination Helper', () => {
     it('should be validate pagination query', () => {
         expect(PaginationHelper.getPaginationRequest(PaginationType.CURSOR, undefined as any)).toEqual({
             type: 'cursor',
-            nextCursor: undefined,
             query: undefined,
             _isNext: false,
         });
-        expect(() => PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { nextCursor: 3 })).toThrowError(
-            UnprocessableEntityException,
-        );
+
+        expect(() => PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { query: 3 })).toThrowError(UnprocessableEntityException);
 
         expect(PaginationHelper.getPaginationRequest(PaginationType.OFFSET, undefined as any)).toEqual({
             type: 'offset',
@@ -45,6 +54,9 @@ describe('Pagination Helper', () => {
             query: undefined,
             _isNext: false,
         });
+
+        expect(() => PaginationHelper.getPaginationRequest(PaginationType.OFFSET, { query: 3 })).toThrowError(UnprocessableEntityException);
+
         expect(() => PaginationHelper.getPaginationRequest(PaginationType.OFFSET, { limit: 200 })).toThrowError(
             UnprocessableEntityException,
         );

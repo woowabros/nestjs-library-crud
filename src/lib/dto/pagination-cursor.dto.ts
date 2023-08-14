@@ -7,11 +7,6 @@ import { PaginationType } from '../interface';
 export class PaginationCursorDto extends AbstractPaginationRequest {
     type: PaginationType.CURSOR = PaginationType.CURSOR;
 
-    @Expose({ name: 'nextCursor' })
-    @IsString()
-    @IsOptional()
-    nextCursor?: string;
-
     @Expose({ name: 'query' })
     @IsString()
     @IsOptional()

@@ -36,10 +36,6 @@ export class PaginationHelper {
             throw new UnprocessableEntityException(error);
         }
 
-        if (transformed.type === PaginationType.CURSOR && transformed.nextCursor && !transformed.query) {
-            transformed.query = btoa('{}');
-        }
-
         return transformed;
     }
 
@@ -50,12 +46,6 @@ export class PaginationHelper {
      * @returns boolean
      */
     static isNextPage(paginationRequest: PaginationRequest): boolean {
-        if (paginationRequest.type === PaginationType.CURSOR) {
-            return paginationRequest.nextCursor != null;
-        }
-        if (paginationRequest.type === PaginationType.OFFSET) {
-            return paginationRequest.offset != null || paginationRequest.limit != null || paginationRequest.query != null;
-        }
-        return false;
+        return paginationRequest.query != null;
     }
 }

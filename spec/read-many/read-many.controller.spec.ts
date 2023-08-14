@@ -55,7 +55,7 @@ describe('ReadMany - Options', () => {
         it('should return next 20 entities after cursor in ascending order', async () => {
             const firstResponse = await request(app.getHttpServer()).get('/sort-asc').expect(HttpStatus.OK);
             const nextResponse = await request(app.getHttpServer()).get('/sort-asc').query({
-                nextCursor: firstResponse.body.metadata.nextCursor,
+                query: firstResponse.body.metadata.query,
             });
 
             expect(nextResponse.statusCode).toEqual(HttpStatus.OK);
@@ -100,13 +100,13 @@ describe('ReadMany - Options', () => {
             const { body: nextResponse } = await request(app.getHttpServer())
                 .get('/sort-desc')
                 .query({
-                    nextCursor: firstResponse.metadata.nextCursor,
+                    query: firstResponse.metadata.query,
                 })
                 .expect(HttpStatus.OK);
             const { body: secondNextResponse } = await request(app.getHttpServer())
                 .get('/sort-desc')
                 .query({
-                    nextCursor: nextResponse.metadata.nextCursor,
+                    query: nextResponse.metadata.query,
                 })
                 .expect(HttpStatus.OK);
 

@@ -46,7 +46,6 @@ describe('CustomEntity - ReadMany', () => {
 
                 expect(response.statusCode).toEqual(HttpStatus.OK);
                 expect(response.body.data).toHaveLength(defaultLimit);
-                expect(response.body.metadata.nextCursor).toBeDefined();
                 expect(response.body.metadata.limit).toEqual(defaultLimit);
 
                 expect(response.body.data[0].uuid).toBeDefined();
@@ -57,12 +56,11 @@ describe('CustomEntity - ReadMany', () => {
             it('should return next 20 entities after cursor', async () => {
                 const firstResponse = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
                 const nextResponse = await request(app.getHttpServer()).get('/base').query({
-                    nextCursor: firstResponse.body.metadata.nextCursor,
+                    query: firstResponse.body.metadata.query,
                 });
 
                 expect(nextResponse.statusCode).toEqual(HttpStatus.OK);
                 expect(nextResponse.body.data).toHaveLength(defaultLimit);
-                expect(nextResponse.body.metadata.nextCursor).toBeDefined();
                 expect(nextResponse.body.metadata.limit).toEqual(defaultLimit);
 
                 expect(firstResponse.body.metadata.nextCursor).not.toEqual(nextResponse.body.metadata.nextCursor);

@@ -13,6 +13,7 @@ import { DECORATORS } from '@nestjs/swagger/dist/constants';
 import { BaseEntity, getMetadataArgsStorage } from 'typeorm';
 import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 
+import { capitalizeFirstLetter } from './capitalize-first-letter';
 import { CRUD_ROUTE_ARGS } from './constants';
 import { CRUD_POLICY } from './crud.policy';
 import { RequestSearchDto } from './dto/request-search.dto';
@@ -33,7 +34,6 @@ import {
 } from './interface';
 import { CrudLogger } from './provider/crud-logger';
 import { CrudReadManyRequest } from './request';
-import { capitalizeFirstLetter, isSomeEnum } from './util';
 
 export class CrudRouteFactory {
     private crudLogger: CrudLogger;
@@ -51,7 +51,11 @@ export class CrudRouteFactory {
         this.entityInformation(crudOptions.entity);
 
         const paginationType = crudOptions.routes?.readMany?.paginationType ?? CRUD_POLICY[Method.READ_MANY].default.paginationType;
-        const isPaginationType = isSomeEnum(PaginationType);
+        const isPaginationType = (
+            <TEnum extends Record<string, unknown>>(enumType: TEnum) =>
+            (nextCursor: unknown): nextCursor is TEnum[keyof TEnum] =>
+                Object.values(enumType).includes(nextCursor as TEnum[keyof TEnum])
+        )(PaginationType);
         if (!isPaginationType(paginationType)) {
             throw new TypeError(`invalid PaginationType ${paginationType}`);
         }

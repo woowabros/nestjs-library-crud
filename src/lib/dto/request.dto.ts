@@ -5,8 +5,8 @@ import { getMetadataStorage, MetadataStorage } from 'class-validator';
 import { ValidationMetadata } from 'class-validator/types/metadata/ValidationMetadata';
 import { BaseEntity } from 'typeorm';
 
+import { capitalizeFirstLetter } from '../capitalize-first-letter';
 import { Method } from '../interface';
-import { capitalizeFirstLetter } from '../util';
 
 export function CreateRequestDto(parentClass: typeof BaseEntity, group: Method) {
     const propertyNamesAppliedValidation = getPropertyNamesFromMetadata(parentClass, group);

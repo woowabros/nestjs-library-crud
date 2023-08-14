@@ -88,7 +88,7 @@ describe('Search Cursor Pagination', () => {
 
         const { body: secondResponse } = await request(app.getHttpServer())
             .post('/base/search')
-            .send({ query: firstResponse.metadata.nextCursor })
+            .send({ nextCursor: firstResponse.metadata.nextCursor })
             .expect(HttpStatus.OK);
 
         expect(secondResponse.data).toHaveLength(10);

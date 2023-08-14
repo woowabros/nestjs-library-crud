@@ -10,6 +10,7 @@ export const PAGINATION_SWAGGER_QUERY: Record<PaginationType, Array<{ name: stri
     [PaginationType.OFFSET]: [
         { name: 'limit', type: 'integer' },
         { name: 'offset', type: 'integer' },
+        { name: 'nextCursor', type: 'string' },
     ],
     [PaginationType.CURSOR]: [{ name: 'nextCursor', type: 'string' }],
 };

@@ -1,5 +1,5 @@
 import { Expose, Transform, Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsPositive, IsString, Max } from 'class-validator';
+import { IsNumber, IsOptional, IsPositive, Max } from 'class-validator';
 
 import { AbstractPaginationRequest } from '../abstract';
 import { PaginationType } from '../interface';
@@ -20,11 +20,6 @@ export class PaginationOffsetDto extends AbstractPaginationRequest {
     @Type(() => Number)
     @IsOptional()
     offset?: number;
-
-    @Expose({ name: 'query' })
-    @IsString()
-    @IsOptional()
-    query?: string;
 
     nextTotal(): number {
         return this.total;

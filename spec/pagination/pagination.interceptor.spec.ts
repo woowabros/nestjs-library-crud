@@ -67,8 +67,11 @@ describe('Pagination with interceptor', () => {
 
             const {
                 body: responseBodyAfterDelete,
-            }: { body: { data: Array<{ id: number; deletedAt?: unknown }>; metadata: { nextCursor: unknown; query: unknown } } } =
-                await request(app.getHttpServer()).get(`/${PaginationType.CURSOR}`).expect(HttpStatus.OK);
+            }: { body: { data: Array<{ id: number; deletedAt?: unknown }>; metadata: { nextCursor: unknown } } } = await request(
+                app.getHttpServer(),
+            )
+                .get(`/${PaginationType.CURSOR}`)
+                .expect(HttpStatus.OK);
             const { body: offsetResponseBodyAfterDelete } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .expect(HttpStatus.OK);
@@ -91,13 +94,13 @@ describe('Pagination with interceptor', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.CURSOR}`)
                 .query({
-                    query: responseBodyAfterDelete.metadata.nextCursor,
+                    nextCursor: responseBodyAfterDelete.metadata.nextCursor,
                 })
                 .expect(HttpStatus.OK);
             const { body: offsetNextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .query({
-                    query: offsetResponseBodyAfterDelete.metadata.nextCursor,
+                    nextCursor: offsetResponseBodyAfterDelete.metadata.nextCursor,
                     offset: offsetResponseBodyAfterDelete.metadata.offset,
                 })
                 .expect(HttpStatus.OK);

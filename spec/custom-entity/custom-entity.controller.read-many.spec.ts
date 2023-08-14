@@ -56,7 +56,7 @@ describe('CustomEntity - ReadMany', () => {
             it('should return next 20 entities after cursor', async () => {
                 const firstResponse = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
                 const nextResponse = await request(app.getHttpServer()).get('/base').query({
-                    query: firstResponse.body.metadata.nextCursor,
+                    nextCursor: firstResponse.body.metadata.nextCursor,
                 });
 
                 expect(nextResponse.statusCode).toEqual(HttpStatus.OK);

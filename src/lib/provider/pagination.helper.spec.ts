@@ -20,7 +20,7 @@ describe('Pagination Helper', () => {
 
     it('should be able to return pagination for GET_MORE type', () => {
         expect(PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { key: 'value', nextCursor: 'token' })).toEqual({
-            query: undefined,
+            query: 'token',
             type: 'cursor',
             _isNext: false,
         });
@@ -32,7 +32,7 @@ describe('Pagination Helper', () => {
         });
 
         expect(PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { query: 'query' })).toEqual({
-            query: 'query',
+            query: undefined,
             type: 'cursor',
             _isNext: false,
         });
@@ -45,7 +45,9 @@ describe('Pagination Helper', () => {
             _isNext: false,
         });
 
-        expect(() => PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { query: 3 })).toThrowError(UnprocessableEntityException);
+        expect(() => PaginationHelper.getPaginationRequest(PaginationType.CURSOR, { nextCursor: 3 })).toThrowError(
+            UnprocessableEntityException,
+        );
 
         expect(PaginationHelper.getPaginationRequest(PaginationType.OFFSET, undefined as any)).toEqual({
             type: 'offset',
@@ -55,7 +57,9 @@ describe('Pagination Helper', () => {
             _isNext: false,
         });
 
-        expect(() => PaginationHelper.getPaginationRequest(PaginationType.OFFSET, { query: 3 })).toThrowError(UnprocessableEntityException);
+        expect(() => PaginationHelper.getPaginationRequest(PaginationType.OFFSET, { nextCursor: 3 })).toThrowError(
+            UnprocessableEntityException,
+        );
 
         expect(() => PaginationHelper.getPaginationRequest(PaginationType.OFFSET, { limit: 200 })).toThrowError(
             UnprocessableEntityException,

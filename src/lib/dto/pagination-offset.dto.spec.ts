@@ -18,13 +18,13 @@ describe('PaginationOffsetDto', () => {
 
         expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100 }))).toEqual([]);
         expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100, offset: 20 }))).toEqual([]);
-        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100, offset: 20, query: 'queryToken' }))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100, offset: 20, nextCursor: 'queryToken' }))).toEqual([]);
     });
 
     it('should be positive number', () => {
         expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 10 }))).toEqual([]);
         expect(validateSync(plainToInstance(PaginationOffsetDto, { offset: 10 }))).toEqual([]);
-        expect(validateSync(plainToInstance(PaginationOffsetDto, { query: 10 }))).toEqual([
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { nextCursor: 10 }))).toEqual([
             {
                 children: [],
                 constraints: { isString: 'query must be a string' },

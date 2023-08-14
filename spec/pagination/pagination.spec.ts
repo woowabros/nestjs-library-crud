@@ -79,13 +79,13 @@ describe('Pagination', () => {
         const { body: nextResponseBody } = await request(app.getHttpServer())
             .get(`/${PaginationType.CURSOR}`)
             .query({
-                query: cursorResponseBody.metadata.nextCursor,
+                nextCursor: cursorResponseBody.metadata.nextCursor,
             })
             .expect(HttpStatus.OK);
         const { body: offsetNextResponseBody } = await request(app.getHttpServer())
             .get(`/${PaginationType.OFFSET}`)
             .query({
-                query: offsetResponseBody.metadata.nextCursor,
+                nextCursor: offsetResponseBody.metadata.nextCursor,
                 offset: offsetResponseBody.metadata.offset,
             })
             .expect(HttpStatus.OK);
@@ -115,7 +115,7 @@ describe('Pagination', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.CURSOR}`)
                 .query({
-                    query: firstResponseBody.metadata.nextCursor,
+                    nextCursor: firstResponseBody.metadata.nextCursor,
                 })
                 .expect(HttpStatus.OK);
 
@@ -158,7 +158,7 @@ describe('Pagination', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.CURSOR}`)
                 .query({
-                    query: responseBody.metadata.nextCursor,
+                    nextCursor: responseBody.metadata.nextCursor,
                 })
                 .expect(HttpStatus.OK);
 
@@ -212,7 +212,7 @@ describe('Pagination', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .query({
-                    query: firstResponseBody.metadata.nextCursor,
+                    nextCursor: firstResponseBody.metadata.nextCursor,
                     offset: firstResponseBody.metadata.offset,
                 })
                 .expect(HttpStatus.OK);
@@ -242,7 +242,7 @@ describe('Pagination', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .post(`/${PaginationType.OFFSET}/search`)
                 .send({
-                    query: firstResponseBody.metadata.nextCursor,
+                    nextCursor: firstResponseBody.metadata.nextCursor,
                     offset: firstResponseBody.metadata.offset,
                 })
                 .expect(HttpStatus.OK);
@@ -280,7 +280,7 @@ describe('Pagination', () => {
             const { body: readManyNextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .query({
-                    query: readManyResponseBody.metadata.nextCursor,
+                    nextCursor: readManyResponseBody.metadata.nextCursor,
                     offset: readManyResponseBody.metadata.offset,
                 })
                 .expect(HttpStatus.OK);
@@ -313,7 +313,7 @@ describe('Pagination', () => {
 
             const { body: searchNextResponseBody } = await request(app.getHttpServer())
                 .post(`/${PaginationType.OFFSET}/search`)
-                .send({ query: searchResponseBody.metadata.nextCursor, offset: searchResponseBody.metadata.offset })
+                .send({ nextCursor: searchResponseBody.metadata.nextCursor, offset: searchResponseBody.metadata.offset })
                 .expect(HttpStatus.OK);
             expect(searchNextResponseBody.metadata).toEqual({
                 page: 2,
@@ -330,7 +330,7 @@ describe('Pagination', () => {
 
             const { body: searchNextNextResponseBody } = await request(app.getHttpServer())
                 .post(`/${PaginationType.OFFSET}/search`)
-                .send({ query: searchNextResponseBody.metadata.nextCursor, offset: searchNextResponseBody.metadata.offset })
+                .send({ nextCursor: searchNextResponseBody.metadata.nextCursor, offset: searchNextResponseBody.metadata.offset })
                 .expect(HttpStatus.OK);
             expect(searchNextNextResponseBody.metadata).toEqual({
                 page: 3,
@@ -357,7 +357,7 @@ describe('Pagination', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .query({
-                    query: responseBody.metadata.nextCursor,
+                    nextCursor: responseBody.metadata.nextCursor,
                     offset: responseBody.metadata.offset,
                     limit,
                 })
@@ -378,7 +378,7 @@ describe('Pagination', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .query({
-                    query: firstResponseBody.metadata.nextCursor,
+                    nextCursor: firstResponseBody.metadata.nextCursor,
                     offset: firstResponseBody.metadata.offset,
                     limit,
                 })

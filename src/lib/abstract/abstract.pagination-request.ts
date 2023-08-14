@@ -1,3 +1,6 @@
+import { Expose } from 'class-transformer';
+import { IsString, IsOptional } from 'class-validator';
+
 import { PaginationType } from '../interface';
 
 interface PaginationQuery {
@@ -14,6 +17,11 @@ export abstract class AbstractPaginationRequest {
     private _nextCursor: string;
 
     type: PaginationType;
+
+    @Expose({ name: 'nextCursor' })
+    @IsString()
+    @IsOptional()
+    query: string;
 
     setWhere(where: string | undefined) {
         if (!where) {

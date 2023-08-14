@@ -67,14 +67,14 @@ describe('Search Cursor Pagination', () => {
             .expect(HttpStatus.OK);
         expect(firstResponse.data).toHaveLength(10);
 
-        const lastEntity = PaginationHelper.deserialize<TestEntity>(firstResponse.metadata.nextCursor);
-        expect(lastEntity).toEqual({ col1: 'col1_29' });
-        const preCondition: Record<string, unknown> = PaginationHelper.deserialize(firstResponse.metadata.query);
+        const preCondition: Record<string, unknown> = PaginationHelper.deserialize(firstResponse.metadata.nextCursor);
         expect(preCondition).toEqual({
             where: expect.any(String),
             nextCursor: expect.any(String),
             total: expect.any(Number),
         });
+        const lastEntity = PaginationHelper.deserialize<TestEntity>(preCondition.nextCursor as string);
+        expect(lastEntity).toEqual({ col1: 'col1_29' });
         expect(PaginationHelper.deserialize(preCondition.where as string)).toEqual({
             where: [
                 {
@@ -88,7 +88,7 @@ describe('Search Cursor Pagination', () => {
 
         const { body: secondResponse } = await request(app.getHttpServer())
             .post('/base/search')
-            .send({ nextCursor: firstResponse.metadata.nextCursor, query: firstResponse.metadata.query })
+            .send({ query: firstResponse.metadata.nextCursor })
             .expect(HttpStatus.OK);
 
         expect(secondResponse.data).toHaveLength(10);
@@ -98,15 +98,14 @@ describe('Search Cursor Pagination', () => {
             expect(firstDataCol1.has(nextData.col1)).not.toBeTruthy();
         }
 
-        const nextLastEntity = PaginationHelper.deserialize(secondResponse.metadata.nextCursor);
-        expect(nextLastEntity).toEqual({ col1: 'col1_1' });
-
-        const nextPreCondition: Record<string, unknown> = PaginationHelper.deserialize(secondResponse.metadata.query);
+        const nextPreCondition: Record<string, unknown> = PaginationHelper.deserialize(secondResponse.metadata.nextCursor);
         expect(nextPreCondition).toEqual({
             where: expect.any(String),
             nextCursor: expect.any(String),
             total: expect.any(Number),
         });
+        const nextLastEntity = PaginationHelper.deserialize(nextPreCondition.nextCursor as string);
+        expect(nextLastEntity).toEqual({ col1: 'col1_1' });
         expect(PaginationHelper.deserialize(nextPreCondition.where as string)).toEqual({
             ...searchRequestBody,
             withDeleted: false,

@@ -54,12 +54,11 @@ const metaProperties = (paginationType: PaginationType) =>
               pages: { type: 'number', example: 1 },
               total: { type: 'number', example: 100 },
               offset: { type: 'number', example: 20 },
-              query: { type: 'string', example: 'queryToken' },
+              nextCursor: { type: 'string', example: 'cursorToken' },
           }
         : {
               total: { type: 'number', example: 100 },
               limit: { type: 'number', example: 20 },
-              query: { type: 'string', example: 'queryToken' },
               nextCursor: { type: 'string', example: 'cursorToken' },
           };
 /**

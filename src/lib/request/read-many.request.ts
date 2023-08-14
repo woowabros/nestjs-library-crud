@@ -123,9 +123,9 @@ export class CrudReadManyRequest<T> {
                 metadata: {
                     page: this.pagination.offset ? Math.floor(this.pagination.offset / this.findOptions.take) + 1 : 1,
                     pages: total ? Math.ceil(total / this.findOptions.take) : 1,
-                    total,
                     offset: (this.pagination.offset ?? 0) + data.length,
-                    query: this.pagination.makeQuery(total, nextCursor),
+                    total,
+                    nextCursor: this.pagination.makeQuery(total, nextCursor),
                 },
             };
         }
@@ -133,10 +133,9 @@ export class CrudReadManyRequest<T> {
         return {
             data,
             metadata: {
-                nextCursor,
                 limit: this.findOptions.take,
                 total,
-                query: this.pagination.makeQuery(total, nextCursor),
+                nextCursor: this.pagination.makeQuery(total, nextCursor),
             },
         };
     }

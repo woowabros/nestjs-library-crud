@@ -67,7 +67,6 @@ describe('Search Query Operator', () => {
             expect(Object.keys(data[0])).toEqual(expect.arrayContaining(requestSearchDto.select as unknown[]));
 
             expect(metadata.nextCursor).toBeDefined();
-            expect(metadata.query).toBeDefined();
             expect(metadata.total).toEqual(10);
         }
     });
@@ -120,7 +119,6 @@ describe('Search Query Operator', () => {
             expect(col2Values).toEqual(expect.arrayContaining(expected));
 
             expect(metadata.nextCursor).toBeDefined();
-            expect(metadata.query).toBeDefined();
         }
     });
 
@@ -181,7 +179,6 @@ describe('Search Query Operator', () => {
             expect(col2Values).toEqual(expect.arrayContaining(expected));
 
             expect(metadata.nextCursor).toBeDefined();
-            expect(metadata.query).toBeDefined();
         }
     });
 });

@@ -91,14 +91,13 @@ describe('Pagination with interceptor', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.CURSOR}`)
                 .query({
-                    nextCursor: responseBodyAfterDelete.metadata.nextCursor,
-                    query: responseBodyAfterDelete.metadata.query,
+                    query: responseBodyAfterDelete.metadata.nextCursor,
                 })
                 .expect(HttpStatus.OK);
             const { body: offsetNextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .query({
-                    query: offsetResponseBodyAfterDelete.metadata.query,
+                    query: offsetResponseBodyAfterDelete.metadata.nextCursor,
                     offset: offsetResponseBodyAfterDelete.metadata.offset,
                 })
                 .expect(HttpStatus.OK);

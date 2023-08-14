@@ -55,7 +55,7 @@ describe('ReadMany - Options', () => {
         it('should return next 20 entities after cursor in ascending order', async () => {
             const firstResponse = await request(app.getHttpServer()).get('/sort-asc').expect(HttpStatus.OK);
             const nextResponse = await request(app.getHttpServer()).get('/sort-asc').query({
-                query: firstResponse.body.metadata.query,
+                query: firstResponse.body.metadata.nextCursor,
             });
 
             expect(nextResponse.statusCode).toEqual(HttpStatus.OK);
@@ -100,23 +100,19 @@ describe('ReadMany - Options', () => {
             const { body: nextResponse } = await request(app.getHttpServer())
                 .get('/sort-desc')
                 .query({
-                    query: firstResponse.metadata.query,
+                    query: firstResponse.metadata.nextCursor,
                 })
                 .expect(HttpStatus.OK);
             const { body: secondNextResponse } = await request(app.getHttpServer())
                 .get('/sort-desc')
                 .query({
-                    query: nextResponse.metadata.query,
+                    query: nextResponse.metadata.nextCursor,
                 })
                 .expect(HttpStatus.OK);
 
-            expect(nextResponse.metadata.query).toEqual(expect.any(String));
-            expect(nextResponse.metadata.query).not.toEqual(firstResponse.metadata.query);
-            expect(secondNextResponse.metadata.query).toEqual(expect.any(String));
-            expect(secondNextResponse.metadata.query).not.toEqual(firstResponse.metadata.query);
-
             expect(nextResponse.metadata.nextCursor).not.toEqual(firstResponse.metadata.nextCursor);
-            expect(secondNextResponse.metadata.nextCursor).not.toEqual(nextResponse.metadata.nextCursor);
+            expect(secondNextResponse.metadata.nextCursor).toEqual(expect.any(String));
+            expect(secondNextResponse.metadata.nextCursor).not.toEqual(firstResponse.metadata.nextCursor);
 
             expect(nextResponse.metadata.total).toEqual(firstResponse.metadata.total - nextResponse.metadata.limit);
             expect(secondNextResponse.metadata.total).toEqual(nextResponse.metadata.total - secondNextResponse.metadata.limit);

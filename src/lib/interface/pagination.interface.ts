@@ -20,7 +20,6 @@ export interface PaginationAbstractResponse<T> {
 
 export interface CursorPaginationResponse<T> extends PaginationAbstractResponse<T> {
     metadata: {
-        query: string;
         limit: number;
         total: number;
         nextCursor: string;
@@ -30,22 +29,25 @@ export interface CursorPaginationResponse<T> extends PaginationAbstractResponse<
 export interface OffsetPaginationResponse<T> extends PaginationAbstractResponse<T> {
     metadata: {
         /**
-         * 현재 page 번호
+         * Current page number
          */
         page: number;
         /**
-         * 전체 page 개수
+         * Total page count
          */
         pages: number;
         /**
-         * 전체 데이터 개수
+         * Total data count
          */
         total: number;
         /**
-         * 한 페이지의 데이터 최대 개수
+         * Maximum number of data on a page
          */
         offset: number;
-        query: string;
+        /**
+         * cursor token for next page
+         */
+        nextCursor: string;
     };
 }
 

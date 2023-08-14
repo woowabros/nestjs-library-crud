@@ -72,22 +72,20 @@ describe('Pagination', () => {
         expect(cursorResponseBody.metadata).toEqual({
             nextCursor: expect.any(String),
             limit: defaultLimit,
-            query: expect.any(String),
             total: 1,
         });
-        expect(offsetResponseBody.metadata).toEqual({ page: 1, pages: 1, total: 1, offset: 1, query: expect.any(String) });
+        expect(offsetResponseBody.metadata).toEqual({ page: 1, pages: 1, total: 1, offset: 1, nextCursor: expect.any(String) });
 
         const { body: nextResponseBody } = await request(app.getHttpServer())
             .get(`/${PaginationType.CURSOR}`)
             .query({
-                nextCursor: cursorResponseBody.metadata.nextCursor,
-                query: cursorResponseBody.metadata.query,
+                query: cursorResponseBody.metadata.nextCursor,
             })
             .expect(HttpStatus.OK);
         const { body: offsetNextResponseBody } = await request(app.getHttpServer())
             .get(`/${PaginationType.OFFSET}`)
             .query({
-                query: offsetResponseBody.metadata.query,
+                query: offsetResponseBody.metadata.nextCursor,
                 offset: offsetResponseBody.metadata.offset,
             })
             .expect(HttpStatus.OK);
@@ -96,7 +94,7 @@ describe('Pagination', () => {
         expect(nextResponseBody.data).toHaveLength(0);
         expect(nextResponseBody.metadata.nextCursor).not.toEqual(cursorResponseBody.metadata.nextCursor);
         expect(nextResponseBody.metadata.limit).toEqual(20);
-        expect(offsetNextResponseBody.metadata).toEqual({ page: 1, pages: 1, total: 1, offset: 1, query: expect.any(String) });
+        expect(offsetNextResponseBody.metadata).toEqual({ page: 1, pages: 1, total: 1, offset: 1, nextCursor: expect.any(String) });
     });
 
     describe('Cursor', () => {
@@ -107,7 +105,6 @@ describe('Pagination', () => {
             expect(cursorBody.metadata).toEqual({
                 nextCursor: expect.any(String),
                 limit: defaultLimit,
-                query: expect.any(String),
                 total: totalCount,
             });
         });
@@ -118,8 +115,7 @@ describe('Pagination', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.CURSOR}`)
                 .query({
-                    nextCursor: firstResponseBody.metadata.nextCursor,
-                    query: firstResponseBody.metadata.query,
+                    query: firstResponseBody.metadata.nextCursor,
                 })
                 .expect(HttpStatus.OK);
 
@@ -129,7 +125,6 @@ describe('Pagination', () => {
             expect(nextResponseBody.metadata).toEqual({
                 nextCursor: expect.any(String),
                 limit: defaultLimit,
-                query: expect.any(String),
                 total: totalCount - defaultLimit,
             });
 
@@ -157,15 +152,13 @@ describe('Pagination', () => {
             expect(responseBody.metadata).toEqual({
                 nextCursor: expect.any(String),
                 limit: defaultLimit,
-                query: expect.any(String),
                 total: totalCount,
             });
 
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.CURSOR}`)
                 .query({
-                    nextCursor: responseBody.metadata.nextCursor,
-                    query: responseBody.metadata.query,
+                    query: responseBody.metadata.nextCursor,
                 })
                 .expect(HttpStatus.OK);
 
@@ -173,7 +166,6 @@ describe('Pagination', () => {
             expect(nextResponseBody.metadata).toEqual({
                 nextCursor: expect.any(String),
                 limit: defaultLimit,
-                query: expect.any(String),
                 total: totalCount - defaultLimit,
             });
             expect(nextResponseBody.metadata.nextCursor).not.toEqual(responseBody.metadata.nextCursor);
@@ -207,11 +199,11 @@ describe('Pagination', () => {
         it('should return 20 entities as default', async () => {
             const { body } = await request(app.getHttpServer()).get(`/${PaginationType.OFFSET}`).expect(HttpStatus.OK);
             expect(body.data).toHaveLength(defaultLimit);
-            expect(body.metadata).toEqual({ page: 1, pages: 5, total: 100, offset: defaultLimit, query: expect.any(String) });
+            expect(body.metadata).toEqual({ page: 1, pages: 5, total: 100, offset: defaultLimit, nextCursor: expect.any(String) });
 
             const { body: searchBody } = await request(app.getHttpServer()).post(`/${PaginationType.OFFSET}/search`).expect(HttpStatus.OK);
             expect(searchBody.data).toHaveLength(defaultLimit);
-            expect(searchBody.metadata).toEqual({ page: 1, pages: 5, total: 100, offset: defaultLimit, query: expect.any(String) });
+            expect(searchBody.metadata).toEqual({ page: 1, pages: 5, total: 100, offset: defaultLimit, nextCursor: expect.any(String) });
         });
 
         it('should return next page from offset on readMany', async () => {
@@ -220,7 +212,7 @@ describe('Pagination', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .query({
-                    query: firstResponseBody.metadata.query,
+                    query: firstResponseBody.metadata.nextCursor,
                     offset: firstResponseBody.metadata.offset,
                 })
                 .expect(HttpStatus.OK);
@@ -230,7 +222,7 @@ describe('Pagination', () => {
                 pages: 5,
                 total: 100,
                 offset: defaultLimit,
-                query: expect.any(String),
+                nextCursor: expect.any(String),
             });
 
             expect(nextResponseBody.metadata).toEqual({
@@ -238,7 +230,7 @@ describe('Pagination', () => {
                 pages: 5,
                 total: 100,
                 offset: defaultLimit * 2,
-                query: expect.any(String),
+                nextCursor: expect.any(String),
             });
         });
 
@@ -250,7 +242,7 @@ describe('Pagination', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .post(`/${PaginationType.OFFSET}/search`)
                 .send({
-                    query: firstResponseBody.metadata.query,
+                    query: firstResponseBody.metadata.nextCursor,
                     offset: firstResponseBody.metadata.offset,
                 })
                 .expect(HttpStatus.OK);
@@ -260,7 +252,7 @@ describe('Pagination', () => {
                 pages: 5,
                 total: 100,
                 offset: defaultLimit,
-                query: expect.any(String),
+                nextCursor: expect.any(String),
             });
 
             expect(nextResponseBody.metadata).toEqual({
@@ -268,7 +260,7 @@ describe('Pagination', () => {
                 pages: 5,
                 total: 100,
                 offset: defaultLimit * 2,
-                query: expect.any(String),
+                nextCursor: expect.any(String),
             });
         });
 
@@ -288,7 +280,7 @@ describe('Pagination', () => {
             const { body: readManyNextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .query({
-                    query: readManyResponseBody.metadata.query,
+                    query: readManyResponseBody.metadata.nextCursor,
                     offset: readManyResponseBody.metadata.offset,
                 })
                 .expect(HttpStatus.OK);
@@ -298,14 +290,14 @@ describe('Pagination', () => {
                 pages: 5,
                 total: 100,
                 offset: 20,
-                query: expect.any(String),
+                nextCursor: expect.any(String),
             });
             expect(readManyNextResponseBody.metadata).toEqual({
                 page: 2,
                 pages: 5,
                 total: 100,
                 offset: 40,
-                query: expect.any(String),
+                nextCursor: expect.any(String),
             });
 
             // search
@@ -321,14 +313,14 @@ describe('Pagination', () => {
 
             const { body: searchNextResponseBody } = await request(app.getHttpServer())
                 .post(`/${PaginationType.OFFSET}/search`)
-                .send({ query: searchResponseBody.metadata.query, offset: searchResponseBody.metadata.offset })
+                .send({ query: searchResponseBody.metadata.nextCursor, offset: searchResponseBody.metadata.offset })
                 .expect(HttpStatus.OK);
             expect(searchNextResponseBody.metadata).toEqual({
                 page: 2,
                 pages: 5,
                 total: 100,
                 offset: 40,
-                query: expect.any(String),
+                nextCursor: expect.any(String),
             });
 
             for (const data of searchNextResponseBody.data) {
@@ -338,14 +330,14 @@ describe('Pagination', () => {
 
             const { body: searchNextNextResponseBody } = await request(app.getHttpServer())
                 .post(`/${PaginationType.OFFSET}/search`)
-                .send({ query: searchNextResponseBody.metadata.query, offset: searchNextResponseBody.metadata.offset })
+                .send({ query: searchNextResponseBody.metadata.nextCursor, offset: searchNextResponseBody.metadata.offset })
                 .expect(HttpStatus.OK);
             expect(searchNextNextResponseBody.metadata).toEqual({
                 page: 3,
                 pages: 5,
                 total: 100,
                 offset: 60,
-                query: expect.any(String),
+                nextCursor: expect.any(String),
             });
             for (const data of searchNextResponseBody.data) {
                 expect(data.name).toEqual('same name');
@@ -360,12 +352,12 @@ describe('Pagination', () => {
                 .query({ limit })
                 .expect(HttpStatus.OK);
             expect(responseBody.data).toHaveLength(limit);
-            expect(responseBody.metadata).toEqual({ page: 1, pages: 7, total: 100, offset: limit, query: expect.any(String) });
+            expect(responseBody.metadata).toEqual({ page: 1, pages: 7, total: 100, offset: limit, nextCursor: expect.any(String) });
 
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .query({
-                    query: responseBody.metadata.query,
+                    query: responseBody.metadata.nextCursor,
                     offset: responseBody.metadata.offset,
                     limit,
                 })
@@ -376,7 +368,7 @@ describe('Pagination', () => {
                 pages: 7,
                 total: 100,
                 offset: limit * 2,
-                query: expect.any(String),
+                nextCursor: expect.any(String),
             });
         });
 
@@ -386,7 +378,7 @@ describe('Pagination', () => {
             const { body: nextResponseBody } = await request(app.getHttpServer())
                 .get(`/${PaginationType.OFFSET}`)
                 .query({
-                    query: firstResponseBody.metadata.query,
+                    query: firstResponseBody.metadata.nextCursor,
                     offset: firstResponseBody.metadata.offset,
                     limit,
                 })
@@ -394,13 +386,19 @@ describe('Pagination', () => {
 
             expect(firstResponseBody.data).toHaveLength(defaultLimit);
             expect(nextResponseBody.data).toHaveLength(limit);
-            expect(firstResponseBody.metadata).toEqual({ page: 1, pages: 5, total: 100, offset: defaultLimit, query: expect.any(String) });
+            expect(firstResponseBody.metadata).toEqual({
+                page: 1,
+                pages: 5,
+                total: 100,
+                offset: defaultLimit,
+                nextCursor: expect.any(String),
+            });
             expect(nextResponseBody.metadata).toEqual({
                 page: 2,
                 pages: Math.ceil(100 / limit),
                 total: 100,
                 offset: defaultLimit + limit,
-                query: expect.any(String),
+                nextCursor: expect.any(String),
             });
 
             const lastOneOfFirstResponse = firstResponseBody.data.pop();

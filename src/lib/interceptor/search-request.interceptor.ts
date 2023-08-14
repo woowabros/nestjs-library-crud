@@ -4,7 +4,7 @@ import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
 import { Observable } from 'rxjs';
-import { BaseEntity, FindOptionsOrder, FindOptionsWhere, LessThan, MoreThan } from 'typeorm';
+import { BaseEntity, FindOptionsOrder, FindOptionsWhere, LessThan, MoreThan, And, FindOperator } from 'typeorm';
 
 import { CustomSearchRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
@@ -287,7 +287,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             const operator = (key: keyof T) => ((findOptions.order?.[key] ?? sort) === Sort.DESC ? LessThan : MoreThan);
 
-            const cursorCondition = Object.entries(lastObject).reduce(
+            const cursorCondition: Record<string, FindOperator<T>> = Object.entries(lastObject).reduce(
                 (queryFilter, [key, operand]) => ({
                     ...queryFilter,
                     [key]: operator(key as keyof T)(operand),
@@ -295,7 +295,14 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 {},
             );
             for (const queryFilter of where) {
-                _.merge(queryFilter, cursorCondition);
+                for (const [key, operation] of Object.entries(cursorCondition)) {
+                    _.merge(
+                        queryFilter,
+                        key in queryFilter
+                            ? { [key]: And(operation, (queryFilter as Record<string, FindOperator<T>>)[key]) }
+                            : { [key]: operation },
+                    );
+                }
             }
             return where;
         }

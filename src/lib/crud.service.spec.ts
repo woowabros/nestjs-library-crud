@@ -50,4 +50,17 @@ describe('CrudService', () => {
             ).rejects.toThrow(ConflictException);
         });
     });
+
+    describe('reservedReadMany', () => {
+        it('should log error and throw error when error occurred', async () => {
+            const mockRepository = {
+                metadata: {
+                    primaryColumns: [{ propertyName: 'id' }],
+                },
+                find: jest.fn(),
+            };
+            const crudService = new CrudService<BaseEntity>(mockRepository as unknown as Repository<BaseEntity>);
+            await expect(crudService.reservedReadMany({ key: 'value', array: [{ key: 'value' }] } as any)).rejects.toThrow(Error);
+        });
+    });
 });

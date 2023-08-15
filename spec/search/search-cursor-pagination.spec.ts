@@ -228,4 +228,14 @@ describe('Search Cursor Pagination', () => {
             },
         });
     });
+
+    it('should be use empty body', async () => {
+        const { body } = await request(app.getHttpServer()).post('/base/search').send({}).expect(HttpStatus.OK);
+        expect(body.data).toBeDefined();
+        expect(body.metadata).toBeDefined();
+
+        const { body: emptyWhere } = await request(app.getHttpServer()).post('/base/search').send({ where: [] }).expect(HttpStatus.OK);
+        expect(emptyWhere.data).toBeDefined();
+        expect(emptyWhere.metadata).toBeDefined();
+    });
 });

@@ -10,6 +10,10 @@ interface PaginationQuery {
 }
 const encoding = 'base64';
 
+export interface PaginationAbstractResponse<T> {
+    data: T[];
+}
+
 export abstract class AbstractPaginationRequest {
     private _isNext: boolean = false;
     private _where: string;
@@ -40,7 +44,7 @@ export abstract class AbstractPaginationRequest {
         ).toString(encoding);
     }
 
-    setQuery(query: string) {
+    setQuery(query: string): void {
         try {
             const paginationType: PaginationQuery = JSON.parse(Buffer.from(query, encoding).toString());
             this._where = paginationType.where;
@@ -49,7 +53,7 @@ export abstract class AbstractPaginationRequest {
 
             this._isNext = true;
         } catch {
-            return {} as PaginationQuery;
+            //
         }
     }
 

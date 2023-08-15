@@ -65,4 +65,8 @@ describe('Pagination Helper', () => {
             UnprocessableEntityException,
         );
     });
+
+    it('should be return empty object when nextCursor is undefined', () => {
+        expect(PaginationHelper.deserialize(undefined as any)).toEqual({});
+    });
 });

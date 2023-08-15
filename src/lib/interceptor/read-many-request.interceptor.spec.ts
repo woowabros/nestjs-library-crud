@@ -67,6 +67,20 @@ describe('ReadManyRequestInterceptor', () => {
         await expect(interceptor.validateQuery({ col1: 1 })).rejects.toThrow(UnprocessableEntityException);
         await expect(interceptor.validateQuery({ col2: '1' })).rejects.toThrow(UnprocessableEntityException);
         await expect(interceptor.validateQuery({ col1: 1, col2: '2', col3: 1 })).rejects.toThrow(UnprocessableEntityException);
+
+        // should be able to ignore limit and offset
+        expect(await interceptor.validateQuery({ col1: 1, col2: 2, limit: 3 })).toEqual({
+            col1: '1',
+            col2: 2,
+        });
+        expect(await interceptor.validateQuery({ col1: 1, col2: 2, offset: 10 })).toEqual({
+            col1: '1',
+            col2: 2,
+        });
+        expect(await interceptor.validateQuery({ col1: 1, col2: 2, limit: 3, offset: 10 })).toEqual({
+            col1: '1',
+            col2: 2,
+        });
     });
 
     it('should be get relation values per each condition', () => {

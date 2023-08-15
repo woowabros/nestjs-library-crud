@@ -42,7 +42,7 @@ export class CrudService<T extends BaseEntity> {
             })();
             return crudReadManyRequest.toResponse(entities, total);
         } catch (error) {
-            Logger.error(crudReadManyRequest.toString());
+            Logger.error(JSON.stringify(crudReadManyRequest));
             Logger.error(error);
             throw error;
         }

@@ -1,2 +1,2 @@
 export * from './abstract.request.interceptor';
-export * from './abstract.pagination-request';
+export * from './abstract.pagination';

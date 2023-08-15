@@ -123,33 +123,6 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             return requestSearchDto;
         }
 
-        validatePagination(requestSearchDto: RequestSearchDto<typeof BaseEntity>): RequestSearchDto<typeof crudOptions.entity> {
-            if (typeof requestSearchDto.nextCursor !== 'string') {
-                throw new UnprocessableEntityException('nextCursor should be String type');
-            }
-            if ('query' in requestSearchDto && typeof requestSearchDto.query !== 'string') {
-                throw new UnprocessableEntityException('query should be String type');
-            }
-            const preCondition = PaginationHelper.deserialize<RequestSearchDto<typeof crudOptions.entity>>(requestSearchDto.query);
-            const lastObject: Record<string, unknown> = PaginationHelper.deserialize(requestSearchDto.nextCursor);
-            preCondition.where = preCondition.where ?? [{}];
-
-            const cursorCondition = Object.entries(lastObject).reduce(
-                (queryFilter, [key, operand]) => ({
-                    ...queryFilter,
-                    [key]: {
-                        operator: _.get(preCondition.order, key, CRUD_POLICY[method].default.sort) === Sort.DESC ? '<' : '>',
-                        operand,
-                    },
-                }),
-                {},
-            );
-            for (const queryFilter of preCondition.where) {
-                _.merge(queryFilter, cursorCondition);
-            }
-            return preCondition;
-        }
-
         validateSelect(select: RequestSearchDto<typeof crudOptions.entity>['select']): void {
             if (!Array.isArray(select)) {
                 throw new UnprocessableEntityException('select must be array type');
@@ -161,7 +134,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
         }
 
         async validateQueryFilterList(value: unknown): Promise<void> {
-            if (!Array.isArray(value) || value.length === 0) {
+            if (!Array.isArray(value)) {
                 throw new UnprocessableEntityException('incorrect query format');
             }
             for (const queryFilter of value) {

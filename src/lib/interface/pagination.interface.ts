@@ -1,3 +1,4 @@
+import { PaginationAbstractResponse } from '../abstract';
 import { PaginationCursorDto } from '../dto/pagination-cursor.dto';
 import { PaginationOffsetDto } from '../dto/pagination-offset.dto';
 
@@ -14,10 +15,6 @@ export const PAGINATION_SWAGGER_QUERY: Record<PaginationType, Array<{ name: stri
     ],
     [PaginationType.CURSOR]: [{ name: 'nextCursor', type: 'string' }],
 };
-
-export interface PaginationAbstractResponse<T> {
-    data: T[];
-}
 
 export interface CursorPaginationResponse<T> extends PaginationAbstractResponse<T> {
     metadata: {

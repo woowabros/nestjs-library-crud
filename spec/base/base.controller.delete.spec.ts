@@ -9,7 +9,7 @@ import { TestHelper } from '../test.helper';
 describe('BaseController', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [BaseModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
@@ -18,7 +18,11 @@ describe('BaseController', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    beforeEach(async () => {
+        await BaseEntity.delete({});
+    });
+
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

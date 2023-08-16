@@ -12,7 +12,7 @@ describe('MultiplePrimaryKey - Recover', () => {
     let service: MultiplePrimaryKeyService;
     let entities: MultiplePrimaryKeyEntity[];
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [MultiplePrimaryKeyModule, TestHelper.getTypeOrmMysqlModule([MultiplePrimaryKeyEntity])],
         }).compile();
@@ -26,7 +26,7 @@ describe('MultiplePrimaryKey - Recover', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -41,20 +41,15 @@ describe('MultiplePrimaryKey - Recover', () => {
             const { uuid1, uuid2 } = entities[0];
             await request(app.getHttpServer()).get(`/base/${uuid1}/${uuid2}`).expect(HttpStatus.OK);
 
-            // Delete
             await request(app.getHttpServer()).delete(`/base/${uuid1}/${uuid2}`).expect(HttpStatus.OK);
 
-            // getOne -> NotFOUND
             await request(app.getHttpServer()).get(`/base/${uuid1}/${uuid2}`).expect(HttpStatus.NOT_FOUND);
 
-            // getMany -> id가 없다.
             const { body } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
             expect(body.data.some((entity: MultiplePrimaryKeyEntity) => entity.uuid1 === uuid1 && entity.uuid2 === uuid2)).toBeFalsy();
 
-            // Recover
             await request(app.getHttpServer()).post(`/base/${uuid1}/${uuid2}/recover`).expect(HttpStatus.CREATED);
 
-            // GetOne -> OK
             await request(app.getHttpServer()).get(`/base/${uuid1}/${uuid2}`).expect(HttpStatus.OK);
         });
     });

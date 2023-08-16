@@ -1,6 +1,5 @@
 import { INestApplication, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
 import request from 'supertest';
 
 import { SubPathModule } from './sub-path.module';
@@ -9,7 +8,7 @@ import { TestHelper } from '../test.helper';
 describe('Subpath - more then one parent parameter', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [SubPathModule()],
         }).compile();
@@ -25,7 +24,7 @@ describe('Subpath - more then one parent parameter', () => {
          * | parent1  | 1     | writer5, 7, 9 |
          */
         await Promise.all(
-            _.range(0, 10).map((parentNo) =>
+            Array.from({ length: 10 }, (_, index) => index).map((parentNo) =>
                 request(app.getHttpServer())
                     .post(`/parent${parentNo % 2 === 0 ? '0' : '1'}/sub/${parentNo < 5 ? 0 : 1}/child`)
                     .send({ name: `writer${parentNo}` })
@@ -34,7 +33,7 @@ describe('Subpath - more then one parent parameter', () => {
         );
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -89,7 +88,7 @@ describe('Subpath - more then one parent parameter', () => {
     });
 
     it('should meet conditions of parent params - search', async () => {
-        const operand = _.range(0, 10).map((parentNo) => `writer${parentNo}`);
+        const operand = Array.from({ length: 10 }, (_, index) => index).map((parentNo) => `writer${parentNo}`);
         for (const parentName of ['parent0', 'parent1']) {
             for (const subId of [0, 1]) {
                 const { body } = await request(app.getHttpServer())

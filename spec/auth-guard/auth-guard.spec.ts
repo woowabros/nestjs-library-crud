@@ -9,7 +9,7 @@ import { TestHelper } from '../test.helper';
 describe('AuthGuard', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [AuthGuardModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
@@ -19,7 +19,7 @@ describe('AuthGuard', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

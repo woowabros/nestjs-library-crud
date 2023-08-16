@@ -18,18 +18,18 @@ describe('PaginationOffsetDto', () => {
 
         expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100 }))).toEqual([]);
         expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100, offset: 20 }))).toEqual([]);
-        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100, offset: 20, query: 'queryToken' }))).toEqual([]);
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100, offset: 20, nextCursor: 'queryToken' }))).toEqual([]);
     });
 
     it('should be positive number', () => {
         expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 10 }))).toEqual([]);
         expect(validateSync(plainToInstance(PaginationOffsetDto, { offset: 10 }))).toEqual([]);
-        expect(validateSync(plainToInstance(PaginationOffsetDto, { query: 10 }))).toEqual([
+        expect(validateSync(plainToInstance(PaginationOffsetDto, { nextCursor: 10 }))).toEqual([
             {
                 children: [],
                 constraints: { isString: 'query must be a string' },
                 property: 'query',
-                target: { query: 10, type: 'offset' },
+                target: { query: 10, type: 'offset', _isNext: false },
                 value: 10,
             },
         ]);
@@ -38,7 +38,7 @@ describe('PaginationOffsetDto', () => {
     it('should be character type', () => {
         expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 'a' }))).toEqual([
             {
-                target: { limit: Number.NaN, type: 'offset' },
+                target: { limit: Number.NaN, type: 'offset', _isNext: false },
                 value: Number.NaN,
                 property: 'limit',
                 children: [],
@@ -51,7 +51,7 @@ describe('PaginationOffsetDto', () => {
 
         expect(validateSync(plainToInstance(PaginationOffsetDto, { offset: 'b' }))).toEqual([
             {
-                target: { offset: Number.NaN, type: 'offset' },
+                target: { offset: Number.NaN, type: 'offset', _isNext: false },
                 value: Number.NaN,
                 property: 'offset',
                 children: [],
@@ -66,7 +66,7 @@ describe('PaginationOffsetDto', () => {
 
         expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 101 }))).toEqual([
             {
-                target: { limit: 101, type: 'offset' },
+                target: { limit: 101, type: 'offset', _isNext: false },
                 value: 101,
                 property: 'limit',
                 children: [],
@@ -77,9 +77,9 @@ describe('PaginationOffsetDto', () => {
     });
 
     it('should be allowed zero', () => {
-        expect(validateByPaginationOffsetDto({ limit: 1 })).toEqual({ limit: 1, type: 'offset' });
-        expect(validateByPaginationOffsetDto({ limit: 0 })).toEqual({ limit: 0, type: 'offset' });
-        expect(validateByPaginationOffsetDto({ limit: -1 })).toEqual({ limit: 0, type: 'offset' });
-        expect(validateByPaginationOffsetDto({})).toEqual({ type: 'offset' });
+        expect(validateByPaginationOffsetDto({ limit: 1 })).toEqual({ limit: 1, type: 'offset', _isNext: false });
+        expect(validateByPaginationOffsetDto({ limit: 0 })).toEqual({ limit: 0, type: 'offset', _isNext: false });
+        expect(validateByPaginationOffsetDto({ limit: -1 })).toEqual({ limit: 0, type: 'offset', _isNext: false });
+        expect(validateByPaginationOffsetDto({})).toEqual({ type: 'offset', _isNext: false });
     });
 });

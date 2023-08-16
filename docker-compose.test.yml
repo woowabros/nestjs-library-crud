@@ -12,8 +12,6 @@ services:
             - --collation-server=utf8mb4_unicode_ci
         ports:
             - '3306:3306'
-        volumes:
-            - 'mysql_data:/var/lib/mysql'
 
     postgresql:
         image: postgres:latest
@@ -24,10 +22,3 @@ services:
             POSTGRES_PASSWORD: $POSTGRESQL_DATABASE_PASSWORD
         ports:
             - '5432:5432'
-        volumes:
-            - postgresql_data:/var/lib/postgresql/data
-volumes:
-    mysql_data:
-        driver: local
-    postgresql_data:
-        driver: local

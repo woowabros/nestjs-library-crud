@@ -23,7 +23,7 @@ describe('SearchRequestInterceptor', () => {
     }
 
     let interceptor: any;
-    beforeEach(() => {
+    beforeAll(() => {
         const Interceptor = SearchRequestInterceptor(
             { entity: TestEntity },
             {
@@ -106,9 +106,10 @@ describe('SearchRequestInterceptor', () => {
             });
         });
 
-        it('should throw when query filter is not an array or empty', async () => {
-            await expect(interceptor.validateBody({ where: [] })).rejects.toThrow(UnprocessableEntityException);
+        it('should throw when query filter is not an array', async () => {
+            await expect(interceptor.validateBody({ where: {} })).rejects.toThrow(UnprocessableEntityException);
             await expect(interceptor.validateBody({ where: [null] })).rejects.toThrow(UnprocessableEntityException);
+            await expect(interceptor.validateBody({ where: [undefined] })).rejects.toThrow(UnprocessableEntityException);
         });
 
         it('should throw when invalid query filter is given', async () => {

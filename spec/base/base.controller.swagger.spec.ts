@@ -14,7 +14,7 @@ describe('BaseController Swagger Decorator', () => {
     let controller: BaseController;
     let routeSet: Record<string, DenormalizedDoc>;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [BaseModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
@@ -29,13 +29,13 @@ describe('BaseController Swagger Decorator', () => {
         } as InstanceWrapper<BaseController>);
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
 
     it('should generate api operation and response to ReadOne method', () => {
-        const readOne = 'BaseController_reservedReadOne';
+        const readOne = 'get /base/{id}';
         expect(routeSet[readOne].responses).toEqual({
             '200': {
                 content: expect.any(Object),
@@ -54,7 +54,8 @@ describe('BaseController Swagger Decorator', () => {
     });
 
     it('should generate api operation and response to ReadMany method', () => {
-        const readMany = 'BaseController_reservedReadMany';
+        const readMany = 'get /base';
+
         expect(routeSet[readMany].responses).toEqual({
             '200': {
                 content: expect.any(Object),
@@ -114,7 +115,7 @@ describe('BaseController Swagger Decorator', () => {
     });
 
     it('should generate api operation and response to Create method', () => {
-        const create = 'BaseController_reservedCreate';
+        const create = 'post /base';
         expect(routeSet[create].responses).toEqual({
             '201': {
                 description: 'Created ok',
@@ -137,7 +138,8 @@ describe('BaseController Swagger Decorator', () => {
     });
 
     it('should generate api operation and response to Delete method', () => {
-        const deleteKey = 'BaseController_reservedDelete';
+        const deleteKey = 'delete /base/{id}';
+
         expect(routeSet[deleteKey].responses).toEqual({
             '200': {
                 description: 'Deleted ok',
@@ -160,7 +162,7 @@ describe('BaseController Swagger Decorator', () => {
     });
 
     it('should generate api operation and response to Update method', () => {
-        const updateKey = 'BaseController_reservedUpdate';
+        const updateKey = 'patch /base/{id}';
         expect(routeSet[updateKey].responses).toEqual({
             '200': {
                 description: 'Updated ok',
@@ -183,7 +185,7 @@ describe('BaseController Swagger Decorator', () => {
     });
 
     it('should generate api operation and response to Upsert method', () => {
-        const updateKey = 'BaseController_reservedUpsert';
+        const updateKey = 'put /base/{id}';
         expect(routeSet[updateKey].responses).toEqual({
             '200': {
                 description: 'Upsert ok',
@@ -208,7 +210,7 @@ describe('BaseController Swagger Decorator', () => {
     });
 
     it('should generate api operation and response to Recover method', () => {
-        const recover = 'BaseController_reservedRecover';
+        const recover = 'post /base/{id}/recover';
         expect(routeSet[recover].responses).toEqual({
             '201': {
                 description: 'Recovered ok',
@@ -230,7 +232,7 @@ describe('BaseController Swagger Decorator', () => {
     });
 
     it('should generate api operation and response to Search method', () => {
-        const search = 'BaseController_reservedSearch';
+        const search = 'post /base/search';
         expect(routeSet[search].responses).toEqual({
             '200': {
                 content: expect.any(Object),

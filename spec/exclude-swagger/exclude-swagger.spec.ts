@@ -14,7 +14,7 @@ describe('exclude swagger by route', () => {
     let controller: ExcludeSwaggerController;
     let routeSet: Record<string, DenormalizedDoc>;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [ExcludeSwaggerModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
@@ -30,18 +30,18 @@ describe('exclude swagger by route', () => {
         } as InstanceWrapper<ExcludeSwaggerController>);
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
 
     it('should not generate recover route in swagger', async () => {
-        const recover = 'HideSwaggerController_reservedRecover';
+        const recover = 'post /exclude-swagger/{id}/recover';
         expect(routeSet[recover]).toBeUndefined();
     });
 
     it('Should be changed swagger readOne response interface', () => {
-        const readOne = 'ExcludeSwaggerController_reservedReadOne';
+        const readOne = 'get /exclude-swagger/{id}';
         expect(routeSet[readOne].responses).toEqual({
             '200': {
                 content: {
@@ -64,7 +64,7 @@ describe('exclude swagger by route', () => {
     });
 
     it('Should be changed swagger update response interface', () => {
-        const update = 'ExcludeSwaggerController_reservedUpdate';
+        const update = 'patch /exclude-swagger/{id}';
         expect(routeSet[update].responses).toEqual({
             '200': {
                 content: {
@@ -87,7 +87,7 @@ describe('exclude swagger by route', () => {
     });
 
     it('Should be changed swagger Create request body interface', () => {
-        const create = 'ExcludeSwaggerController_reservedCreate';
+        const create = 'post /exclude-swagger';
         expect(routeSet[create].root).toEqual({
             method: 'post',
             path: '/exclude-swagger',

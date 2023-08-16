@@ -1,6 +1,5 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
 import request from 'supertest';
 
 import { CustomEntity } from './custom-entity.entity';
@@ -12,7 +11,7 @@ describe('CustomEntity - ReadMany', () => {
     let app: INestApplication;
     let service: CustomEntityService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [CustomEntityModule, TestHelper.getTypeOrmMysqlModule([CustomEntity])],
         }).compile();
@@ -20,13 +19,15 @@ describe('CustomEntity - ReadMany', () => {
 
         service = moduleFixture.get<CustomEntityService>(CustomEntityService);
         await Promise.all(
-            _.range(100).map((number) => service.repository.save(service.repository.create({ uuid: `${number}`, name: `name-${number}` }))),
+            Array.from({ length: 100 }, (_, index) => index).map((number) =>
+                service.repository.save(service.repository.create({ uuid: `${number}`, name: `name-${number}` })),
+            ),
         );
 
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -45,7 +46,6 @@ describe('CustomEntity - ReadMany', () => {
 
                 expect(response.statusCode).toEqual(HttpStatus.OK);
                 expect(response.body.data).toHaveLength(defaultLimit);
-                expect(response.body.metadata.nextCursor).toBeDefined();
                 expect(response.body.metadata.limit).toEqual(defaultLimit);
 
                 expect(response.body.data[0].uuid).toBeDefined();
@@ -61,7 +61,6 @@ describe('CustomEntity - ReadMany', () => {
 
                 expect(nextResponse.statusCode).toEqual(HttpStatus.OK);
                 expect(nextResponse.body.data).toHaveLength(defaultLimit);
-                expect(nextResponse.body.metadata.nextCursor).toBeDefined();
                 expect(nextResponse.body.metadata.limit).toEqual(defaultLimit);
 
                 expect(firstResponse.body.metadata.nextCursor).not.toEqual(nextResponse.body.metadata.nextCursor);

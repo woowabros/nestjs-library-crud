@@ -1,5 +1,6 @@
 import { HttpStatus, NestInterceptor, RequestMethod, Type } from '@nestjs/common';
 
+import { capitalizeFirstLetter } from './capitalize-first-letter';
 import { ReadOneRequestInterceptor, CreateRequestInterceptor } from './interceptor';
 import { DeleteRequestInterceptor } from './interceptor/delete-request.interceptor';
 import { ReadManyRequestInterceptor } from './interceptor/read-many-request.interceptor';
@@ -8,7 +9,6 @@ import { SearchRequestInterceptor } from './interceptor/search-request.intercept
 import { UpdateRequestInterceptor } from './interceptor/update-request.interceptor';
 import { UpsertRequestInterceptor } from './interceptor/upsert-request.interceptor';
 import { CrudOptions, Method, PrimaryKey, FactoryOption, Sort, PaginationType } from './interface';
-import { capitalizeFirstLetter } from './util';
 
 type CrudMethodPolicy = {
     [Method.READ_ONE]: MethodPolicy<Method.READ_ONE>;
@@ -54,12 +54,11 @@ const metaProperties = (paginationType: PaginationType) =>
               pages: { type: 'number', example: 1 },
               total: { type: 'number', example: 100 },
               offset: { type: 'number', example: 20 },
-              query: { type: 'string', example: 'queryToken' },
+              nextCursor: { type: 'string', example: 'cursorToken' },
           }
         : {
               total: { type: 'number', example: 100 },
               limit: { type: 'number', example: 20 },
-              query: { type: 'string', example: 'queryToken' },
               nextCursor: { type: 'string', example: 'cursorToken' },
           };
 /**

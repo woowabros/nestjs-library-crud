@@ -1,23 +1,26 @@
 import { INestApplication, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
 import request from 'supertest';
 
+import { DepthOneEntity } from './depth-one.entity';
 import { SubPathModule } from './sub-path.module';
 import { TestHelper } from '../test.helper';
 
 describe('Subpath - one parent parameter', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [SubPathModule()],
         }).compile();
         app = moduleFixture.createNestApplication();
         await app.init();
+    });
 
+    beforeEach(async () => {
+        await DepthOneEntity.delete({});
         await Promise.all(
-            _.range(0, 5).map((parentNo) =>
+            Array.from({ length: 5 }, (_, index) => index).map((parentNo) =>
                 request(app.getHttpServer())
                     .post(`/parent${parentNo % 2 === 0 ? '0' : '1'}/child`)
                     .send({ name: `writer${parentNo}` })
@@ -26,7 +29,7 @@ describe('Subpath - one parent parameter', () => {
         );
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -65,7 +68,7 @@ describe('Subpath - one parent parameter', () => {
     });
 
     it('should meet conditions of parent params - search', async () => {
-        const operand = _.range(0, 5).map((parentNo) => `writer${parentNo}`);
+        const operand = Array.from({ length: 5 }, (_, index) => index).map((parentNo) => `writer${parentNo}`);
         const { body } = await request(app.getHttpServer())
             .post('/parent0/child/search')
             .send({

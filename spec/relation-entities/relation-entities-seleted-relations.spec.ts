@@ -8,7 +8,7 @@ import { TestHelper } from '../test.helper';
 describe('disable relation option', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [
                 RelationEntitiesModule({
@@ -31,7 +31,7 @@ describe('disable relation option', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

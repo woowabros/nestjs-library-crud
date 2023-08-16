@@ -9,7 +9,7 @@ import { TestHelper } from '../test.helper';
 describe('BaseController', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [BaseModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
@@ -18,7 +18,11 @@ describe('BaseController', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    beforeEach(async () => {
+        await BaseEntity.delete({});
+    });
+
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -52,7 +56,7 @@ describe('BaseController', () => {
             expect(created.statusCode).toEqual(HttpStatus.CREATED);
             const id = created.body.id;
 
-            await new Promise((res) => setTimeout(res, 1000));
+            await new Promise((res) => setTimeout(res, 100));
             await request(app.getHttpServer()).patch(`/base/${id}`).send({ name: 'name2' }).expect(HttpStatus.OK);
 
             const readOne = await request(app.getHttpServer()).get(`/base/${id}`).expect(HttpStatus.OK);

@@ -10,7 +10,7 @@ import { TestHelper } from '../test.helper';
 describe('Apply ApiExtraModels Decorator', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [DynamicCrudModule({ readMany: { decorators: [ApiExtraModels(ExtraModel)] } })],
         }).compile();
@@ -20,7 +20,7 @@ describe('Apply ApiExtraModels Decorator', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

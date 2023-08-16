@@ -7,7 +7,6 @@ import { BaseEntity } from 'typeorm';
 
 import { ReadManyRequestInterceptor } from './read-many-request.interceptor';
 import { CUSTOM_REQUEST_OPTIONS } from '../constants';
-import { PaginationType } from '../interface';
 import { ExecutionContextHost } from '../provider';
 import { CrudLogger } from '../provider/crud-logger';
 
@@ -31,17 +30,6 @@ describe('ReadManyRequestInterceptor', () => {
         expect(async () => {
             await interceptor.intercept(new ExecutionContextHost([{ [CUSTOM_REQUEST_OPTIONS]: {} }]), handler);
         }).not.toThrowError();
-    });
-
-    it('should be able to return pagination for GET_MORE type', () => {
-        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
-        const interceptor = new Interceptor();
-
-        expect(interceptor.getPaginationRequest(PaginationType.CURSOR, { key: 'value', nextCursor: 'token' })).toEqual({
-            nextCursor: 'token',
-            query: btoa('{}'),
-            type: 'cursor',
-        });
     });
 
     it('should be able to fields validation from entity columns', async () => {
@@ -79,6 +67,20 @@ describe('ReadManyRequestInterceptor', () => {
         await expect(interceptor.validateQuery({ col1: 1 })).rejects.toThrow(UnprocessableEntityException);
         await expect(interceptor.validateQuery({ col2: '1' })).rejects.toThrow(UnprocessableEntityException);
         await expect(interceptor.validateQuery({ col1: 1, col2: '2', col3: 1 })).rejects.toThrow(UnprocessableEntityException);
+
+        // should be able to ignore limit and offset
+        expect(await interceptor.validateQuery({ col1: 1, col2: 2, limit: 3 })).toEqual({
+            col1: '1',
+            col2: 2,
+        });
+        expect(await interceptor.validateQuery({ col1: 1, col2: 2, offset: 10 })).toEqual({
+            col1: '1',
+            col2: 2,
+        });
+        expect(await interceptor.validateQuery({ col1: 1, col2: 2, limit: 3, offset: 10 })).toEqual({
+            col1: '1',
+            col2: 2,
+        });
     });
 
     it('should be get relation values per each condition', () => {
@@ -106,16 +108,5 @@ describe('ReadManyRequestInterceptor', () => {
         expect(interceptorWithFalseOptions.getRelations({ relations: [] })).toEqual([]);
         expect(interceptorWithFalseOptions.getRelations({ relations: ['table'] })).toEqual(['table']);
         expect(interceptorWithFalseOptions.getRelations({})).toEqual([]);
-    });
-
-    it('should be validate pagination query', () => {
-        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
-        const interceptor = new Interceptor();
-
-        interceptor.getPaginationRequest(PaginationType.CURSOR, undefined as any);
-        expect(() => interceptor.getPaginationRequest(PaginationType.CURSOR, { nextCursor: 3 })).toThrowError(UnprocessableEntityException);
-
-        interceptor.getPaginationRequest(PaginationType.OFFSET, undefined as any);
-        expect(() => interceptor.getPaginationRequest(PaginationType.OFFSET, { limit: 200 })).toThrowError(UnprocessableEntityException);
     });
 });

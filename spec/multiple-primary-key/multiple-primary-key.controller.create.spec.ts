@@ -4,26 +4,21 @@ import request from 'supertest';
 
 import { MultiplePrimaryKeyEntity } from './multiple-primary-key.entity';
 import { MultiplePrimaryKeyModule } from './multiple-primary-key.module';
-import { MultiplePrimaryKeyService } from './multiple-primary-key.service';
 import { TestHelper } from '../test.helper';
 
 describe('MultiplePrimaryKey - Create', () => {
     let app: INestApplication;
-    let service: MultiplePrimaryKeyService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [MultiplePrimaryKeyModule, TestHelper.getTypeOrmMysqlModule([MultiplePrimaryKeyEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
 
-        service = moduleFixture.get<MultiplePrimaryKeyService>(MultiplePrimaryKeyService);
-        await Promise.all(['name1', 'name2'].map((name: string) => service.repository.save(service.repository.create({ name }))));
-
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

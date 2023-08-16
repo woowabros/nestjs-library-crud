@@ -9,7 +9,7 @@ import { TestHelper } from '../test.helper';
 describe('No custom Swagger Decorator', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [DynamicCrudModule({ readMany: { decorators: [] } })],
         }).compile();
@@ -19,7 +19,7 @@ describe('No custom Swagger Decorator', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

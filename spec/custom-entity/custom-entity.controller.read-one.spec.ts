@@ -11,7 +11,7 @@ describe('CustomEntity - ReadOne', () => {
     let app: INestApplication;
     let service: CustomEntityService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [CustomEntityModule, TestHelper.getTypeOrmMysqlModule([CustomEntity])],
         }).compile();
@@ -23,14 +23,14 @@ describe('CustomEntity - ReadOne', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
 
     describe('READ_ONE', () => {
         let id: string;
-        beforeEach(async () => {
+        beforeAll(async () => {
             id = (await service.getAll())?.[0]?.uuid;
         });
 

@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/quotes */
-/* eslint-disable no-useless-escape */
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
+import request from 'supertest';
 
 import { TestEntity, TestModule, TestService } from './module';
 import { RequestSearchDto } from '../../src/lib/dto/request-search.dto';
@@ -10,14 +8,13 @@ import { TestHelper } from '../test.helper';
 
 describe('Search Query Operator', () => {
     let app: INestApplication;
-    let service: TestService;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [TestModule, TestHelper.getTypeOrmMysqlModule([TestEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
-        service = moduleFixture.get<TestService>(TestService);
+        const service: TestService = moduleFixture.get<TestService>(TestService);
 
         /**
          * 10 entities are created for the test.
@@ -35,14 +32,14 @@ describe('Search Query Operator', () => {
          * - when index is [5-9], is has null
          */
         await Promise.all(
-            _.range(5).map((no: number) =>
+            Array.from({ length: 5 }, (_, index) => index).map((no: number) =>
                 service.repository.save(
                     service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no, col3: 10 - no }),
                 ),
             ),
         );
         await Promise.all(
-            _.range(5, 10).map((no: number) =>
+            Array.from({ length: 5 }, (_, index) => index + 5).map((no: number) =>
                 service.repository.save(service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no })),
             ),
         );
@@ -50,7 +47,7 @@ describe('Search Query Operator', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -63,20 +60,19 @@ describe('Search Query Operator', () => {
         ];
 
         for (const requestSearchDto of requestSearchDtoList) {
-            const { data, metadata } = await service.reservedSearch({
-                requestSearchDto,
-                relations: [],
-            });
+            const {
+                body: { data, metadata },
+            } = await request(app.getHttpServer()).post('/base/search').send(requestSearchDto).expect(HttpStatus.OK);
             expect(data).toHaveLength(5);
             expect(Object.keys(data[0])).toEqual(expect.arrayContaining(requestSearchDto.select as unknown[]));
 
             expect(metadata.nextCursor).toBeDefined();
-            expect(metadata.query).toBeDefined();
             expect(metadata.total).toEqual(10);
         }
     });
 
     it('should query condition with RequestSearchDto when `where` is provided', async () => {
+        const take = 100;
         const fixtures: Array<[RequestSearchDto<TestEntity>, number[]]> = [
             [{ where: [{ col2: { operator: '=', operand: 5 } }] }, [5]],
             [{ where: [{ col2: { operator: '=', operand: 5, not: true } }] }, [0, 1, 2, 3, 4, 6, 7, 8, 9]],
@@ -112,17 +108,22 @@ describe('Search Query Operator', () => {
             [{ where: [{ col3: { operator: 'NULL', not: true } }] }, [0, 1, 2, 3, 4]],
         ];
         for (const [requestSearchDto, expected] of fixtures) {
-            const { data, metadata } = await service.reservedSearch({ requestSearchDto, relations: [] });
-            const col2Values = data.map((d) => d.col2);
+            const {
+                body: { data, metadata },
+            } = await request(app.getHttpServer())
+                .post('/base/search')
+                .send({ ...requestSearchDto, take })
+                .expect(HttpStatus.OK);
+            const col2Values = (data as TestEntity[]).map((d) => d.col2);
             expect(col2Values).toHaveLength(expected.length);
             expect(col2Values).toEqual(expect.arrayContaining(expected));
 
             expect(metadata.nextCursor).toBeDefined();
-            expect(metadata.query).toBeDefined();
         }
     });
 
     it('nested complex where condition test', async () => {
+        const take = 100;
         const fixtures: Array<[RequestSearchDto<TestEntity>, number[]]> = [
             [{ where: [{ col2: { operator: 'BETWEEN', operand: [3, 5] } }], order: { col1: 'ASC' } }, [3, 4, 5]],
             [
@@ -167,13 +168,17 @@ describe('Search Query Operator', () => {
             ],
         ];
         for (const [requestSearchDto, expected] of fixtures) {
-            const { data, metadata } = await service.reservedSearch({ requestSearchDto, relations: [] });
-            const col2Values = data.map((d) => d.col2);
+            const {
+                body: { data, metadata },
+            } = await request(app.getHttpServer())
+                .post('/base/search')
+                .send({ ...requestSearchDto, take })
+                .expect(HttpStatus.OK);
+            const col2Values = (data as TestEntity[]).map((d) => d.col2);
             expect(col2Values).toHaveLength(expected.length);
             expect(col2Values).toEqual(expect.arrayContaining(expected));
 
             expect(metadata.nextCursor).toBeDefined();
-            expect(metadata.query).toBeDefined();
         }
     });
 });

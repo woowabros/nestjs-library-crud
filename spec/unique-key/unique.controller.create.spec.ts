@@ -9,7 +9,7 @@ import { TestHelper } from '../test.helper';
 describe('UniqueController', () => {
     let app: INestApplication;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [UniqueModule, TestHelper.getTypeOrmMysqlModule([UniqueEntity])],
         }).compile();
@@ -18,7 +18,7 @@ describe('UniqueController', () => {
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });

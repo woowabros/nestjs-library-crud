@@ -4,29 +4,21 @@ import request from 'supertest';
 
 import { CustomEntity } from './custom-entity.entity';
 import { CustomEntityModule } from './custom-entity.module';
-import { CustomEntityService } from './custom-entity.service';
 import { TestHelper } from '../test.helper';
 
 describe('CustomEntity - Delete', () => {
     let app: INestApplication;
-    let service: CustomEntityService;
-    let entities: CustomEntity[];
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
             imports: [CustomEntityModule, TestHelper.getTypeOrmMysqlModule([CustomEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
 
-        service = moduleFixture.get<CustomEntityService>(CustomEntityService);
-        entities = await Promise.all(
-            ['name1', 'name2'].map((name: string) => service.repository.save(service.repository.create({ name }))),
-        );
-
         await app.init();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await TestHelper.dropTypeOrmEntityTables();
         await app?.close();
     });
@@ -38,23 +30,22 @@ describe('CustomEntity - Delete', () => {
         });
 
         it('recover the entity after delete', async () => {
-            const uuid = entities[0].uuid;
+            const name = 'name1';
+            const {
+                body: { uuid },
+            } = await request(app.getHttpServer()).post('/base').send({ name }).expect(HttpStatus.CREATED);
+
             await request(app.getHttpServer()).get(`/base/${uuid}`).expect(HttpStatus.OK);
 
-            // Delete
             await request(app.getHttpServer()).delete(`/base/${uuid}`).expect(HttpStatus.OK);
 
-            // getOne -> NotFOUND
             await request(app.getHttpServer()).get(`/base/${uuid}`).expect(HttpStatus.NOT_FOUND);
 
-            // getMany -> id가 없다.
             const { body } = await request(app.getHttpServer()).get('/base').expect(HttpStatus.OK);
             expect(body.data.some((entity: any) => entity.uuid === uuid)).toBeFalsy();
 
-            // Recover
             await request(app.getHttpServer()).post(`/base/${uuid}/recover`).expect(HttpStatus.CREATED);
 
-            // GetOne -> OK
             await request(app.getHttpServer()).get(`/base/${uuid}`).expect(HttpStatus.OK);
         });
     });

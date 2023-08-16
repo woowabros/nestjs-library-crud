@@ -31,16 +31,14 @@ describe('Search Query Operator', () => {
          * - when index is [0-4], it has [10-6]
          * - when index is [5-9], is has null
          */
-        await Promise.all(
+        await service.repository.save(
             Array.from({ length: 5 }, (_, index) => index).map((no: number) =>
-                service.repository.save(
-                    service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no, col3: 10 - no }),
-                ),
+                service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no, col3: 10 - no }),
             ),
         );
-        await Promise.all(
+        await service.repository.save(
             Array.from({ length: 5 }, (_, index) => index + 5).map((no: number) =>
-                service.repository.save(service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no })),
+                service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no }),
             ),
         );
 

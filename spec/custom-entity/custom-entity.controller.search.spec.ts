@@ -18,10 +18,8 @@ describe('CustomEntity - Search', () => {
         app = moduleFixture.createNestApplication();
 
         service = moduleFixture.get<CustomEntityService>(CustomEntityService);
-        await Promise.all(
-            Array.from({ length: 100 }, (_, index) => index).map((number) =>
-                service.repository.save(service.repository.create({ uuid: `${number}`, name: `name-${number}` })),
-            ),
+        await service.repository.save(
+            Array.from({ length: 100 }, (_, index) => index).map((number) => ({ uuid: `${number}`, name: `name-${number}` })),
         );
 
         await service.repository.save(service.repository.create({ uuid: 'test' }));

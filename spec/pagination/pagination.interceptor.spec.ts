@@ -35,11 +35,7 @@ describe('Pagination with interceptor', () => {
             app = moduleFixture.createNestApplication();
 
             const service: BaseService = moduleFixture.get<BaseService>(BaseService);
-            await Promise.all(
-                Array.from({ length: 100 }, (_, index) => index).map((number) =>
-                    service.repository.save(service.repository.create({ name: `name-${number}` })),
-                ),
-            );
+            await service.repository.save(Array.from({ length: 100 }, (_, index) => index).map((number) => ({ name: `name-${number}` })));
             await app.init();
         });
 
@@ -141,11 +137,7 @@ describe('Pagination with interceptor', () => {
             app = moduleFixture.createNestApplication();
 
             const service: BaseService = moduleFixture.get<BaseService>(BaseService);
-            await Promise.all(
-                Array.from({ length: 100 }, (_, index) => index).map((number) =>
-                    service.repository.save(service.repository.create({ name: `name-${number}` })),
-                ),
-            );
+            await service.repository.save(Array.from({ length: 100 }, (_, index) => index).map((number) => ({ name: `name-${number}` })));
             await app.init();
         });
 

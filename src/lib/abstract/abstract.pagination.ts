@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsString, IsOptional } from 'class-validator';
 
-import { PaginationType } from '../interface';
+import { PaginationResponse, PaginationType } from '../interface';
 
 interface PaginationQuery {
     where: string;
@@ -74,4 +74,5 @@ export abstract class AbstractPaginationRequest {
     }
 
     abstract nextTotal(dataLength?: number): number;
+    abstract metadata<T>(take: number, dataLength: number, total: number, nextCursor: string): PaginationResponse<T>['metadata'];
 }

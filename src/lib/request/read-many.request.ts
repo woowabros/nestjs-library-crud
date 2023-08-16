@@ -111,32 +111,24 @@ export class CrudReadManyRequest<T> {
     }
 
     toResponse(data: T[], total: number): PaginationResponse<T> {
+        const take = this.findOptions.take;
+        const dataLength = data.length;
         const nextCursor = PaginationHelper.serialize(
             _.pick(
                 data.at(-1),
                 this.primaryKeys.map(({ name }) => name),
             ) as FindOptionsWhere<T>,
         );
+
         if (this.pagination.type === PaginationType.OFFSET) {
             return {
                 data,
-                metadata: {
-                    page: this.pagination.offset ? Math.floor(this.pagination.offset / this.findOptions.take) + 1 : 1,
-                    pages: total ? Math.ceil(total / this.findOptions.take) : 1,
-                    offset: (this.pagination.offset ?? 0) + data.length,
-                    total,
-                    nextCursor: this.pagination.makeQuery(total, nextCursor),
-                },
+                metadata: this.pagination.metadata(take, dataLength, total, nextCursor),
             };
         }
-
         return {
             data,
-            metadata: {
-                limit: this.findOptions.take,
-                total,
-                nextCursor: this.pagination.makeQuery(total, nextCursor),
-            },
+            metadata: this.pagination.metadata(take, dataLength, total, nextCursor),
         };
     }
 }

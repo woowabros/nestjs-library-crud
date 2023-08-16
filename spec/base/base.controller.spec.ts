@@ -20,7 +20,7 @@ describe('BaseController', () => {
 
         controller = moduleFixture.get<BaseController>(BaseController);
         service = moduleFixture.get<BaseService>(BaseService);
-        await Promise.all(['name1', 'name2'].map((name: string) => service.repository.save(service.repository.create({ name }))));
+        await service.repository.save(['name1', 'name2'].map((name: string) => service.repository.create({ name })));
 
         await app.init();
     });

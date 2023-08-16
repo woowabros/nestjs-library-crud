@@ -18,7 +18,7 @@ describe('MultiplePrimaryKey - ReadOne', () => {
         app = moduleFixture.createNestApplication();
 
         service = moduleFixture.get<MultiplePrimaryKeyService>(MultiplePrimaryKeyService);
-        await Promise.all(['name1', 'name2'].map((name: string) => service.repository.save(service.repository.create({ name }))));
+        await service.repository.save(['name1', 'name2'].map((name: string) => service.repository.create({ name })));
 
         await app.init();
     });

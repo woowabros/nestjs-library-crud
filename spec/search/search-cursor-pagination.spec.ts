@@ -36,16 +36,14 @@ describe('Search Cursor Pagination', () => {
          * - when index is [0-24], it has [50-26]
          * - when index is [25-49], is has null
          */
-        await Promise.all(
+        await service.repository.save(
             Array.from({ length: 25 }, (_, index) => index).map((no: number) =>
-                service.repository.save(
-                    service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no, col3: 50 - no }),
-                ),
+                service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no, col3: 50 - no }),
             ),
         );
-        await Promise.all(
+        await service.repository.save(
             Array.from({ length: 25 }, (_, index) => index + 25).map((no: number) =>
-                service.repository.save(service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no })),
+                service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no }),
             ),
         );
         expect(await TestEntity.count()).toEqual(50);

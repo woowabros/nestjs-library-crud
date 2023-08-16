@@ -34,10 +34,8 @@ describe('Pagination', () => {
 
     beforeEach(async () => {
         await service.repository.delete({});
-        await Promise.all(
-            Array.from({ length: totalCount }, (_, index) => index).map((number) =>
-                service.repository.save(service.repository.create({ name: `name-${number}` })),
-            ),
+        await service.repository.save(
+            Array.from({ length: totalCount }, (_, index) => index).map((number) => ({ name: `name-${number}` })),
         );
     });
 

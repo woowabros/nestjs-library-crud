@@ -98,7 +98,25 @@ describe('exclude swagger by route', () => {
             requestBody: {
                 description: 'CreateBaseDto',
                 required: true,
-                content: { 'application/json': { schema: { $ref: '#/components/schemas/CreateBaseBodyDto' } } },
+                content: {
+                    'application/json': {
+                        schema: {
+                            $ref: '#/components/schemas/CreateBaseBodyDto',
+                            anyOf: [
+                                {
+                                    $ref: '#/components/schemas/CreateBaseBodyDto',
+                                },
+                                {
+                                    items: {
+                                        $ref: '#/components/schemas/CreateBaseBodyDto',
+                                    },
+                                    type: 'array',
+                                },
+                            ],
+                            type: 'object',
+                        },
+                    },
+                },
             },
         });
     });

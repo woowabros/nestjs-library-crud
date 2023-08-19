@@ -35,6 +35,27 @@ import {
 import { CrudLogger } from './provider/crud-logger';
 import { CrudReadManyRequest } from './request';
 
+type ParameterDecorators =
+    | {
+          name?: string;
+          description?: string;
+          required: boolean;
+          in: string;
+          items?: { type: string };
+          type: unknown;
+          isArray?: boolean;
+      }
+    | {
+          name?: any;
+          description?: string;
+          required: boolean;
+          in: string;
+          type: unknown;
+          schema: {
+              [type: string]: unknown;
+          };
+      };
+
 export class CrudRouteFactory {
     private crudLogger: CrudLogger;
     private entity: {
@@ -244,15 +265,13 @@ export class CrudRouteFactory {
     }
 
     private defineParameterSwagger(method: Method, params: string[], target: Object) {
-        const parameterDecorators: Array<{
-            name?: string;
-            description?: string;
-            required: boolean;
-            in: string;
-            items?: { type: string };
-            type: unknown;
-            isArray?: boolean;
-        }> = params.map((param) => ({ name: param, required: true, in: 'path', type: String, isArray: false }));
+        const parameterDecorators: ParameterDecorators[] = params.map((param) => ({
+            name: param,
+            required: true,
+            in: 'path',
+            type: String,
+            isArray: false,
+        }));
 
         if (method === Method.READ_MANY) {
             parameterDecorators.push(
@@ -285,23 +304,43 @@ export class CrudRouteFactory {
             });
         }
         if (CRUD_POLICY[method].useBody) {
-            parameterDecorators.push({
-                description: [capitalizeFirstLetter(method), capitalizeFirstLetter(this.tableName), 'Dto'].join(''),
-                required: true,
-                in: 'body',
-                type: (() => {
-                    if (method === Method.SEARCH) {
-                        return RequestSearchDto;
-                    }
-                    const routeConfig = this.crudOptions.routes?.[method];
-                    if (routeConfig?.swagger && 'body' in routeConfig.swagger) {
-                        return this.generalTypeGuard(routeConfig.swagger['body']!, method, 'body');
-                    }
+            const bodyType = (() => {
+                if (method === Method.SEARCH) {
+                    return RequestSearchDto;
+                }
+                const routeConfig = this.crudOptions.routes?.[method];
+                if (routeConfig?.swagger && 'body' in routeConfig.swagger) {
+                    return this.generalTypeGuard(routeConfig.swagger['body']!, method, 'body');
+                }
 
-                    return CreateRequestDto(this.crudOptions.entity, method);
-                })(),
-                isArray: false,
-            });
+                return CreateRequestDto(this.crudOptions.entity, method);
+            })();
+
+            parameterDecorators.push(
+                method === Method.CREATE
+                    ? {
+                          description: [capitalizeFirstLetter(method), capitalizeFirstLetter(this.tableName), 'Dto'].join(''),
+                          required: true,
+                          in: 'body',
+                          type: bodyType,
+                          schema: {
+                              type: 'object',
+                              anyOf: [
+                                  {
+                                      $ref: `#/components/schemas/${bodyType.name}`,
+                                  },
+                                  { type: 'array', items: { $ref: `#/components/schemas/${bodyType.name}` } },
+                              ],
+                          },
+                      }
+                    : {
+                          description: [capitalizeFirstLetter(method), capitalizeFirstLetter(this.tableName), 'Dto'].join(''),
+                          required: true,
+                          in: 'body',
+                          type: bodyType,
+                          isArray: false,
+                      },
+            );
         }
         Reflect.defineMetadata(DECORATORS.API_PARAMETERS, parameterDecorators, target);
     }

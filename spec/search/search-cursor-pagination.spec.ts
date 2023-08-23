@@ -225,6 +225,23 @@ describe('Search Cursor Pagination', () => {
                 nextCursor: expect.any(String),
             },
         });
+
+        const { body: searchInBody } = await request(app.getHttpServer())
+            .post('/base/search')
+            .send({ where: [{ col1: { operator: 'IN', operand: ['col1_19', 'col1_21', 'col1_23', 'col1_25', 'col1_27'] } }], take: 2 })
+            .expect(HttpStatus.OK);
+        expect(searchInBody.data).toEqual([
+            { col1: 'col1_27', col2: 27, col3: null },
+            { col1: 'col1_25', col2: 25, col3: null },
+        ]);
+        const { body: nextInBody } = await request(app.getHttpServer())
+            .post('/base/search')
+            .send({ nextCursor: searchInBody.metadata.nextCursor })
+            .expect(HttpStatus.OK);
+        expect(nextInBody.data).toEqual([
+            { col1: 'col1_23', col2: 23, col3: 27 },
+            { col1: 'col1_21', col2: 21, col3: 29 },
+        ]);
     });
 
     it('should be use empty body', async () => {

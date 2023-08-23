@@ -67,7 +67,7 @@ describe('CustomEntity - Search', () => {
                 .send({ where: [{ uuid: { operator: '=', operand: '1' } }, { uuid: { operator: '=', operand: '10' } }] });
             expect(response.statusCode).toEqual(HttpStatus.OK);
             expect(response.body.data).toHaveLength(2);
-            expect(response.body.data.map((d: { uuid: string }) => d.uuid)).toEqual(['1', '10']);
+            expect(response.body.data.map((d: { uuid: string }) => d.uuid)).toEqual(expect.arrayContaining(['1', '10']));
         });
 
         it('should return entities filtered by null', async () => {

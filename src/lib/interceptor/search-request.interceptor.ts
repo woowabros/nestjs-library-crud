@@ -64,8 +64,11 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                       )
                     : {};
 
+            const primaryKeys = factoryOption.primaryKeys ?? [];
+            requestSearchDto.order ??= primaryKeys.reduce((acc, { name }) => ({ ...acc, [name]: CRUD_POLICY[method].default.sort }), {});
+
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
-                .setPrimaryKey(factoryOption.primaryKeys ?? [])
+                .setPrimaryKey(primaryKeys)
                 .setPagination(pagination)
                 .setSelect(requestSearchDto.select)
                 .setWhere(where)
@@ -260,6 +263,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             const operator = (key: keyof T) => ((findOptions.order?.[key] ?? sort) === Sort.DESC ? LessThan : MoreThan);
 
+            console.log(findOptions.order, sort);
             const cursorCondition: Record<string, FindOperator<T>> = Object.entries(lastObject).reduce(
                 (queryFilter, [key, operand]) => ({
                     ...queryFilter,

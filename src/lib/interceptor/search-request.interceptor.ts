@@ -263,7 +263,6 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             const operator = (key: keyof T) => ((findOptions.order?.[key] ?? sort) === Sort.DESC ? LessThan : MoreThan);
 
-            console.log(findOptions.order, sort);
             const cursorCondition: Record<string, FindOperator<T>> = Object.entries(lastObject).reduce(
                 (queryFilter, [key, operand]) => ({
                     ...queryFilter,

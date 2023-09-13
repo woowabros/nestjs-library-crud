@@ -22,3 +22,13 @@ services:
             POSTGRES_PASSWORD: $POSTGRESQL_DATABASE_PASSWORD
         ports:
             - '5432:5432'
+
+    postgresql-slave:
+        image: postgres:latest
+        restart: always
+        environment:
+            POSTGRES_DB: $POSTGRESQL_DATABASE_NAME
+            POSTGRES_USER: $POSTGRESQL_DATABASE_USERNAME
+            POSTGRES_PASSWORD: $POSTGRESQL_DATABASE_PASSWORD
+        ports:
+            - '$POSTGRESQL_SLAVE_PORT:5432'

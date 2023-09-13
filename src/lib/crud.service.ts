@@ -15,10 +15,14 @@ import {
 } from './interface';
 import { CrudReadManyRequest } from './request';
 
+const SUPPORTED_REPLICATION_TYPES = new Set(['mysql', 'mariadb', 'postgres', 'aurora-postgres', 'aurora-mysql']);
+
 export class CrudService<T extends BaseEntity> {
     private primaryKey: string[];
+    private usableQueryRunner = false;
 
     constructor(public readonly repository: Repository<T>) {
+        this.usableQueryRunner = SUPPORTED_REPLICATION_TYPES.has(this.repository.metadata.connection?.options.type);
         this.primaryKey = this.repository.metadata.primaryColumns?.map((columnMetadata) => columnMetadata.propertyName) ?? [];
     }
 
@@ -86,79 +90,76 @@ export class CrudService<T extends BaseEntity> {
     };
 
     readonly reservedUpsert = async (crudUpsertRequest: CrudUpsertRequest<T>): Promise<T> => {
-        return this.repository
-            .findOne({
-                where: crudUpsertRequest.params as unknown as FindOptionsWhere<T>,
-                withDeleted: true,
-            })
-            .then(async (entity: T | null) => {
-                const upsertEntity = entity ?? this.repository.create(crudUpsertRequest.params as unknown as DeepPartial<T>);
-                if ('deletedAt' in upsertEntity && upsertEntity.deletedAt != null) {
-                    throw new ConflictException('it has been deleted');
-                }
+        return this.findOne(crudUpsertRequest.params as unknown as FindOptionsWhere<T>, true).then(async (entity: T | null) => {
+            const upsertEntity = entity ?? this.repository.create(crudUpsertRequest.params as unknown as DeepPartial<T>);
+            if ('deletedAt' in upsertEntity && upsertEntity.deletedAt != null) {
+                throw new ConflictException('it has been deleted');
+            }
 
-                if (crudUpsertRequest.author) {
-                    _.merge(upsertEntity, { [crudUpsertRequest.author.property]: crudUpsertRequest.author.value });
-                }
+            if (crudUpsertRequest.author) {
+                _.merge(upsertEntity, { [crudUpsertRequest.author.property]: crudUpsertRequest.author.value });
+            }
 
-                return this.repository.save(_.assign(upsertEntity, crudUpsertRequest.body));
-            });
+            return this.repository.save(_.assign(upsertEntity, crudUpsertRequest.body));
+        });
     };
 
     readonly reservedUpdate = async (crudUpdateOneRequest: CrudUpdateOneRequest<T>): Promise<T> => {
-        return this.repository
-            .findOne({
-                where: crudUpdateOneRequest.params as unknown as FindOptionsWhere<T>,
-            })
-            .then(async (entity: T | null) => {
-                if (!entity) {
-                    throw new NotFoundException();
-                }
+        return this.findOne(crudUpdateOneRequest.params as unknown as FindOptionsWhere<T>, false).then(async (entity: T | null) => {
+            if (!entity) {
+                throw new NotFoundException();
+            }
 
-                if (crudUpdateOneRequest.author) {
-                    _.merge(entity, { [crudUpdateOneRequest.author.property]: crudUpdateOneRequest.author.value });
-                }
+            if (crudUpdateOneRequest.author) {
+                _.merge(entity, { [crudUpdateOneRequest.author.property]: crudUpdateOneRequest.author.value });
+            }
 
-                return this.repository.save(_.assign(entity, crudUpdateOneRequest.body));
-            });
+            return this.repository.save(_.assign(entity, crudUpdateOneRequest.body));
+        });
     };
 
     readonly reservedDelete = async (crudDeleteOneRequest: CrudDeleteOneRequest<T>): Promise<T> => {
         if (this.primaryKey.length === 0) {
             throw new ConflictException('cannot found primary key from entity');
         }
+        return this.findOne(crudDeleteOneRequest.params as unknown as FindOptionsWhere<T>, false).then(async (entity: T | null) => {
+            if (!entity) {
+                throw new NotFoundException();
+            }
 
-        return this.repository
-            .findOne({
-                where: crudDeleteOneRequest.params as unknown as FindOptionsWhere<T>,
-            })
-            .then(async (entity: T | null) => {
-                if (!entity) {
-                    throw new NotFoundException();
-                }
+            if (crudDeleteOneRequest.author) {
+                _.merge(entity, { [crudDeleteOneRequest.author.property]: crudDeleteOneRequest.author.value });
+                await this.repository.save(entity);
+            }
 
-                if (crudDeleteOneRequest.author) {
-                    _.merge(entity, { [crudDeleteOneRequest.author.property]: crudDeleteOneRequest.author.value });
-                    await this.repository.save(entity);
-                }
-
-                await (crudDeleteOneRequest.softDeleted ? entity.softRemove() : entity.remove());
-                return entity;
-            });
+            await (crudDeleteOneRequest.softDeleted ? entity.softRemove() : entity.remove());
+            return entity;
+        });
     };
 
     readonly reservedRecover = async (crudRecoverRequest: CrudRecoverRequest<T>): Promise<T> => {
-        return this.repository
-            .findOne({
-                where: crudRecoverRequest.params as unknown as FindOptionsWhere<T>,
-                withDeleted: true,
-            })
-            .then(async (entity: T | null) => {
-                if (!entity) {
-                    throw new NotFoundException();
-                }
-                await this.repository.recover(entity);
-                return entity;
-            });
+        return this.findOne(crudRecoverRequest.params as unknown as FindOptionsWhere<T>, true).then(async (entity: T | null) => {
+            if (!entity) {
+                throw new NotFoundException();
+            }
+            await this.repository.recover(entity);
+            return entity;
+        });
     };
+
+    private async findOne(where: FindOptionsWhere<T>, withDeleted: boolean): Promise<T | null> {
+        if (!this.usableQueryRunner) {
+            return this.repository.findOne({ where, withDeleted });
+        }
+        const queryBuilder = this.repository.createQueryBuilder().where(where);
+        if (withDeleted) {
+            queryBuilder.withDeleted();
+        }
+        const runner = queryBuilder.connection.createQueryRunner('master');
+        try {
+            return await queryBuilder.setQueryRunner(runner).getOne();
+        } finally {
+            await runner.release();
+        }
+    }
 }

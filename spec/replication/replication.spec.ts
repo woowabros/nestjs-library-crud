@@ -64,7 +64,14 @@ describe('replication', () => {
         await app?.close();
     });
 
-    it('should not be affected by replication-lag', async () => {
+    it('is not able to read lately created entity if replication lag exists', async () => {
+        const name = 'replication-test';
+        const { body: created } = await request(app.getHttpServer()).post('/base').send({ name }).expect(HttpStatus.CREATED);
+
+        await request(app.getHttpServer()).get(`/base/${created.id}`).expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('should be able to get result of lately updated or deleted entity even if replication lag exists', async () => {
         const name = 'replication-test';
         const { body: created } = await request(app.getHttpServer()).post('/base').send({ name }).expect(HttpStatus.CREATED);
 

@@ -31,7 +31,7 @@ describe('ReadOneRequestInterceptor', () => {
         const Interceptor = ReadOneRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor();
 
-        expect(interceptor.getFields(undefined, undefined)).toEqual([]);
+        expect(interceptor.getFields(undefined, undefined)).toBeUndefined();
         expect(interceptor.getFields(undefined, ['1', '2', '3'])).toEqual(['1', '2', '3']);
         expect(interceptor.getFields(['11', '12', '13'], undefined)).toEqual(['11', '12', '13']);
 

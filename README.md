@@ -163,6 +163,7 @@ interface RouteBaseOption {
         hide?: boolean;
         response?: Type<unknown>;
     };
+    exclude?: string[];
 }
 ```
 

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { FindManyOptions, FindOptionsOrder, FindOptionsSelect, FindOptionsSelectByString, FindOptionsWhere } from 'typeorm';
+import { FindManyOptions, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere } from 'typeorm';
 
 import { CRUD_POLICY } from '../crud.policy';
 import { Method, PaginationRequest, PaginationResponse, PaginationType, PrimaryKey, Sort } from '../interface';
@@ -50,8 +50,7 @@ export class CrudReadManyRequest<T> {
         return this;
     }
 
-    // TODO: FindOptionsSelectByString is deprecated.
-    setSelect(select: FindOptionsSelect<T> | FindOptionsSelectByString<T> | undefined): this {
+    setSelect(select: FindOptionsSelect<T> | undefined): this {
         this._findOptions.select = select;
         return this;
     }

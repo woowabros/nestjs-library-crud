@@ -43,6 +43,7 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 params,
                 body,
                 author: this.getAuthor(req, crudOptions, Method.UPSERT),
+                exclude: new Set(crudOptions.routes?.[Method.UPSERT]?.exclude ?? []),
             };
 
             this.crudLogger.logRequest(req, crudUpsertRequest);

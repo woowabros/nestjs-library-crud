@@ -22,20 +22,29 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
-
+            const readOneOptions = crudOptions.routes?.[method] ?? {};
             const customReadOneRequestOptions: CustomReadOneRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
 
             const fieldsByRequest = this.checkFields(req.query?.fields);
 
             const softDeleted = _.isBoolean(customReadOneRequestOptions?.softDeleted)
                 ? customReadOneRequestOptions.softDeleted
-                : crudOptions.routes?.[method]?.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean);
+                : readOneOptions.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean);
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);
 
             const crudReadOneRequest: CrudReadOneRequest<typeof crudOptions.entity> = {
                 params,
-                fields: this.getFields(customReadOneRequestOptions?.fields, fieldsByRequest),
+                fields: (
+                    this.getFields(customReadOneRequestOptions?.fields, fieldsByRequest) ??
+                    factoryOption.columns?.map((column) => column.name) ??
+                    []
+                ).reduce((acc, name) => {
+                    if (readOneOptions.exclude?.includes(name)) {
+                        return acc;
+                    }
+                    return { ...acc, [name]: true };
+                }, {}),
                 softDeleted,
                 relations: this.getRelations(customReadOneRequestOptions),
             };
@@ -46,14 +55,14 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             return next.handle();
         }
 
-        getFields(interceptorFields?: string[], requestFields?: string[]): string[] {
+        getFields(interceptorFields?: string[], requestFields?: string[]): string[] | undefined {
             if (!interceptorFields) {
-                return requestFields ?? [];
+                return requestFields;
             }
             if (!requestFields) {
-                return interceptorFields ?? [];
+                return interceptorFields;
             }
-            return _.intersection(interceptorFields, requestFields) ?? [];
+            return _.intersection(interceptorFields, requestFields);
         }
 
         checkFields(fields?: string | QueryString.ParsedQs | string[] | QueryString.ParsedQs[]): string[] | undefined {

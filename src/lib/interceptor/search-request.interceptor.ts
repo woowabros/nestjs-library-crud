@@ -70,7 +70,14 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
                 .setPrimaryKey(primaryKeys)
                 .setPagination(pagination)
-                .setSelect(requestSearchDto.select)
+                .setSelect(
+                    (requestSearchDto.select ?? factoryOption.columns?.map((column) => column.name) ?? []).reduce((acc, name) => {
+                        if (searchOptions.exclude?.includes(name)) {
+                            return acc;
+                        }
+                        return { ...acc, [name]: true };
+                    }, {}),
+                )
                 .setWhere(where)
                 .setTake(requestSearchDto.take ?? CRUD_POLICY[method].default.numberOfTake)
                 .setOrder(requestSearchDto.order as FindOptionsOrder<typeof crudOptions.entity>, CRUD_POLICY[method].default.sort)

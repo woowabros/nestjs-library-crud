@@ -24,6 +24,7 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 params,
                 body,
                 author: this.getAuthor(req, crudOptions, Method.UPDATE),
+                exclude: new Set(crudOptions.routes?.[Method.UPDATE]?.exclude ?? []),
             };
 
             this.crudLogger.logRequest(req, crudUpdateOneRequest);

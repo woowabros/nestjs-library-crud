@@ -20,6 +20,7 @@ export function RecoverRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             const crudRecoverRequest: CrudRecoverRequest<typeof crudOptions.entity> = {
                 params,
                 author: this.getAuthor(req, crudOptions, Method.RECOVER),
+                exclude: new Set(crudOptions.routes?.[Method.RECOVER]?.exclude ?? []),
             };
 
             this.crudLogger.logRequest(req, crudRecoverRequest);

@@ -262,6 +262,11 @@ export class CrudRouteFactory {
             }),
             target,
         );
+
+        if (method === Method.READ_MANY) {
+            const extraModels: Array<{ name: string }> = Reflect.getMetadata(DECORATORS.API_EXTRA_MODELS, target) ?? [];
+            Reflect.defineMetadata(DECORATORS.API_EXTRA_MODELS, [...extraModels, swaggerResponse], target);
+        }
     }
 
     private defineParameterSwagger(method: Method, params: string[], target: Object) {

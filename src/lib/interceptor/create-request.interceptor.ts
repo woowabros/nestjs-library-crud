@@ -30,6 +30,7 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const crudCreateRequest: CrudCreateRequest<typeof crudOptions.entity> = {
                 body,
                 author: this.getAuthor(req, crudOptions, Method.CREATE),
+                exclude: new Set(crudOptions.routes?.[Method.CREATE]?.exclude ?? []),
             };
 
             this.crudLogger.logRequest(req, crudCreateRequest);

@@ -79,6 +79,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 )
                 .setRelations(customSearchRequestOptions?.relations ?? factoryOption.relations)
                 .setDeserialize(this.deserialize)
+                .setExclude(searchOptions.exclude ?? [])
                 .generate();
 
             this.crudLogger.logRequest(req, crudReadManyRequest.toString());

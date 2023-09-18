@@ -25,6 +25,10 @@ interface RouteBaseOption {
          */
         response?: Type<unknown>;
     };
+    /**
+     * Configures the keys of entity to exclude from the route's response
+     */
+    exclude?: string[];
 }
 
 export interface PrimaryKey {
@@ -63,7 +67,7 @@ export interface CrudOptions {
              */
             params?: string[];
             /**
-             * If set to true, soft-deleted enitity could be included in the result.
+             * If set to true, soft-deleted entity could be included in the result.
              * @default false
              */
             softDelete?: boolean;
@@ -95,7 +99,7 @@ export interface CrudOptions {
              */
             relations?: false | string[];
             /**
-             * If set to true, soft-deleted enitity could be included in the result.
+             * If set to true, soft-deleted entity could be included in the result.
              * @default true
              */
             softDelete?: boolean;
@@ -122,7 +126,7 @@ export interface CrudOptions {
              */
             relations?: false | string[];
             /**
-             * If set to true, soft-deleted enitity could be included in the result. See `crud.policy.ts` for more details.
+             * If set to true, soft-deleted entity could be included in the result. See `crud.policy.ts` for more details.
              * @default true
              */
             softDelete?: boolean;
@@ -178,7 +182,7 @@ export interface CrudOptions {
              */
             params?: string[];
             /**
-             * If set to true, the enitity will be soft deleted. (Records the delete date of the entity)
+             * If set to true, the entity will be soft deleted. (Records the delete date of the entity)
              * @default true
              */
             softDelete?: boolean;

@@ -30,6 +30,7 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 params,
                 softDeleted,
                 author: this.getAuthor(req, crudOptions, method),
+                exclude: new Set(deleteOptions.exclude ?? []),
             };
 
             this.crudLogger.logRequest(req, crudDeleteOneRequest);

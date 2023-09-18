@@ -7,6 +7,7 @@ export type CrudRequestId<T> = keyof T | Array<keyof T>;
 
 export interface CrudRequestBase {
     author?: Author;
+    exclude: Set<string>;
 }
 
 export interface CrudReadRequestBase extends CrudRequestBase {

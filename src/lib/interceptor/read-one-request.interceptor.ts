@@ -22,14 +22,14 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
-
+            const readOneOptions = crudOptions.routes?.[method] ?? {};
             const customReadOneRequestOptions: CustomReadOneRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
 
             const fieldsByRequest = this.checkFields(req.query?.fields);
 
             const softDeleted = _.isBoolean(customReadOneRequestOptions?.softDeleted)
                 ? customReadOneRequestOptions.softDeleted
-                : crudOptions.routes?.[method]?.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean);
+                : readOneOptions.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean);
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);
 
@@ -38,6 +38,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
                 fields: this.getFields(customReadOneRequestOptions?.fields, fieldsByRequest),
                 softDeleted,
                 relations: this.getRelations(customReadOneRequestOptions),
+                exclude: new Set(readOneOptions.exclude ?? []),
             };
 
             this.crudLogger.logRequest(req, crudReadOneRequest);

@@ -57,6 +57,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 .setSort(readManyOptions.sort ? Sort[readManyOptions.sort] : CRUD_POLICY[method].default.sort)
                 .setRelations(this.getRelations(customReadManyRequestOptions))
                 .setDeserialize(this.deserialize)
+                .setExclude(readManyOptions.exclude ?? [])
                 .generate();
 
             this.crudLogger.logRequest(req, crudReadManyRequest.toString());

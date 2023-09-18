@@ -73,7 +73,7 @@ describe('Logging', () => {
         await request(app.getHttpServer()).post('/base').send({
             col1: 1,
         });
-        expect(loggerSpy).toHaveBeenNthCalledWith(1, { body: { col1: 1 } }, 'CRUD POST /base');
+        expect(loggerSpy).toHaveBeenNthCalledWith(1, { body: { col1: 1 }, exclude: new Set() }, 'CRUD POST /base');
 
         await request(app.getHttpServer()).get('/base');
         expect(loggerSpy).toHaveBeenNthCalledWith(
@@ -87,6 +87,7 @@ describe('Logging', () => {
                     withDeleted: false,
                     relations: [],
                 },
+                _exclude: new Set(),
                 _pagination: { _isNext: false, type: 'cursor', _where: btoa('{}') },
                 _sort: 'DESC',
             }),
@@ -102,6 +103,7 @@ describe('Logging', () => {
                 },
                 fields: [],
                 relations: [],
+                exclude: new Set(),
                 softDeleted: expect.any(Boolean),
             },
             'CRUD GET /base/1',
@@ -117,6 +119,7 @@ describe('Logging', () => {
                 body: {
                     col2: 'test',
                 },
+                exclude: new Set(),
             },
             'CRUD PATCH /base/1',
         );
@@ -129,6 +132,7 @@ describe('Logging', () => {
                     col1: '2',
                 },
                 body: {},
+                exclude: new Set(),
             },
             'CRUD PUT /base/2',
         );
@@ -141,6 +145,7 @@ describe('Logging', () => {
                     col1: '1',
                 },
                 softDeleted: true,
+                exclude: new Set(),
             },
             'CRUD DELETE /base/1',
         );
@@ -152,6 +157,7 @@ describe('Logging', () => {
                 params: {
                     col1: '1',
                 },
+                exclude: new Set(),
             },
             'CRUD POST /base/1/recover',
         );

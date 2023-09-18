@@ -29,7 +29,11 @@ export class CrudService<T extends BaseEntity> {
     readonly reservedReadMany = async (crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> => {
         try {
             const { entities, total } = await (async () => {
-                const findEntities = this.repository.find({ ...crudReadManyRequest.findOptions });
+                const findEntities = this.repository.find({ ...crudReadManyRequest.findOptions }).then((entities) => {
+                    return crudReadManyRequest.exclude.size === 0
+                        ? entities
+                        : entities.map((entity) => this.excludeEntity(entity, crudReadManyRequest.exclude));
+                });
 
                 if (crudReadManyRequest.pagination.isNext) {
                     const entities = await findEntities;
@@ -64,7 +68,7 @@ export class CrudService<T extends BaseEntity> {
                 if (_.isNil(entity)) {
                     throw new NotFoundException();
                 }
-                return entity;
+                return this.excludeEntity(entity, crudReadOneRequest.exclude);
             });
     };
 
@@ -82,7 +86,9 @@ export class CrudService<T extends BaseEntity> {
         return this.repository
             .save(entities)
             .then((result) => {
-                return isCrudCreateManyRequest<T>(crudCreateRequest) ? result : result[0];
+                return isCrudCreateManyRequest<T>(crudCreateRequest)
+                    ? result.map((entity) => this.excludeEntity(entity, crudCreateRequest.exclude))
+                    : this.excludeEntity(result[0], crudCreateRequest.exclude);
             })
             .catch((error) => {
                 throw new ConflictException(error);
@@ -100,7 +106,9 @@ export class CrudService<T extends BaseEntity> {
                 _.merge(upsertEntity, { [crudUpsertRequest.author.property]: crudUpsertRequest.author.value });
             }
 
-            return this.repository.save(_.assign(upsertEntity, crudUpsertRequest.body));
+            return this.repository
+                .save(_.assign(upsertEntity, crudUpsertRequest.body))
+                .then((entity) => this.excludeEntity(entity, crudUpsertRequest.exclude));
         });
     };
 
@@ -114,7 +122,9 @@ export class CrudService<T extends BaseEntity> {
                 _.merge(entity, { [crudUpdateOneRequest.author.property]: crudUpdateOneRequest.author.value });
             }
 
-            return this.repository.save(_.assign(entity, crudUpdateOneRequest.body));
+            return this.repository
+                .save(_.assign(entity, crudUpdateOneRequest.body))
+                .then((entity) => this.excludeEntity(entity, crudUpdateOneRequest.exclude));
         });
     };
 
@@ -133,7 +143,7 @@ export class CrudService<T extends BaseEntity> {
             }
 
             await (crudDeleteOneRequest.softDeleted ? entity.softRemove() : entity.remove());
-            return entity;
+            return this.excludeEntity(entity, crudDeleteOneRequest.exclude);
         });
     };
 
@@ -143,7 +153,7 @@ export class CrudService<T extends BaseEntity> {
                 throw new NotFoundException();
             }
             await this.repository.recover(entity);
-            return entity;
+            return this.excludeEntity(entity, crudRecoverRequest.exclude);
         });
     };
 
@@ -161,5 +171,15 @@ export class CrudService<T extends BaseEntity> {
         } finally {
             await runner.release();
         }
+    }
+
+    private excludeEntity(entity: T, exclude: Set<string>): T {
+        if (exclude.size === 0) {
+            return entity;
+        }
+        for (const excludeKey of exclude.values()) {
+            delete entity[excludeKey as unknown as keyof T];
+        }
+        return entity;
     }
 }

@@ -24,7 +24,11 @@ describe('CrudService', () => {
 
         it('should return entity', async () => {
             await expect(
-                crudService.reservedReadOne({ params: { id: mockEntity.id } as Partial<BaseEntity>, relations: [] }),
+                crudService.reservedReadOne({
+                    params: { id: mockEntity.id } as Partial<BaseEntity>,
+                    relations: [],
+                    exclude: new Set(),
+                }),
             ).resolves.toEqual(mockEntity);
         });
     });
@@ -46,6 +50,7 @@ describe('CrudService', () => {
                 crudService.reservedDelete({
                     params: {},
                     softDeleted: false,
+                    exclude: new Set(),
                 }),
             ).rejects.toThrow(ConflictException);
         });

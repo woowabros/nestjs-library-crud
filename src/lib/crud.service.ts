@@ -29,11 +29,7 @@ export class CrudService<T extends BaseEntity> {
     readonly reservedReadMany = async (crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> => {
         try {
             const { entities, total } = await (async () => {
-                const findEntities = this.repository.find({ ...crudReadManyRequest.findOptions }).then((entities) => {
-                    return crudReadManyRequest.exclude.size === 0
-                        ? entities
-                        : entities.map((entity) => this.excludeEntity(entity, crudReadManyRequest.exclude));
-                });
+                const findEntities = this.repository.find({ ...crudReadManyRequest.findOptions });
 
                 if (crudReadManyRequest.pagination.isNext) {
                     const entities = await findEntities;
@@ -68,7 +64,7 @@ export class CrudService<T extends BaseEntity> {
                 if (_.isNil(entity)) {
                     throw new NotFoundException();
                 }
-                return this.excludeEntity(entity, crudReadOneRequest.exclude);
+                return entity;
             });
     };
 

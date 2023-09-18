@@ -46,6 +46,14 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
 
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
                 .setPrimaryKey(factoryOption.primaryKeys ?? [])
+                .setSelect(
+                    factoryOption.columns?.reduce((acc, { name }) => {
+                        if (readManyOptions.exclude?.includes(name)) {
+                            return acc;
+                        }
+                        return { ...acc, [name]: true };
+                    }, {}),
+                )
                 .setPagination(pagination)
                 .setWithDeleted(
                     _.isBoolean(customReadManyRequestOptions?.softDeleted)
@@ -57,7 +65,6 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 .setSort(readManyOptions.sort ? Sort[readManyOptions.sort] : CRUD_POLICY[method].default.sort)
                 .setRelations(this.getRelations(customReadManyRequestOptions))
                 .setDeserialize(this.deserialize)
-                .setExclude(readManyOptions.exclude ?? [])
                 .generate();
 
             this.crudLogger.logRequest(req, crudReadManyRequest.toString());

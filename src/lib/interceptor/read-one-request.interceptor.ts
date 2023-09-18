@@ -35,10 +35,18 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
 
             const crudReadOneRequest: CrudReadOneRequest<typeof crudOptions.entity> = {
                 params,
-                fields: this.getFields(customReadOneRequestOptions?.fields, fieldsByRequest),
+                fields: (
+                    this.getFields(customReadOneRequestOptions?.fields, fieldsByRequest) ??
+                    factoryOption.columns?.map((column) => column.name) ??
+                    []
+                ).reduce((acc, name) => {
+                    if (readOneOptions.exclude?.includes(name)) {
+                        return acc;
+                    }
+                    return { ...acc, [name]: true };
+                }, {}),
                 softDeleted,
                 relations: this.getRelations(customReadOneRequestOptions),
-                exclude: new Set(readOneOptions.exclude ?? []),
             };
 
             this.crudLogger.logRequest(req, crudReadOneRequest);
@@ -47,14 +55,14 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
             return next.handle();
         }
 
-        getFields(interceptorFields?: string[], requestFields?: string[]): string[] {
+        getFields(interceptorFields?: string[], requestFields?: string[]): string[] | undefined {
             if (!interceptorFields) {
-                return requestFields ?? [];
+                return requestFields;
             }
             if (!requestFields) {
-                return interceptorFields ?? [];
+                return interceptorFields;
             }
-            return _.intersection(interceptorFields, requestFields) ?? [];
+            return _.intersection(interceptorFields, requestFields);
         }
 
         checkFields(fields?: string | QueryString.ParsedQs | string[] | QueryString.ParsedQs[]): string[] | undefined {

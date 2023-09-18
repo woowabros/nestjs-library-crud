@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { FindManyOptions, FindOptionsOrder, FindOptionsSelect, FindOptionsSelectByString, FindOptionsWhere } from 'typeorm';
+import { FindManyOptions, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere } from 'typeorm';
 
 import { CRUD_POLICY } from '../crud.policy';
 import { Method, PaginationRequest, PaginationResponse, PaginationType, PrimaryKey, Sort } from '../interface';
@@ -20,7 +20,6 @@ export class CrudReadManyRequest<T> {
     private _sort: Sort;
     private _pagination: PaginationRequest;
     private _deserialize: (crudReadManyRequest: CrudReadManyRequest<T>) => Where<T>;
-    private _exclude: Set<string> = new Set();
 
     get primaryKeys() {
         return this._primaryKeys;
@@ -34,10 +33,6 @@ export class CrudReadManyRequest<T> {
 
     get sort() {
         return this._sort;
-    }
-
-    get exclude(): Set<string> {
-        return this._exclude;
     }
 
     setPagination(pagination: PaginationRequest): this {
@@ -55,8 +50,7 @@ export class CrudReadManyRequest<T> {
         return this;
     }
 
-    // TODO: FindOptionsSelectByString is deprecated.
-    setSelect(select: FindOptionsSelect<T> | FindOptionsSelectByString<T> | undefined): this {
+    setSelect(select: FindOptionsSelect<T> | undefined): this {
         this._findOptions.select = select;
         return this;
     }
@@ -90,11 +84,6 @@ export class CrudReadManyRequest<T> {
 
     setDeserialize(deserialize: (crudReadManyRequest: CrudReadManyRequest<T>) => FindOptionsWhere<T> | Array<FindOptionsWhere<T>>): this {
         this._deserialize = deserialize;
-        return this;
-    }
-
-    setExclude(exclude: string[]): this {
-        this._exclude = new Set(exclude);
         return this;
     }
 

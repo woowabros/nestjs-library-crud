@@ -27,7 +27,6 @@ describe('CrudService', () => {
                 crudService.reservedReadOne({
                     params: { id: mockEntity.id } as Partial<BaseEntity>,
                     relations: [],
-                    exclude: new Set(),
                 }),
             ).resolves.toEqual(mockEntity);
         });

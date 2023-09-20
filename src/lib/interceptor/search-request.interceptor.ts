@@ -62,7 +62,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     ? requestSearchDto.where.map((queryFilter, index) =>
                           TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter, index),
                       )
-                    : {};
+                    : [];
 
             const primaryKeys = factoryOption.primaryKeys ?? [];
             requestSearchDto.order ??= primaryKeys.reduce((acc, { name }) => ({ ...acc, [name]: CRUD_POLICY[method].default.sort }), {});
@@ -265,7 +265,6 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             if (pagination.type === PaginationType.OFFSET) {
                 return where;
             }
-
             const lastObject: Record<string, unknown> = PaginationHelper.deserialize(pagination.nextCursor);
 
             const operator = (key: keyof T) => ((findOptions.order?.[key] ?? sort) === Sort.DESC ? LessThan : MoreThan);
@@ -287,6 +286,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     );
                 }
             }
+            where.push(cursorCondition);
             return where;
         }
     }

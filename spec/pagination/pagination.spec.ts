@@ -105,6 +105,21 @@ describe('Pagination', () => {
                 limit: defaultLimit,
                 total: totalCount,
             });
+
+            const { body: searchBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.CURSOR}/search`)
+                .send()
+                .expect(HttpStatus.OK);
+            expect(searchBody.data).toHaveLength(defaultLimit);
+            expect(searchBody.metadata).toEqual({ limit: 20, total: 100, nextCursor: expect.any(String) });
+
+            const { body: searchNextBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.CURSOR}/search`)
+                .send({ nextCursor: searchBody.metadata.nextCursor, offset: defaultLimit })
+                .expect(HttpStatus.OK);
+            for (const entity of searchNextBody.data) {
+                expect(searchBody.data.some((data: { id: number }) => data.id === entity.id)).not.toBeTruthy();
+            }
         });
 
         it('should return next 20 entities after cursor', async () => {
@@ -202,6 +217,14 @@ describe('Pagination', () => {
             const { body: searchBody } = await request(app.getHttpServer()).post(`/${PaginationType.OFFSET}/search`).expect(HttpStatus.OK);
             expect(searchBody.data).toHaveLength(defaultLimit);
             expect(searchBody.metadata).toEqual({ page: 1, pages: 5, total: 100, offset: defaultLimit, nextCursor: expect.any(String) });
+
+            const { body: searchNextBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.OFFSET}/search`)
+                .send({ nextCursor: body.metadata.nextCursor, offset: defaultLimit })
+                .expect(HttpStatus.OK);
+            for (const entity of searchNextBody.data) {
+                expect(searchBody.data.some((data: { id: number }) => data.id === entity.id)).not.toBeTruthy();
+            }
         });
 
         it('should return next page from offset on readMany', async () => {

@@ -141,7 +141,7 @@ export class CrudRouteFactory {
     }
 
     protected search<T>(controllerMethodName: string) {
-        this.targetPrototype[controllerMethodName] = function reservedReadMany(crudReadManyRequest: CrudReadManyRequest<T>) {
+        this.targetPrototype[controllerMethodName] = function reservedSearch(crudReadManyRequest: CrudReadManyRequest<T>) {
             return this.crudService.reservedReadMany(crudReadManyRequest);
         };
     }

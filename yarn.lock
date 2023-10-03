@@ -1332,15 +1332,15 @@
     tslib "2.6.2"
 
 "@nestjs/swagger@^7.1.11":
-  version "7.1.11"
-  resolved "https://registry.yarnpkg.com/@nestjs/swagger/-/swagger-7.1.11.tgz#f2b8f93530988e7444fde5253960e30a2e7e7201"
-  integrity sha512-EneFcucWC4a0n/FVd1Hg1MRugt65vL/1RDsQMqhMRfVw6IbYWuiKh51TNI4QwOPrRGiR1ry8qHJCBcTX9cl89Q==
+  version "7.1.12"
+  resolved "https://registry.yarnpkg.com/@nestjs/swagger/-/swagger-7.1.12.tgz#49944d884846031f1c7792dcb0d2be4425b92f7a"
+  integrity sha512-Q1P/IE+cws0sJeNtbs+8uDalcVylpmAnaEUFenGOa3KSNnXF/8DOE84mET/uUhFXsiz9PLHK8Hy7o7B6fRpMhg==
   dependencies:
     "@nestjs/mapped-types" "2.0.2"
     js-yaml "4.1.0"
     lodash "4.17.21"
     path-to-regexp "3.2.0"
-    swagger-ui-dist "5.6.2"
+    swagger-ui-dist "5.7.2"
 
 "@nestjs/testing@^10.0.3":
   version "10.2.5"
@@ -8234,10 +8234,10 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
-swagger-ui-dist@5.6.2:
-  version "5.6.2"
-  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-5.6.2.tgz#ff50a99e118fa71099f31cd37fde5d0e53f7fd28"
-  integrity sha512-2LKVuU2m6RHkemJloKiKJOTpN2RPmbsiad0OfSdtmFHOXJKAgYRZMwJcpT96RX6E9HUB5RkVOFC6vWqVjRgSOg==
+swagger-ui-dist@5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-5.7.2.tgz#b783568cc7f494a9ad9173c9c98fd0cbbb5c851a"
+  integrity sha512-mVZc9QVQ6pTCV5crli3+Ng+DoMPwdtMHK8QLk2oX8Mtamp4D/hV+uYdC3lV0JZrDgpNEcjs0RrWTqMwwosuLPQ==
 
 tapable@^0.1.8:
   version "0.1.10"

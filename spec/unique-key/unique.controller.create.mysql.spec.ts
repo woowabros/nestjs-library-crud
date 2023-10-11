@@ -38,4 +38,14 @@ describe('UniqueController', () => {
             await request(app.getHttpServer()).post('/unique').send(toCreate).expect(HttpStatus.CONFLICT);
         });
     });
+
+    describe('UPDATE', () => {
+        it('should throw when cannot update duplicated entities', async () => {
+            const name = 'name1';
+            await request(app.getHttpServer()).post('/unique').send({ name }).expect(HttpStatus.CREATED);
+            const { body: created } = await request(app.getHttpServer()).post('/unique').send({ name: 'name2' }).expect(HttpStatus.CREATED);
+            await request(app.getHttpServer()).patch(`/unique/${created.id}`).send({ name }).expect(HttpStatus.CONFLICT);
+            await request(app.getHttpServer()).patch(`/unique/${created.id}`).send({ name: 'name3' }).expect(HttpStatus.OK);
+        });
+    });
 });

@@ -86,9 +86,7 @@ export class CrudService<T extends BaseEntity> {
                     ? result.map((entity) => this.excludeEntity(entity, crudCreateRequest.exclude))
                     : this.excludeEntity(result[0], crudCreateRequest.exclude);
             })
-            .catch((error) => {
-                throw new ConflictException(error);
-            });
+            .catch(this.throwConflictException);
     };
 
     readonly reservedUpsert = async (crudUpsertRequest: CrudUpsertRequest<T>): Promise<T> => {
@@ -104,7 +102,8 @@ export class CrudService<T extends BaseEntity> {
 
             return this.repository
                 .save(_.assign(upsertEntity, crudUpsertRequest.body))
-                .then((entity) => this.excludeEntity(entity, crudUpsertRequest.exclude));
+                .then((entity) => this.excludeEntity(entity, crudUpsertRequest.exclude))
+                .catch(this.throwConflictException);
         });
     };
 
@@ -120,7 +119,8 @@ export class CrudService<T extends BaseEntity> {
 
             return this.repository
                 .save(_.assign(entity, crudUpdateOneRequest.body))
-                .then((entity) => this.excludeEntity(entity, crudUpdateOneRequest.exclude));
+                .then((entity) => this.excludeEntity(entity, crudUpdateOneRequest.exclude))
+                .catch(this.throwConflictException);
         });
     };
 
@@ -148,7 +148,7 @@ export class CrudService<T extends BaseEntity> {
             if (!entity) {
                 throw new NotFoundException();
             }
-            await this.repository.recover(entity);
+            await this.repository.recover(entity).catch(this.throwConflictException);
             return this.excludeEntity(entity, crudRecoverRequest.exclude);
         });
     };
@@ -177,5 +177,10 @@ export class CrudService<T extends BaseEntity> {
             delete entity[excludeKey as unknown as keyof T];
         }
         return entity;
+    }
+
+    private throwConflictException(error: Error): never {
+        Logger.error(error);
+        throw new ConflictException(error);
     }
 }

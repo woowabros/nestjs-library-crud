@@ -102,7 +102,7 @@
         "jest": "29.7.0",
         "jsonc-eslint-parser": "^2.3.0",
         "lint-staged": "^14.0.1",
-        "mongodb-memory-server": "^8.13.0",
+        "mongodb-memory-server": "^9.0.1",
         "mysql2": "^3.4.2",
         "pg": "^8.11.1",
         "prettier": "^2.8.8",

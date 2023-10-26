@@ -92,7 +92,7 @@
         "commitlint": "^17.6.6",
         "cz-conventional-changelog": "^3.3.0",
         "dotenv": "^16.3.1",
-        "eslint": "~8.51.0",
+        "eslint": "~8.52.0",
         "eslint-config-prettier": "9.0.0",
         "eslint-import-resolver-typescript": "^3.5.5",
         "eslint-import-resolver-webpack": "^0.13.2",

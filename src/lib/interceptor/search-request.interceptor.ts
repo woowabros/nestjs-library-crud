@@ -276,8 +276,11 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 }),
                 {},
             );
+
+            let mergedKeySet: Set<string> = new Set();
             for (const queryFilter of where) {
                 for (const [key, operation] of Object.entries(cursorCondition)) {
+                    mergedKeySet.add(key);
                     _.merge(
                         queryFilter,
                         key in queryFilter
@@ -286,7 +289,13 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     );
                 }
             }
-            where.push(cursorCondition);
+            for (const [key, operation] of Object.entries(cursorCondition)) {
+                if (mergedKeySet.has(key)) {
+                    continue;
+                }
+                where.push({ [key]: operation });
+            }
+
             return where;
         }
     }

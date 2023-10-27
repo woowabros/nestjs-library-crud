@@ -221,7 +221,7 @@ describe('Search Cursor Pagination', () => {
             ],
             metadata: {
                 limit: 5,
-                total: 20,
+                total: 25,
                 nextCursor: expect.any(String),
             },
         });

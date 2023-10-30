@@ -33,7 +33,7 @@ export class CrudService<T extends BaseEntity> {
 
                 if (crudReadManyRequest.pagination.isNext) {
                     const entities = await findEntities;
-                    return { entities, total: crudReadManyRequest.pagination.nextTotal(entities.length) };
+                    return { entities, total: crudReadManyRequest.pagination.nextTotal() };
                 }
                 const [entities, total] = await Promise.all([
                     findEntities,

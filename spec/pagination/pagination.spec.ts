@@ -138,7 +138,7 @@ describe('Pagination', () => {
             expect(nextResponseBody.metadata).toEqual({
                 nextCursor: expect.any(String),
                 limit: defaultLimit,
-                total: totalCount - defaultLimit,
+                total: totalCount,
             });
 
             const lastOneOfFirstResponse = firstResponseBody.data.pop();
@@ -179,7 +179,7 @@ describe('Pagination', () => {
             expect(nextResponseBody.metadata).toEqual({
                 nextCursor: expect.any(String),
                 limit: defaultLimit,
-                total: totalCount - defaultLimit,
+                total: totalCount,
             });
             expect(nextResponseBody.metadata.nextCursor).not.toEqual(responseBody.metadata.nextCursor);
 

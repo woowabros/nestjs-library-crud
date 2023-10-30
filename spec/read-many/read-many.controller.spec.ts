@@ -109,8 +109,8 @@ describe('ReadMany - Options', () => {
             expect(secondNextResponse.metadata.nextCursor).toEqual(expect.any(String));
             expect(secondNextResponse.metadata.nextCursor).not.toEqual(firstResponse.metadata.nextCursor);
 
-            expect(nextResponse.metadata.total).toEqual(firstResponse.metadata.total - nextResponse.metadata.limit);
-            expect(secondNextResponse.metadata.total).toEqual(nextResponse.metadata.total - secondNextResponse.metadata.limit);
+            expect(nextResponse.metadata.total).toEqual(firstResponse.metadata.total);
+            expect(secondNextResponse.metadata.total).toEqual(nextResponse.metadata.total);
 
             expect(nextResponse.data).toHaveLength(defaultLimit);
             expect(nextResponse.metadata.nextCursor).toBeDefined();

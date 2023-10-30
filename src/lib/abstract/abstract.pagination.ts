@@ -73,6 +73,6 @@ export abstract class AbstractPaginationRequest {
         return this._nextCursor;
     }
 
-    abstract nextTotal(dataLength?: number): number;
+    abstract nextTotal(): number;
     abstract metadata<T>(take: number, dataLength: number, total: number, nextCursor: string): PaginationResponse<T>['metadata'];
 }

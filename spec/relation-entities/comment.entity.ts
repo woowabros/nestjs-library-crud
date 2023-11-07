@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import { IsString, IsOptional, IsNotEmpty, IsNumber } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
+import { QuestionEntity } from './question.entity';
 import { WriterEntity } from './writer.entity';
 import { GROUP } from '../../src';
 import { CrudAbstractEntity } from '../crud.abstract.entity';
@@ -14,6 +15,10 @@ export class CommentEntity extends CrudAbstractEntity {
     @IsNotEmpty({ groups: [GROUP.CREATE, GROUP.UPSERT] })
     @IsOptional({ groups: [GROUP.READ_MANY] })
     questionId: number;
+
+    @ManyToOne(() => QuestionEntity)
+    @JoinColumn({ name: 'questionId' })
+    question: QuestionEntity;
 
     @Column('varchar', { nullable: false })
     @IsString({ groups: [GROUP.CREATE, GROUP.UPDATE, GROUP.UPSERT] })

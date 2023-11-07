@@ -14,7 +14,7 @@ describe('Relation Entities Search', () => {
                 RelationEntitiesModule({
                     category: {},
                     writer: {},
-                    question: { search: { relations: ['writer', 'category', 'comment'] } },
+                    question: { search: { relations: ['writer', 'category', 'comments'] } },
                     comment: {},
                 }),
             ],
@@ -52,11 +52,11 @@ describe('Relation Entities Search', () => {
             .expect(HttpStatus.CREATED);
 
         // Create 2 comments
-        await request(app.getHttpServer())
+        const { body: comment1Body } = await request(app.getHttpServer())
             .post('/comment')
             .send({ questionId: questionBody.id, message: 'Comment Message#1', writerId: writer2Body.id })
             .expect(HttpStatus.CREATED);
-        await request(app.getHttpServer())
+        const { body: comment2Body } = await request(app.getHttpServer())
             .post('/comment')
             .send({ questionId: questionBody.id, message: 'Comment Message#2', writerId: writer1Body.id })
             .expect(HttpStatus.CREATED);
@@ -94,6 +94,7 @@ describe('Relation Entities Search', () => {
                 lastModifiedAt: writer1Body.lastModifiedAt,
                 name: writer1Body.name,
             },
+            comments: [comment1Body, comment2Body],
         });
     });
 });

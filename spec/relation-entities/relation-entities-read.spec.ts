@@ -135,6 +135,7 @@ describe('Relation Entities Read', () => {
                 lastModifiedAt: writer1Body.lastModifiedAt,
                 name: writer1Body.name,
             },
+            comments: [comment1Body, comment2Body],
         });
 
         const { body: getQuestionBody } = await request(app.getHttpServer()).get(`/question/${questionBody.id}`).expect(HttpStatus.OK);
@@ -161,6 +162,7 @@ describe('Relation Entities Read', () => {
                 lastModifiedAt: writer1Body.lastModifiedAt,
                 name: writer1Body.name,
             },
+            comments: [comment1Body, comment2Body],
         });
 
         const { body: commentListBody } = await request(app.getHttpServer())
@@ -185,6 +187,7 @@ describe('Relation Entities Read', () => {
                     createdAt: comment.writerId === writer1Body.id ? writer1Body.createdAt : writer2Body.createdAt,
                     lastModifiedAt: comment.writerId === writer1Body.id ? writer1Body.lastModifiedAt : writer2Body.lastModifiedAt,
                 },
+                question: questionBody,
             });
         }
 
@@ -210,6 +213,7 @@ describe('Relation Entities Read', () => {
                     createdAt: comment.writerId === writer1Body.id ? writer1Body.createdAt : writer2Body.createdAt,
                     lastModifiedAt: comment.writerId === writer1Body.id ? writer1Body.lastModifiedAt : writer2Body.lastModifiedAt,
                 },
+                question: questionBody,
             });
         }
 
@@ -231,6 +235,7 @@ describe('Relation Entities Read', () => {
                 createdAt: commentBody.writerId === writer1Body.id ? writer1Body.createdAt : writer2Body.createdAt,
                 lastModifiedAt: commentBody.writerId === writer1Body.id ? writer1Body.lastModifiedAt : writer2Body.lastModifiedAt,
             },
+            question: questionBody,
         });
     });
 });

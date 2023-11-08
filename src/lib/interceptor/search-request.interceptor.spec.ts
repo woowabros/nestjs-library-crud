@@ -246,4 +246,31 @@ describe('SearchRequestInterceptor', () => {
             expect(await interceptor.validateBody({ take: 100_000 })).toEqual({ take: 100_000, withDeleted: false });
         });
     });
+
+    it('should be get relation values per each condition', () => {
+        const Interceptor = SearchRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
+        const interceptor = new Interceptor();
+
+        expect(interceptor.getRelations({ relations: [] })).toEqual([]);
+        expect(interceptor.getRelations({ relations: ['table'] })).toEqual(['table']);
+        expect(interceptor.getRelations({})).toEqual([]);
+
+        const InterceptorWithOptions = SearchRequestInterceptor(
+            { entity: {} as typeof BaseEntity, routes: { search: { relations: ['option'] } } },
+            { relations: [], logger: new CrudLogger() },
+        );
+        const interceptorWithOptions = new InterceptorWithOptions();
+        expect(interceptorWithOptions.getRelations({ relations: [] })).toEqual([]);
+        expect(interceptorWithOptions.getRelations({ relations: ['table'] })).toEqual(['table']);
+        expect(interceptorWithOptions.getRelations({})).toEqual(['option']);
+
+        const InterceptorWithFalseOptions = SearchRequestInterceptor(
+            { entity: {} as typeof BaseEntity, routes: { search: { relations: false } } },
+            { relations: [], logger: new CrudLogger() },
+        );
+        const interceptorWithFalseOptions = new InterceptorWithFalseOptions();
+        expect(interceptorWithFalseOptions.getRelations({ relations: [] })).toEqual([]);
+        expect(interceptorWithFalseOptions.getRelations({ relations: ['table'] })).toEqual(['table']);
+        expect(interceptorWithFalseOptions.getRelations({})).toEqual([]);
+    });
 });

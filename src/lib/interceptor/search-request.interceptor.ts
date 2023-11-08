@@ -84,7 +84,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 .setWithDeleted(
                     requestSearchDto.withDeleted ?? crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted,
                 )
-                .setRelations(customSearchRequestOptions?.relations ?? factoryOption.relations)
+                .setRelations(this.getRelations(customSearchRequestOptions))
                 .setDeserialize(this.deserialize)
                 .generate();
 
@@ -258,6 +258,19 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 throw new UnprocessableEntityException(`take must be less than ${limitOfTake}`);
             }
             return takeNumber;
+        }
+
+        getRelations(customSearchRequestOptions: CustomSearchRequestOptions): string[] {
+            if (Array.isArray(customSearchRequestOptions?.relations)) {
+                return customSearchRequestOptions.relations;
+            }
+            if (crudOptions.routes?.[method]?.relations === false) {
+                return [];
+            }
+            if (crudOptions.routes?.[method] && Array.isArray(crudOptions.routes?.[method]?.relations)) {
+                return crudOptions.routes[method].relations;
+            }
+            return factoryOption.relations;
         }
 
         deserialize<T>({ pagination, findOptions, sort }: CrudReadManyRequest<T>): Array<FindOptionsWhere<T>> {

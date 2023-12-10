@@ -138,7 +138,7 @@ export class CrudService<T extends BaseEntity> {
                 await this.repository.save(entity);
             }
 
-            await (crudDeleteOneRequest.softDeleted ? entity.softRemove() : entity.remove());
+            await (crudDeleteOneRequest.softDeleted ? this.repository.softRemove(entity) : this.repository.remove(entity));
             return this.excludeEntity(entity, crudDeleteOneRequest.exclude);
         });
     };

@@ -911,9 +911,9 @@
     swagger-ui-dist "5.9.1"
 
 "@nestjs/testing@^10.0.3":
-  version "10.2.7"
-  resolved "https://registry.yarnpkg.com/@nestjs/testing/-/testing-10.2.7.tgz#50408ccb4c809d216a12d60ac7932fd6ad7fedf4"
-  integrity sha512-d2SIqiJIf/7NSILeNNWSdRvTTpHSouGgisGHwf5PVDC7z4/yXZw/wPO9eJhegnxFlqk6n2LW4QBTmMzbqjAfHA==
+  version "10.2.10"
+  resolved "https://registry.yarnpkg.com/@nestjs/testing/-/testing-10.2.10.tgz#bd0a1e86622f7aa8cf6d8804af0f23b9444c3099"
+  integrity sha512-IVLUnPz/+fkBtPATYfqTIP+phN9yjkXejmj+JyhmcfPJZpxBmD1i9VSMqa4u54l37j0xkGPscQ0IXpbhqMYUKw==
   dependencies:
     tslib "2.6.2"
 

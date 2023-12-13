@@ -1,5 +1,5 @@
 import { CallHandler, ConflictException, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
+import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS } from '../constants';
-import { CrudOptions, CrudUpsertRequest, FactoryOption, GROUP, Method } from '../interface';
+import { CrudOptions, CrudUpsertRequest, EntityType, FactoryOption, GROUP, Method } from '../interface';
 
 export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
@@ -67,7 +67,9 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 throw new UnprocessableEntityException('Cannot include value of primary key');
             }
 
-            const transformed = plainToInstance(crudOptions.entity, body, { groups: [GROUP.UPSERT] });
+            const transformed = plainToInstance(crudOptions.entity as unknown as ClassConstructor<EntityType>, body, {
+                groups: [GROUP.UPSERT],
+            });
             const errorList = await validate(transformed, { groups: [GROUP.UPSERT], whitelist: true, forbidNonWhitelisted: true });
 
             if (errorList.length > 0) {

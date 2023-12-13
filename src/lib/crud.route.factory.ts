@@ -10,7 +10,7 @@ import {
     ROUTE_ARGS_METADATA,
 } from '@nestjs/common/constants';
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
-import { BaseEntity, getMetadataArgsStorage } from 'typeorm';
+import { getMetadataArgsStorage } from 'typeorm';
 import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 
 import { capitalizeFirstLetter } from './capitalize-first-letter';
@@ -31,6 +31,7 @@ import {
     PaginationType,
     PAGINATION_SWAGGER_QUERY,
     PrimaryKey,
+    EntityType,
 } from './interface';
 import { CrudLogger } from './provider/crud-logger';
 import { CrudReadManyRequest } from './request';
@@ -93,14 +94,14 @@ export class CrudRouteFactory {
         }
     }
 
-    private entityInformation(entity: typeof BaseEntity) {
+    private entityInformation(entity: EntityType) {
         const tableName = getMetadataArgsStorage().tables.find(({ target }) => target === entity)?.name;
         if (!tableName) {
             throw new Error('Cannot find Entity name from TypeORM');
         }
         this.entity.tableName = tableName;
 
-        const inheritanceTree = MetadataUtils.getInheritanceTree(entity);
+        const inheritanceTree = MetadataUtils.getInheritanceTree(entity as Function);
         const columnList = getMetadataArgsStorage().columns.filter(({ target }) => inheritanceTree.includes(target as Function));
         const entityColumns = columnList.map(({ propertyName, options }) => ({
             name: propertyName,
@@ -251,7 +252,7 @@ export class CrudRouteFactory {
                 Reflect.defineMetadata(DECORATORS.API_EXTRA_MODELS, [...extraModels, responseDto], target);
             }
         }
-        const swaggerResponse = this.crudOptions.routes?.[method]?.swagger?.response ?? this.crudOptions.entity;
+        const swaggerResponse = this.crudOptions.routes?.[method]?.swagger?.response ?? (this.crudOptions.entity as Type<EntityType>);
 
         Reflect.defineMetadata(
             DECORATORS.API_RESPONSE,

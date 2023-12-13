@@ -1,5 +1,5 @@
 import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
+import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS } from '../constants';
-import { CrudOptions, CrudUpdateOneRequest, FactoryOption, GROUP, Method } from '../interface';
+import { CrudOptions, CrudUpdateOneRequest, EntityType, FactoryOption, GROUP, Method } from '../interface';
 
 export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
@@ -48,7 +48,7 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 throw new UnprocessableEntityException('Cannot changed value of primary key');
             }
 
-            const transformed = plainToInstance(crudOptions.entity, body, { groups: [GROUP.UPDATE] });
+            const transformed = plainToInstance(crudOptions.entity as ClassConstructor<EntityType>, body, { groups: [GROUP.UPDATE] });
             const errorList = await validate(transformed, {
                 groups: [GROUP.UPDATE],
                 whitelist: true,

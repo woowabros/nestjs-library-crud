@@ -4,7 +4,7 @@ import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
 import { Observable } from 'rxjs';
-import { BaseEntity, FindOptionsOrder, FindOptionsWhere, LessThan, MoreThan, And, FindOperator } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, LessThan, MoreThan, And, FindOperator } from 'typeorm';
 
 import { CustomSearchRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
@@ -12,7 +12,7 @@ import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { CreateParamsDto } from '../dto/params.dto';
 import { RequestSearchDto } from '../dto/request-search.dto';
-import { CrudOptions, FactoryOption, GROUP, Method, PaginationType, Sort } from '../interface';
+import { CrudOptions, EntityType, FactoryOption, GROUP, Method, PaginationType, Sort } from '../interface';
 import { operatorBetween, operatorIn, operatorNull, operatorList, OperatorUnion } from '../interface/query-operation.interface';
 import { PaginationHelper, TypeOrmQueryBuilderHelper } from '../provider';
 import { CrudReadManyRequest } from '../request';
@@ -45,7 +45,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const requestSearchDto = await (async () => {
                 if (isNextPage) {
                     pagination.setQuery(pagination.query ?? btoa('{}'));
-                    return PaginationHelper.deserialize<RequestSearchDto<typeof BaseEntity>>(pagination.where);
+                    return PaginationHelper.deserialize<RequestSearchDto<EntityType>>(pagination.where);
                 }
                 const searchBody = await this.validateBody(req.body);
                 pagination.setWhere(PaginationHelper.serialize((searchBody ?? {}) as FindOptionsWhere<typeof crudOptions.entity>));
@@ -72,7 +72,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 .setPagination(pagination)
                 .setSelect(
                     (requestSearchDto.select ?? factoryOption.columns?.map((column) => column.name) ?? []).reduce((acc, name) => {
-                        if (searchOptions.exclude?.includes(name)) {
+                        if (searchOptions.exclude?.includes(name as string)) {
                             return acc;
                         }
                         return { ...acc, [name]: true };
@@ -206,7 +206,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 }
 
                 const transformed = plainToInstance(
-                    CreateParamsDto(crudOptions.entity, Object.keys(query) as unknown as Array<keyof BaseEntity>),
+                    CreateParamsDto(crudOptions.entity, Object.keys(query) as unknown as Array<keyof EntityType>),
                     query,
                 );
                 const errorList = await validate(transformed, {
@@ -274,7 +274,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
         }
 
         deserialize<T>({ pagination, findOptions, sort }: CrudReadManyRequest<T>): Array<FindOptionsWhere<T>> {
-            const where = findOptions.where as Array<FindOptionsWhere<BaseEntity>>;
+            const where = findOptions.where as Array<FindOptionsWhere<EntityType>>;
             if (pagination.type === PaginationType.OFFSET) {
                 return where;
             }

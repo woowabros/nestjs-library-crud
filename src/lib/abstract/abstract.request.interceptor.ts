@@ -3,21 +3,20 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
 import _ from 'lodash';
-import { BaseEntity } from 'typeorm';
 
 import { CreateParamsDto } from '../dto/params.dto';
-import { Author, Column, CrudOptions, GROUP, Method } from '../interface';
+import { Author, Column, CrudOptions, EntityType, GROUP, Method } from '../interface';
 import { CrudLogger } from '../provider/crud-logger';
 
 export abstract class RequestAbstractInterceptor {
     constructor(public readonly crudLogger: CrudLogger) {}
 
     async checkParams(
-        entity: typeof BaseEntity,
+        entity: EntityType,
         params: Record<string, string>,
         factoryColumns: Column[] = [],
         exception = new NotFoundException(),
-    ): Promise<Partial<Record<keyof BaseEntity, unknown>>> {
+    ): Promise<Partial<Record<keyof EntityType, unknown>>> {
         if (_.isNil(params)) {
             return {};
         }
@@ -28,7 +27,7 @@ export abstract class RequestAbstractInterceptor {
             this.crudLogger.log(`Invalid query params: ${invalidColumns.toLocaleString()}`);
             throw exception;
         }
-        const transformed = plainToInstance(CreateParamsDto(entity, paramsKey as unknown as Array<keyof BaseEntity>), params);
+        const transformed = plainToInstance(CreateParamsDto(entity, paramsKey as unknown as Array<keyof EntityType>), params);
         const errorList = await validate(transformed, { groups: [GROUP.PARAMS], forbidUnknownValues: false });
         if (errorList.length > 0) {
             this.crudLogger.log(errorList, 'ValidationError');

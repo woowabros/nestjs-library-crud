@@ -1,7 +1,7 @@
 import { NestInterceptor, Type } from '@nestjs/common';
-import { BaseEntity, ColumnType } from 'typeorm';
+import { ColumnType } from 'typeorm';
 
-import { Method, Sort, PaginationType, Author } from '.';
+import { Method, Sort, PaginationType, Author, EntityType } from '.';
 
 interface RouteBaseOption {
     /**
@@ -43,7 +43,7 @@ export interface CrudOptions {
     /**
      * Entity class which CRUD operations will be performed
      */
-    entity: typeof BaseEntity;
+    entity: EntityType;
 
     /**
      * enable Debug logging

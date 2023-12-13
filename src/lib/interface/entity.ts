@@ -1,3 +1,3 @@
-import { DeepPartial, ObjectLiteral } from 'typeorm';
+import { ObjectLiteral } from 'typeorm';
 
-export type EntityType = DeepPartial<ObjectLiteral>;
+export type EntityType = ObjectLiteral;

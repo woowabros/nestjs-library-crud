@@ -1,3 +1,4 @@
+import { UnprocessableEntityException } from '@nestjs/common';
 import {
     Not,
     MoreThan,
@@ -10,14 +11,14 @@ import {
     In,
     IsNull,
     Raw,
-    BaseEntity,
     FindOptionsWhere,
 } from 'typeorm';
 
+import { EntityType } from '../interface';
 import { QueryFilter, operatorBetween, operatorIn, operatorNull } from '../interface/query-operation.interface';
 
 export class TypeOrmQueryBuilderHelper {
-    static queryFilterToFindOptionsWhere<T extends BaseEntity>(filter: QueryFilter<T>, index: number): FindOptionsWhere<T> {
+    static queryFilterToFindOptionsWhere<T extends EntityType>(filter: QueryFilter<T>, index: number): FindOptionsWhere<T> {
         const prefix = (() => {
             let num = index;
             let letters = '';
@@ -35,56 +36,67 @@ export class TypeOrmQueryBuilderHelper {
         for (const [field, operation] of Object.entries(filter)) {
             if (typeof operation === 'object' && operation !== null) {
                 if ('operator' in operation) {
-                    const paramName = getParameterName();
-                    switch (operation.operator) {
-                        case '=':
-                            findOptionsWhere[field] = operation.operand;
-                            break;
-                        case '!=':
-                            findOptionsWhere[field] = Not(operation.operand);
-                            break;
-                        case '>':
-                            findOptionsWhere[field] = MoreThan(operation.operand);
-                            break;
-                        case '>=':
-                            findOptionsWhere[field] = MoreThanOrEqual(operation.operand);
-                            break;
-                        case '<':
-                            findOptionsWhere[field] = LessThan(operation.operand);
-                            break;
-                        case '<=':
-                            findOptionsWhere[field] = LessThanOrEqual(operation.operand);
-                            break;
-                        case 'LIKE':
-                            findOptionsWhere[field] = Like(operation.operand);
-                            break;
-                        case 'ILIKE':
-                            findOptionsWhere[field] = ILike(operation.operand);
-                            break;
-                        case '?':
-                            findOptionsWhere[field] = Raw((alias) => `${alias} ? :${paramName}`, {
-                                [paramName]: operation.operand,
-                            });
-                            break;
-                        case '@>':
-                            findOptionsWhere[field] = Raw((alias) => `${alias} @> :${paramName}`, {
-                                [paramName]: operation.operand,
-                            });
-                            break;
-                        case 'JSON_CONTAINS':
-                            findOptionsWhere[field] = Raw((alias) => `JSON_CONTAINS (${alias}, :${paramName})`, {
-                                [paramName]: operation.operand,
-                            });
-                            break;
-                        case operatorBetween:
-                            findOptionsWhere[field] = Between(...operation.operand);
-                            break;
-                        case operatorIn:
-                            findOptionsWhere[field] = In(operation.operand);
-                            break;
-                        case operatorNull:
-                            findOptionsWhere[field] = IsNull();
-                            break;
+                    if (operation.operator === operatorNull) {
+                        findOptionsWhere[field] = IsNull();
+                    }
+
+                    if ('operand' in operation) {
+                        const paramName = getParameterName();
+                        const { operator, operand } = operation;
+                        switch (operator) {
+                            case '=':
+                                findOptionsWhere[field] = operand;
+                                break;
+                            case '!=':
+                                findOptionsWhere[field] = Not(operand);
+                                break;
+                            case '>':
+                                findOptionsWhere[field] = MoreThan(operand);
+                                break;
+                            case '>=':
+                                findOptionsWhere[field] = MoreThanOrEqual(operand);
+                                break;
+                            case '<':
+                                findOptionsWhere[field] = LessThan(operand);
+                                break;
+                            case '<=':
+                                findOptionsWhere[field] = LessThanOrEqual(operand);
+                                break;
+                            case 'LIKE':
+                                findOptionsWhere[field] = Like(operand);
+                                break;
+                            case 'ILIKE':
+                                findOptionsWhere[field] = ILike(operand);
+                                break;
+                            case '?':
+                                findOptionsWhere[field] = Raw((alias) => `${alias} ? :${paramName}`, {
+                                    [paramName]: operand,
+                                });
+                                break;
+                            case '@>':
+                                findOptionsWhere[field] = Raw((alias) => `${alias} @> :${paramName}`, {
+                                    [paramName]: operand,
+                                });
+                                break;
+                            case 'JSON_CONTAINS':
+                                findOptionsWhere[field] = Raw((alias) => `JSON_CONTAINS (${alias}, :${paramName})`, {
+                                    [paramName]: operand,
+                                });
+                                break;
+                            case operatorBetween:
+                                if (!Array.isArray(operand) || operand.length !== 2) {
+                                    throw new UnprocessableEntityException(`Invalid operand for operator ${operatorBetween}`);
+                                }
+                                const [min, max] = operand;
+                                findOptionsWhere[field] = Between(min, max);
+                                break;
+                            case operatorIn:
+                                if (!Array.isArray(operand)) {
+                                    throw new UnprocessableEntityException(`Invalid operand for operator ${operatorBetween}`);
+                                }
+                                findOptionsWhere[field] = In(operand);
+                                break;
+                        }
                     }
                 }
 

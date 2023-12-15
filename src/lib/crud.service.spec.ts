@@ -2,6 +2,7 @@ import { ConflictException } from '@nestjs/common';
 import { BaseEntity, Repository } from 'typeorm';
 
 import { CrudService } from './crud.service';
+import { EntityType } from './interface';
 
 describe('CrudService', () => {
     describe('reservedReadOne', () => {
@@ -11,7 +12,7 @@ describe('CrudService', () => {
             },
             findOne: jest.fn(),
         };
-        const crudService = new CrudService<BaseEntity>(mockRepository as unknown as Repository<BaseEntity>);
+        const crudService = new CrudService(mockRepository as unknown as Repository<EntityType>);
         const mockEntity = { id: 1, name: 'name1' };
 
         beforeAll(() => {
@@ -38,7 +39,7 @@ describe('CrudService', () => {
                 primaryColumns: [],
             },
         };
-        const crudService = new CrudService<BaseEntity>(mockRepository as unknown as Repository<BaseEntity>);
+        const crudService = new CrudService(mockRepository as unknown as Repository<EntityType>);
 
         it('should be defined', () => {
             expect(crudService).toBeDefined();
@@ -63,7 +64,7 @@ describe('CrudService', () => {
                 },
                 find: jest.fn(),
             };
-            const crudService = new CrudService<BaseEntity>(mockRepository as unknown as Repository<BaseEntity>);
+            const crudService = new CrudService(mockRepository as unknown as Repository<EntityType>);
             await expect(crudService.reservedReadMany({ key: 'value', array: [{ key: 'value' }] } as any)).rejects.toThrow(Error);
         });
     });

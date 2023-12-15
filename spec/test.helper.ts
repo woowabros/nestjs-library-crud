@@ -5,9 +5,8 @@ import { ModelPropertiesAccessor } from '@nestjs/swagger/dist/services/model-pro
 import { SchemaObjectFactory } from '@nestjs/swagger/dist/services/schema-object-factory';
 import { SwaggerTypesMapper } from '@nestjs/swagger/dist/services/swagger-types-mapper';
 import { SwaggerExplorer } from '@nestjs/swagger/dist/swagger-explorer';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { BaseEntity, getMetadataArgsStorage } from 'typeorm';
-import { MixedList } from 'typeorm/common/MixedList';
 
 export class TestHelper {
     static getRoutePath(httpServer: any): Record<string, string[]> {
@@ -42,7 +41,7 @@ export class TestHelper {
         }
     }
 
-    static getTypeOrmMysqlModule(entities: MixedList<typeof BaseEntity>) {
+    static getTypeOrmMysqlModule(entities: TypeOrmModuleOptions['entities']) {
         return TypeOrmModule.forRoot({
             type: 'mysql',
             bigNumberStrings: false,
@@ -56,7 +55,7 @@ export class TestHelper {
         });
     }
 
-    static getTypeOrmPgsqlModule(entities: MixedList<typeof BaseEntity>) {
+    static getTypeOrmPgsqlModule(entities: TypeOrmModuleOptions['entities']) {
         return TypeOrmModule.forRoot({
             type: 'postgres',
             database: process.env.POSTGRESQL_DATABASE_NAME,
@@ -69,7 +68,7 @@ export class TestHelper {
         });
     }
 
-    static async getTypeOrmMongoModule(url: string, entities: MixedList<typeof BaseEntity>) {
+    static async getTypeOrmMongoModule(url: string, entities: TypeOrmModuleOptions['entities']) {
         return TypeOrmModule.forRoot({
             type: 'mongodb',
             url,

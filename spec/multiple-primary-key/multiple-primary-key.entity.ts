@@ -1,7 +1,10 @@
+import crypto from 'crypto';
+
 import { IsOptional, IsString } from 'class-validator';
 import { BaseEntity, BeforeInsert, Column, DeleteDateColumn, Entity, PrimaryColumn } from 'typeorm';
 
 import { GROUP } from '../../src/lib/interface';
+
 @Entity('base')
 export class MultiplePrimaryKeyEntity extends BaseEntity {
     @PrimaryColumn()
@@ -22,7 +25,7 @@ export class MultiplePrimaryKeyEntity extends BaseEntity {
 
     @BeforeInsert()
     setPrimaryKey() {
-        this.uuid1 = this.uuid1 ?? `${Math.floor(Math.random() * 10_000)}${Date.now()}`;
-        this.uuid2 = this.uuid2 ?? `${Math.floor(Math.random() * 10_000)}${Date.now()}`;
+        this.uuid1 = this.uuid1 ?? `${crypto.getRandomValues(new Uint16Array(1))[0]}${Date.now()}`;
+        this.uuid2 = this.uuid2 ?? `${crypto.getRandomValues(new Uint16Array(1))[0]}${Date.now()}`;
     }
 }

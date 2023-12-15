@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { BaseEntity, BeforeInsert, Column, DeleteDateColumn, Entity, PrimaryColumn } from 'typeorm';
 
@@ -26,6 +28,6 @@ export class CustomEntity extends BaseEntity {
 
     @BeforeInsert()
     setPrimaryKey() {
-        this.uuid = this.uuid ?? `${Date.now()}${Math.floor(Math.random() * 10_000)}`;
+        this.uuid = this.uuid ?? `${Date.now()}${crypto.getRandomValues(new Uint16Array(1))[0]}`;
     }
 }

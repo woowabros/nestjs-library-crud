@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
+// noinspection JSUnusedGlobalSymbols
+
 import { ExecutionContext, HttpStatus, Type } from '@nestjs/common';
 import {
     CUSTOM_ROUTE_ARGS_METADATA,
@@ -16,8 +18,7 @@ import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 import { capitalizeFirstLetter } from './capitalize-first-letter';
 import { CRUD_ROUTE_ARGS } from './constants';
 import { CRUD_POLICY } from './crud.policy';
-import { RequestSearchDto } from './dto/request-search.dto';
-import { CreateRequestDto, getPropertyNamesFromMetadata } from './dto/request.dto';
+import { CreateRequestDto, getPropertyNamesFromMetadata, RequestSearchDto } from './dto';
 import {
     Column,
     CrudCreateRequest,
@@ -26,14 +27,14 @@ import {
     CrudReadOneRequest,
     CrudRecoverRequest,
     CrudUpdateOneRequest,
+    EntityType,
     FactoryOption,
     Method,
-    PaginationType,
     PAGINATION_SWAGGER_QUERY,
+    PaginationType,
     PrimaryKey,
-    EntityType,
 } from './interface';
-import { CrudLogger } from './provider/crud-logger';
+import { CrudLogger } from './provider';
 import { CrudReadManyRequest } from './request';
 
 type ParameterDecorators =
@@ -58,7 +59,7 @@ type ParameterDecorators =
       };
 
 export class CrudRouteFactory {
-    private crudLogger: CrudLogger;
+    private readonly crudLogger: CrudLogger;
     private entity: {
         tableName: string;
         relations?: string[];
@@ -67,7 +68,7 @@ export class CrudRouteFactory {
     } = {
         tableName: '',
     };
-    private paginationType: PaginationType;
+    private readonly paginationType: PaginationType;
 
     constructor(protected target: any, protected crudOptions: CrudOptions) {
         this.entityInformation(crudOptions.entity);
@@ -95,30 +96,38 @@ export class CrudRouteFactory {
     }
 
     private entityInformation(entity: EntityType) {
-        const tableName = getMetadataArgsStorage().tables.find(({ target }) => target === entity)?.name;
-        if (!tableName) {
-            throw new Error('Cannot find Entity name from TypeORM');
-        }
-        this.entity.tableName = tableName;
-
-        const inheritanceTree = MetadataUtils.getInheritanceTree(entity as Function);
-        const columnList = getMetadataArgsStorage().columns.filter(({ target }) => inheritanceTree.includes(target as Function));
-        const entityColumns = columnList.map(({ propertyName, options }) => ({
-            name: propertyName,
-            type: options.type,
-            isPrimary: Boolean(options.primary),
-        }));
-
-        this.entity.columns = entityColumns;
-
-        const primaryKeys = entityColumns.filter(({ isPrimary }) => isPrimary);
-        if (!(primaryKeys.length === 1 && primaryKeys[0].name === 'id')) {
-            this.entity.primaryKeys = primaryKeys;
+        const table = getMetadataArgsStorage().tables.find(({ target }) => target === entity);
+        if (!table) {
+            throw new Error('Cannot find Entity table from TypeORM');
         }
 
-        this.entity.relations = getMetadataArgsStorage().relations.flatMap(({ target, propertyName }) =>
-            inheritanceTree.includes(target as Function) ? [propertyName] : [],
-        );
+        if (table.type === 'entity-child') {
+            // TODO: I dont know how TypeORM operates for the moment, but based on my debugging, it looks like type entity-child needs to be processed in another way
+        } else {
+            if (!table.name) {
+                throw new Error('Cannot find Entity name from TypeORM');
+            }
+            this.entity.tableName = table.name;
+
+            const inheritanceTree = MetadataUtils.getInheritanceTree(entity as Function);
+            const columnList = getMetadataArgsStorage().columns.filter(({ target }) => inheritanceTree.includes(target as Function));
+            const entityColumns = columnList.map(({ propertyName, options }) => ({
+                name: propertyName,
+                type: options.type,
+                isPrimary: Boolean(options.primary),
+            }));
+
+            this.entity.columns = entityColumns;
+
+            const primaryKeys = entityColumns.filter(({ isPrimary }) => isPrimary);
+            if (!(primaryKeys.length === 1 && primaryKeys[0].name === 'id')) {
+                this.entity.primaryKeys = primaryKeys;
+            }
+
+            this.entity.relations = getMetadataArgsStorage().relations.flatMap(({ target, propertyName }) =>
+                inheritanceTree.includes(target as Function) ? [propertyName] : [],
+            );
+        }
     }
 
     protected get tableName(): string {

@@ -34,8 +34,8 @@ type MethodPolicy<T extends Method> = {
     default: T extends Method.READ_ONE | Method.DELETE
         ? DefaultOptionsReadOne
         : T extends Method.READ_MANY | Method.SEARCH
-          ? DefaultOptionsReadMany
-          : DefaultOptions;
+        ? DefaultOptionsReadMany
+        : DefaultOptions;
 };
 interface DefaultOptions {}
 interface DefaultOptionsReadOne extends DefaultOptions {

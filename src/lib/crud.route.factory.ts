@@ -94,8 +94,18 @@ export class CrudRouteFactory {
         }
     }
 
-    private entityInformation(entity: EntityType) {
-        const tableName = getMetadataArgsStorage().tables.find(({ target }) => target === entity)?.name;
+    private entityInformation(entity: EntityType): void {
+        const tableName = (() => {
+            const table = getMetadataArgsStorage().tables.find(({ target }) => target === entity);
+            if (!table) {
+                throw new Error('Cannot find Table from TypeORM');
+            }
+            if (!table.name && table.type === 'entity-child') {
+                const discriminatorValue = getMetadataArgsStorage().discriminatorValues.find(({ target }) => target === entity)?.value;
+                return typeof discriminatorValue === 'string' ? discriminatorValue : discriminatorValue?.name;
+            }
+            return table.name;
+        })();
         if (!tableName) {
             throw new Error('Cannot find Entity name from TypeORM');
         }
@@ -103,6 +113,7 @@ export class CrudRouteFactory {
 
         const inheritanceTree = MetadataUtils.getInheritanceTree(entity as Function);
         const columnList = getMetadataArgsStorage().columns.filter(({ target }) => inheritanceTree.includes(target as Function));
+
         const entityColumns = columnList.map(({ propertyName, options }) => ({
             name: propertyName,
             type: options.type,

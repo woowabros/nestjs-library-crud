@@ -69,7 +69,10 @@ export class CrudRouteFactory {
     };
     private paginationType: PaginationType;
 
-    constructor(protected target: any, protected crudOptions: CrudOptions) {
+    constructor(
+        protected target: any,
+        protected crudOptions: CrudOptions,
+    ) {
         this.entityInformation(crudOptions.entity);
 
         const paginationType = crudOptions.routes?.readMany?.paginationType ?? CRUD_POLICY[Method.READ_MANY].default.paginationType;

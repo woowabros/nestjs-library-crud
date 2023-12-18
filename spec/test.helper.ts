@@ -83,12 +83,15 @@ export class TestHelper {
         const schemaObjectFactory = new SchemaObjectFactory(new ModelPropertiesAccessor(), new SwaggerTypesMapper());
         const explorer = new SwaggerExplorer(schemaObjectFactory);
         const routes = explorer.exploreController(wrapper, new ApplicationConfig());
-        return routes.reduce((summary, route) => {
-            if (!route.root?.operationId) {
+        return routes.reduce(
+            (summary, route) => {
+                if (!route.root?.operationId) {
+                    return summary;
+                }
+                summary[`${route.root.method} ${route.root.path}`] = route;
                 return summary;
-            }
-            summary[`${route.root.method} ${route.root.path}`] = route;
-            return summary;
-        }, {} as Record<string, DenormalizedDoc>);
+            },
+            {} as Record<string, DenormalizedDoc>,
+        );
     }
 }

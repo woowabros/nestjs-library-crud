@@ -10,7 +10,7 @@ import {
     ROUTE_ARGS_METADATA,
 } from '@nestjs/common/constants';
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
-import { getMetadataArgsStorage } from 'typeorm';
+import { getMetadataArgsStorage, DefaultNamingStrategy } from 'typeorm';
 import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 
 import { capitalizeFirstLetter } from './capitalize-first-letter';
@@ -100,14 +100,19 @@ export class CrudRouteFactory {
     private entityInformation(entity: EntityType): void {
         const tableName = (() => {
             const table = getMetadataArgsStorage().tables.find(({ target }) => target === entity);
+
             if (!table) {
                 throw new Error('Cannot find Table from TypeORM');
             }
+
+            const namingStrategy = (tableName: string | undefined) => new DefaultNamingStrategy().tableName(entity.name, tableName);
+
             if (!table.name && table.type === 'entity-child') {
                 const discriminatorValue = getMetadataArgsStorage().discriminatorValues.find(({ target }) => target === entity)?.value;
-                return typeof discriminatorValue === 'string' ? discriminatorValue : discriminatorValue?.name;
+                return namingStrategy(typeof discriminatorValue === 'string' ? discriminatorValue : discriminatorValue?.name);
             }
-            return table.name;
+
+            return namingStrategy(table?.name);
         })();
         if (!tableName) {
             throw new Error('Cannot find Entity name from TypeORM');

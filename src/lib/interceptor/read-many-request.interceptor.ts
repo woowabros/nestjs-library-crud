@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
+import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type, UnprocessableEntityException } from '@nestjs/common';
 import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
@@ -15,7 +15,7 @@ import { PaginationHelper } from '../provider';
 import { CrudReadManyRequest } from '../request';
 
 const method = Method.READ_MANY;
-export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
+export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         constructor() {
             super(factoryOption.logger);

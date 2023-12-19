@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 
@@ -6,7 +6,7 @@ import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CrudOptions, CrudRecoverRequest, FactoryOption, Method } from '../interface';
 
-export function RecoverRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
+export function RecoverRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         constructor() {
             super(factoryOption.logger);

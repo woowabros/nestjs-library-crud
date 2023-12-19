@@ -1,6 +1,6 @@
-/* eslint-disable max-classes-per-file */
 /* eslint-disable @typescript-eslint/naming-convention */
-import { UnprocessableEntityException } from '@nestjs/common';
+/* eslint-disable max-classes-per-file */
+import { NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
 import { Type } from 'class-transformer';
 import { IsEmpty, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { BaseEntity } from 'typeorm';
@@ -8,6 +8,7 @@ import { BaseEntity } from 'typeorm';
 import { UpsertRequestInterceptor } from './upsert-request.interceptor';
 import { CrudLogger } from '../provider/crud-logger';
 
+type InterceptorType = NestInterceptor<any, any> & { validateBody: (body: unknown) => Promise<unknown> };
 describe('UpsertRequestInterceptor', () => {
     it('should be not include value of primary key', async () => {
         class BodyDto extends BaseEntity {
@@ -32,9 +33,9 @@ describe('UpsertRequestInterceptor', () => {
             { entity: BodyDto },
             { primaryKeys: [{ name: 'col1', type: 'string' }], relations: [], logger: new CrudLogger() },
         );
-        const interceptor = new Interceptor();
+        const interceptor = new Interceptor() as InterceptorType;
 
-        await expect(interceptor.validateBody({ col1: 1, col2: 2 })).rejects.toThrowError(
+        await expect(interceptor.validateBody({ col1: 1, col2: 2 })).rejects.toThrow(
             new UnprocessableEntityException('Cannot include value of primary key'),
         );
         expect(await interceptor.validateBody({ col2: 2 })).toEqual({ col2: 2 });
@@ -59,7 +60,7 @@ describe('UpsertRequestInterceptor', () => {
             col3: number;
         }
         const Interceptor = UpsertRequestInterceptor({ entity: BodyDto }, { primaryKeys: [], relations: [], logger: new CrudLogger() });
-        const interceptor = new Interceptor();
+        const interceptor = new Interceptor() as InterceptorType;
         expect(await interceptor.validateBody({ col1: 1, col2: '2' })).toEqual({
             col1: '1',
             col2: 2,
@@ -80,7 +81,7 @@ describe('UpsertRequestInterceptor', () => {
             { entity: {} as typeof BaseEntity },
             { primaryKeys: [], relations: [], logger: new CrudLogger() },
         );
-        const interceptor = new Interceptor();
+        const interceptor = new Interceptor() as InterceptorType;
 
         await expect(interceptor.validateBody(null)).rejects.toThrow(UnprocessableEntityException);
         await expect(interceptor.validateBody(undefined)).rejects.toThrow(UnprocessableEntityException);
@@ -91,7 +92,7 @@ describe('UpsertRequestInterceptor', () => {
             { entity: {} as typeof BaseEntity },
             { primaryKeys: [], relations: [], logger: new CrudLogger() },
         );
-        const interceptor = new Interceptor();
+        const interceptor = new Interceptor() as InterceptorType;
 
         await expect(interceptor.validateBody(1)).rejects.toThrow(UnprocessableEntityException);
         await expect(interceptor.validateBody('')).rejects.toThrow(UnprocessableEntityException);

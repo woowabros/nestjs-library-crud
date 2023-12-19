@@ -1,4 +1,12 @@
-import { CallHandler, ConflictException, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
+import {
+    CallHandler,
+    ConflictException,
+    ExecutionContext,
+    mixin,
+    NestInterceptor,
+    Type,
+    UnprocessableEntityException,
+} from '@nestjs/common';
 import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { Request } from 'express';
@@ -9,7 +17,7 @@ import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS } from '../constants';
 import { CrudOptions, CrudUpsertRequest, EntityType, FactoryOption, GROUP, Method } from '../interface';
 
-export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
+export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         constructor() {
             super(factoryOption.logger);

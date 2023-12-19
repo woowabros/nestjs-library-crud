@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
+import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type, UnprocessableEntityException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { Request } from 'express';
@@ -14,7 +14,7 @@ import { RequestFieldsDto } from '../dto/request-fields.dto';
 import { CrudOptions, Method, FactoryOption, CrudReadOneRequest } from '../interface';
 
 const method = Method.READ_ONE;
-export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
+export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         constructor() {
             super(factoryOption.logger);

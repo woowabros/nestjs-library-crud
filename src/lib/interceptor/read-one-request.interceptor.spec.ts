@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { CallHandler, HttpStatus, UnprocessableEntityException } from '@nestjs/common';
+import { CallHandler, HttpStatus, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
 import { of } from 'rxjs';
 import { BaseEntity } from 'typeorm';
 
@@ -24,12 +24,14 @@ describe('ReadOneRequestInterceptor', () => {
         expect(interceptor).toBeDefined();
         expect(async () => {
             await interceptor.intercept(new ExecutionContextHost([{ [CUSTOM_REQUEST_OPTIONS]: {} }]), handler);
-        }).not.toThrowError();
+        }).not.toThrow();
     });
 
     it('should get fields from interceptor fields and request fields', () => {
         const Interceptor = ReadOneRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
-        const interceptor = new Interceptor();
+        const interceptor = new Interceptor() as NestInterceptor<any, any> & {
+            getFields: (interceptorFields?: string[], requestFields?: string[]) => string | undefined;
+        };
 
         expect(interceptor.getFields(undefined, undefined)).toBeUndefined();
         expect(interceptor.getFields(undefined, ['1', '2', '3'])).toEqual(['1', '2', '3']);
@@ -52,7 +54,9 @@ describe('ReadOneRequestInterceptor', () => {
                 logger: new CrudLogger(),
             },
         );
-        const interceptor = new Interceptor();
+        const interceptor = new Interceptor() as NestInterceptor<any, any> & {
+            checkFields: (fields?: unknown) => string | undefined;
+        };
 
         expect(interceptor.checkFields()).toBeUndefined();
         expect(interceptor.checkFields('col1')).toEqual(['col1']);
@@ -75,13 +79,15 @@ describe('ReadOneRequestInterceptor', () => {
             { entity: {} as typeof BaseEntity },
             { columns: [], relations: [], logger: new CrudLogger() },
         );
-        const interceptor = new Interceptor();
+        const interceptor = new Interceptor() as NestInterceptor<any, any> & {
+            checkFields: (fields?: unknown) => string | undefined;
+        };
 
         const invalidFieldsList = [1, [1, 2], [['col1', 'col2']], {}, [undefined], [null]];
         for (const fields of invalidFieldsList) {
             expect(() => {
                 interceptor.checkFields(fields);
-            }).toThrowError(UnprocessableEntityException);
+            }).toThrow(UnprocessableEntityException);
         }
     });
 

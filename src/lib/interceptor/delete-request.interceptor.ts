@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type } from '@nestjs/common';
 import { Request } from 'express';
 import _ from 'lodash';
 import { Observable } from 'rxjs';
@@ -10,7 +10,7 @@ import { CRUD_POLICY } from '../crud.policy';
 import { CrudDeleteOneRequest, CrudOptions, Method, FactoryOption } from '../interface';
 
 const method = Method.DELETE;
-export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
+export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         constructor() {
             super(factoryOption.logger);

@@ -1,6 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Controller, Injectable, Module } from '@nestjs/common';
+import { Controller, Injectable, Module, HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsOptional } from 'class-validator';
@@ -47,6 +46,7 @@ class TestController implements CrudController<TestEntity> {
 })
 class TestModule {}
 
+const TEST_LISTEN_PORT = 3339;
 describe('Search complex conditions', () => {
     let app: INestApplication;
 
@@ -56,6 +56,8 @@ describe('Search complex conditions', () => {
         }).compile();
         app = moduleFixture.createNestApplication();
         await app.init();
+        // FIXME: There is a problem that read ECONNRESET error occurs in node20
+        await app.listen(TEST_LISTEN_PORT);
 
         await Promise.all(
             Array.from({ length: 10 }, (_, index) => index).map((no) =>

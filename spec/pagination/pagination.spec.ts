@@ -7,6 +7,7 @@ import { PaginationType } from '../../src';
 import { BaseService } from '../base/base.service';
 import { TestHelper } from '../test.helper';
 
+const TEST_LISTEN_PORT = 3339;
 describe('Pagination', () => {
     let app: INestApplication;
     let service: BaseService;
@@ -30,6 +31,8 @@ describe('Pagination', () => {
 
         service = moduleFixture.get<BaseService>(BaseService);
         await app.init();
+        // FIXME: There is a problem that read ECONNRESET error occurs in node20
+        await app.listen(TEST_LISTEN_PORT);
     });
 
     beforeEach(async () => {

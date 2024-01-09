@@ -5,6 +5,7 @@ import request from 'supertest';
 import { SubPathModule } from './sub-path.module';
 import { TestHelper } from '../test.helper';
 
+const TEST_LISTEN_PORT = 3339;
 describe('Subpath - more then one parent parameter', () => {
     let app: INestApplication;
 
@@ -14,6 +15,8 @@ describe('Subpath - more then one parent parameter', () => {
         }).compile();
         app = moduleFixture.createNestApplication();
         await app.init();
+        // FIXME: There is a problem that read ECONNRESET error occurs in node20
+        await app.listen(TEST_LISTEN_PORT);
 
         /**
          * | parentId | subId | name          |

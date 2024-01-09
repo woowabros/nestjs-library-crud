@@ -8,6 +8,7 @@ import { PaginationType } from '../../src';
 import { BaseService } from '../base/base.service';
 import { TestHelper } from '../test.helper';
 
+const TEST_LISTEN_PORT = 3339;
 describe('Pagination with interceptor', () => {
     const defaultLimit = 20;
     describe('with ReadMany Interceptor', () => {
@@ -37,6 +38,8 @@ describe('Pagination with interceptor', () => {
             const service: BaseService = moduleFixture.get<BaseService>(BaseService);
             await service.repository.save(Array.from({ length: 100 }, (_, index) => index).map((number) => ({ name: `name-${number}` })));
             await app.init();
+            // FIXME: There is a problem that read ECONNRESET error occurs in node20
+            await app.listen(TEST_LISTEN_PORT);
         });
 
         afterAll(async () => {

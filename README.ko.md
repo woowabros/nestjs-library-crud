@@ -144,11 +144,11 @@ export class UserModule {}
 
 Crud 데코레이터는 아래와 같은 구성 옵션을 제공합니다:
 
-### 엔티티
+### entity
 
 (필수) 컨트롤러가 동작하기 위해서 TypeORM 엔티티가 필요합니다.
 
-### routes 옵션
+### routes
 
 (선택) routes 옵션을 사용해서 각 Route에 대한 구성을 지정할 수 있습니다. 모든 Route에는 다음의 기본 옵션들이 있습니다.
 
@@ -170,7 +170,7 @@ interface RouteBaseOption {
 
 (추가 예정)
 
-### only 옵션
+### only
 
 (선택) 생성할 Route에 대한 배열을 지정하여 해당 Route들만 생성되도록 구성할 수 있습니다. 만약 지정되지 않는다면 모든 Route가 생성됩니다.
 

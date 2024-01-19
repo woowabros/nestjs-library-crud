@@ -140,6 +140,48 @@ export class UserModule {}
 -   `POST /users/search` - retrieves a list of users based on complex search criteria
 -   `POST /users/:id/recover` - recovers a soft deleted user by ID
 
+## 구성
+
+Crud 데코레이터는 아래와 같은 구성 옵션을 제공합니다:
+
+### 엔티티
+
+(필수) 컨트롤러가 동작하기 위해서 TypeORM 엔티티가 필요합니다.
+
+### routes 옵션
+
+(선택) routes 옵션을 사용해서 각 Route에 대한 구성을 지정할 수 있습니다. 모든 Route에는 다음의 기본 옵션들이 있습니다.
+
+```typescript
+import { NestInterceptor, Type } from '@nestjs/common';
+
+interface RouteBaseOption {
+    decorators?: Array<PropertyDecorator | MethodDecorator>;
+    interceptors?: Array<Type<NestInterceptor>>;
+    swagger?: {
+        hide?: boolean;
+        response?: Type<unknown>;
+    };
+    exclude?: string[];
+}
+```
+
+그리고 각 Route들은 아래와 같은 고유한 옵션을 지닙니다.
+
+(추가 예정)
+
+### only 옵션
+
+(선택) 생성할 Route에 대한 배열을 지정하여 해당 Route들만 생성되도록 구성할 수 있습니다. 만약 지정되지 않는다면 모든 Route가 생성됩니다.
+
+예를 들어, CREATE/READ_ONE에 대해서만 생성하고 싶다면 아래와 같이 구성할 수 있습니다.
+
+```typescript
+import { Crud, Method } from '@nestjs-library/crud';
+
+@Crud({ entity: User, only: [Method.CREATE,  Method.READ_ONE] })
+```
+
 ---
 
 ## [Contributors](https://github.com/type-challenges/type-challenges/graphs/contributors)

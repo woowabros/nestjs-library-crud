@@ -443,5 +443,24 @@ describe('Pagination', () => {
             } = await request(app.getHttpServer()).get(`/${PaginationType.OFFSET}`).query({ name: 'name-1' }).expect(HttpStatus.OK);
             expect(metadata.total).toEqual(1);
         });
+
+        it('should be able to get all data', async () => {
+            const { body: firstResponseBody } = await request(app.getHttpServer()).get(`/${PaginationType.OFFSET}`).expect(HttpStatus.OK);
+            const { body: nextResponseBody } = await request(app.getHttpServer())
+                .get(`/${PaginationType.OFFSET}`)
+                .query({
+                    nextCursor: firstResponseBody.metadata.nextCursor,
+                    offset: firstResponseBody.metadata.offset,
+                })
+                .expect(HttpStatus.OK);
+
+            const entities = await service.repository.find({ order: { id: 'DESC' } });
+            expect((firstResponseBody.data as Array<{ name: string }>).map(({ name }) => name)).toEqual(
+                entities.slice(0, 20).map(({ name }) => name),
+            );
+            expect((nextResponseBody.data as Array<{ name: string }>).map(({ name }) => name)).toEqual(
+                entities.slice(20, 40).map(({ name }) => name),
+            );
+        });
     });
 });

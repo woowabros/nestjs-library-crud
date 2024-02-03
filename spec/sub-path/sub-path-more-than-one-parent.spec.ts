@@ -5,7 +5,6 @@ import request from 'supertest';
 import { SubPathModule } from './sub-path.module';
 import { TestHelper } from '../test.helper';
 
-const TEST_LISTEN_PORT = 3339;
 describe('Subpath - more then one parent parameter', () => {
     let app: INestApplication;
 
@@ -15,8 +14,6 @@ describe('Subpath - more then one parent parameter', () => {
         }).compile();
         app = moduleFixture.createNestApplication();
         await app.init();
-        // FIXME: There is a problem that read ECONNRESET error occurs in node20
-        await app.listen(TEST_LISTEN_PORT);
 
         /**
          * | parentId | subId | name          |
@@ -26,14 +23,12 @@ describe('Subpath - more then one parent parameter', () => {
          * | parent1  | 0     | writer1, 3    |
          * | parent1  | 1     | writer5, 7, 9 |
          */
-        await Promise.all(
-            Array.from({ length: 10 }, (_, index) => index).map((parentNo) =>
-                request(app.getHttpServer())
-                    .post(`/parent${parentNo % 2 === 0 ? '0' : '1'}/sub/${parentNo < 5 ? 0 : 1}/child`)
-                    .send({ name: `writer${parentNo}` })
-                    .expect(HttpStatus.CREATED),
-            ),
-        );
+        for (let i = 0; i < 10; i++) {
+            await request(app.getHttpServer())
+                .post(`/parent${i % 2 === 0 ? '0' : '1'}/sub/${i < 5 ? 0 : 1}/child`)
+                .send({ name: `writer${i}` })
+                .expect(HttpStatus.CREATED);
+        }
     });
 
     afterAll(async () => {

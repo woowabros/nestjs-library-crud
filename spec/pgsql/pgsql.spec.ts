@@ -56,8 +56,6 @@ class TestController implements CrudController<TestEntity> {
 })
 class TestModule {}
 
-const TEST_LISTEN_PORT = 3339;
-
 describe('Search complex conditions', () => {
     let app: INestApplication;
 
@@ -67,20 +65,6 @@ describe('Search complex conditions', () => {
         }).compile();
         app = moduleFixture.createNestApplication();
         await app.init();
-        // FIXME: There is a problem that read ECONNRESET error occurs in node20
-        await app.listen(TEST_LISTEN_PORT);
-
-        await Promise.all(
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((no) =>
-                request(app.getHttpServer())
-                    .post('/base')
-                    .send({
-                        col1: no,
-                        col2: [{ multiple2: no % 2 === 0, multiple4: no % 4 === 0 }],
-                        col3: [{ multiple3: no % 3 === 0, multiple5: no % 5 === 0 }],
-                    }),
-            ),
-        );
     });
 
     afterAll(async () => {

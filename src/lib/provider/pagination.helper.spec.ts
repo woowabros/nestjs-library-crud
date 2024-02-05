@@ -56,8 +56,6 @@ describe('Pagination Helper', () => {
         });
 
         expect(() => PaginationHelper.getPaginationRequest(PaginationType.OFFSET, { nextCursor: 3 })).toThrow(UnprocessableEntityException);
-
-        expect(() => PaginationHelper.getPaginationRequest(PaginationType.OFFSET, { limit: 200 })).toThrow(UnprocessableEntityException);
     });
 
     it('should be return empty object when nextCursor is undefined', () => {

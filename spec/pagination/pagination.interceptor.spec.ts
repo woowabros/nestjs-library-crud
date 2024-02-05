@@ -8,7 +8,6 @@ import { PaginationType } from '../../src';
 import { BaseService } from '../base/base.service';
 import { TestHelper } from '../test.helper';
 
-const TEST_LISTEN_PORT = 3339;
 describe('Pagination with interceptor', () => {
     const defaultLimit = 20;
     describe('with ReadMany Interceptor', () => {
@@ -38,8 +37,6 @@ describe('Pagination with interceptor', () => {
             const service: BaseService = moduleFixture.get<BaseService>(BaseService);
             await service.repository.save(Array.from({ length: 100 }, (_, index) => index).map((number) => ({ name: `name-${number}` })));
             await app.init();
-            // FIXME: There is a problem that read ECONNRESET error occurs in node20
-            await app.listen(TEST_LISTEN_PORT);
         });
 
         afterAll(async () => {
@@ -59,9 +56,9 @@ describe('Pagination with interceptor', () => {
             expect(responseBodyBeforeDelete.data).toEqual(offsetResponseBodyBeforeDelete.data);
             expect(responseBodyBeforeDelete.data).toHaveLength(defaultLimit);
 
-            await Promise.all(
-                deleteIdList.map((id) => request(app.getHttpServer()).delete(`/${PaginationType.CURSOR}/${id}`).expect(HttpStatus.OK)),
-            );
+            for (const id of deleteIdList) {
+                await request(app.getHttpServer()).delete(`/${PaginationType.CURSOR}/${id}`).expect(HttpStatus.OK);
+            }
             const deletedIdSet = new Set(deleteIdList);
 
             const {
@@ -161,9 +158,9 @@ describe('Pagination with interceptor', () => {
             expect(responseBodyBeforeDelete.data).toHaveLength(defaultLimit);
 
             const deleteIdList: number[] = responseBodyBeforeDelete.data.filter(({ id }) => id % 2 === 0).map(({ id }) => id);
-            await Promise.all(
-                deleteIdList.map((id) => request(app.getHttpServer()).delete(`/${PaginationType.CURSOR}/${id}`).expect(HttpStatus.OK)),
-            );
+            for (const id of deleteIdList) {
+                await request(app.getHttpServer()).delete(`/${PaginationType.CURSOR}/${id}`).expect(HttpStatus.OK);
+            }
             const deletedIdSet = new Set(deleteIdList);
 
             const { body: responseBodyAfterDelete }: { body: { data: Array<{ id: number }> } } = await request(app.getHttpServer())

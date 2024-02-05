@@ -44,7 +44,6 @@ describe('PaginationOffsetDto', () => {
                 children: [],
                 constraints: {
                     isNumber: 'limit must be a number conforming to the specified constraints',
-                    max: 'limit must not be greater than 100',
                 },
             },
         ]);
@@ -55,31 +54,23 @@ describe('PaginationOffsetDto', () => {
                 value: Number.NaN,
                 property: 'offset',
                 children: [],
-                constraints: { isPositive: 'offset must be a positive number' },
+                constraints: { isNumber: 'offset must be a number conforming to the specified constraints' },
             },
         ]);
         expect(validateSync(plainToInstance(PaginationOffsetDto, { query: 'c' }))).toEqual([]);
-    });
-
-    it('should be limited', () => {
-        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 100 }))).toEqual([]);
-
-        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: 101 }))).toEqual([
-            {
-                target: { limit: 101, type: 'offset', _isNext: false },
-                value: 101,
-                property: 'limit',
-                children: [],
-                constraints: { max: 'limit must not be greater than 100' },
-            },
-        ]);
-        expect(validateSync(plainToInstance(PaginationOffsetDto, { limit: -1 }))).toEqual([]);
     });
 
     it('should be allowed zero', () => {
         expect(validateByPaginationOffsetDto({ limit: 1 })).toEqual({ limit: 1, type: 'offset', _isNext: false });
         expect(validateByPaginationOffsetDto({ limit: 0 })).toEqual({ limit: 0, type: 'offset', _isNext: false });
         expect(validateByPaginationOffsetDto({ limit: -1 })).toEqual({ limit: 0, type: 'offset', _isNext: false });
+        expect(validateByPaginationOffsetDto({})).toEqual({ type: 'offset', _isNext: false });
+    });
+
+    it('should be allowed offset zero', () => {
+        expect(validateByPaginationOffsetDto({ offset: 1 })).toEqual({ offset: 1, type: 'offset', _isNext: false });
+        expect(validateByPaginationOffsetDto({ offset: 0 })).toEqual({ offset: 0, type: 'offset', _isNext: false });
+        expect(validateByPaginationOffsetDto({ offset: -1 })).toEqual({ offset: 0, type: 'offset', _isNext: false });
         expect(validateByPaginationOffsetDto({})).toEqual({ type: 'offset', _isNext: false });
     });
 });

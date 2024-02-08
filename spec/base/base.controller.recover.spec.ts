@@ -55,5 +55,9 @@ describe('BaseController', () => {
                 .post(`/base/${Number('a')}/recover`)
                 .expect(HttpStatus.NOT_FOUND);
         });
+
+        it('should be throw not found exception', async () => {
+            await request(app.getHttpServer()).post('/base/0/recover').expect(HttpStatus.NOT_FOUND);
+        });
     });
 });

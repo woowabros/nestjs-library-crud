@@ -9,6 +9,7 @@ describe('CrudService', () => {
         const mockRepository = {
             metadata: {
                 primaryColumns: [{ propertyName: 'id' }],
+                columns: [{ databaseName: 'id' }, { databaseName: 'name1' }],
             },
             findOne: jest.fn(),
         };
@@ -37,6 +38,7 @@ describe('CrudService', () => {
         const mockRepository = {
             metadata: {
                 primaryColumns: [],
+                columns: [{ databaseName: 'id' }, { databaseName: 'name1' }],
             },
         };
         const crudService = new CrudService(mockRepository as unknown as Repository<EntityType>);
@@ -61,6 +63,7 @@ describe('CrudService', () => {
             const mockRepository = {
                 metadata: {
                     primaryColumns: [{ propertyName: 'id' }],
+                    columns: [{ databaseName: 'id' }, { databaseName: 'name1' }],
                 },
                 find: jest.fn(),
             };

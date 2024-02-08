@@ -32,19 +32,10 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
                 : readOneOptions.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean);
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);
-
             const crudReadOneRequest: CrudReadOneRequest<typeof crudOptions.entity> = {
                 params,
-                fields: (
-                    this.getFields(customReadOneRequestOptions?.fields, fieldsByRequest) ??
-                    factoryOption.columns?.map((column) => column.name) ??
-                    []
-                ).reduce((acc, name) => {
-                    if (readOneOptions.exclude?.includes(name)) {
-                        return acc;
-                    }
-                    return { ...acc, [name]: true };
-                }, {}),
+                selectColumns: this.getFields(customReadOneRequestOptions?.fields, fieldsByRequest),
+                excludedColumns: readOneOptions.exclude,
                 softDeleted,
                 relations: this.getRelations(customReadOneRequestOptions),
             };

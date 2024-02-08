@@ -1,6 +1,6 @@
 import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
-import { DeepPartial, FindOptionsSelect, FindOptionsWhere, Repository } from 'typeorm';
+import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
 
 import {
     CrudReadOneRequest,
@@ -20,14 +20,19 @@ const SUPPORTED_REPLICATION_TYPES = new Set(['mysql', 'mariadb', 'postgres', 'au
 
 export class CrudService<T extends EntityType> {
     private primaryKey: string[];
+    private columnNames: string[];
     private usableQueryRunner = false;
 
     constructor(public readonly repository: Repository<T>) {
         this.usableQueryRunner = SUPPORTED_REPLICATION_TYPES.has(this.repository.metadata.connection?.options.type);
         this.primaryKey = this.repository.metadata.primaryColumns?.map((columnMetadata) => columnMetadata.propertyName) ?? [];
+        this.columnNames = this.repository.metadata.columns.map((column) =>
+            column.embeddedMetadata ? column.propertyPath : column.databaseName,
+        );
     }
 
     readonly reservedReadMany = async (crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> => {
+        crudReadManyRequest.excludedColumns(this.columnNames);
         try {
             const { entities, total } = await (async () => {
                 const findEntities = this.repository.find({ ...crudReadManyRequest.findOptions });
@@ -56,7 +61,9 @@ export class CrudService<T extends EntityType> {
     readonly reservedReadOne = async (crudReadOneRequest: CrudReadOneRequest<T>): Promise<T> => {
         return this.repository
             .findOne({
-                select: crudReadOneRequest.fields as unknown as FindOptionsSelect<T>,
+                select: (crudReadOneRequest.selectColumns ?? this.columnNames).filter(
+                    (columnName) => !crudReadOneRequest.excludedColumns?.includes(columnName),
+                ),
                 where: crudReadOneRequest.params as FindOptionsWhere<T>,
                 withDeleted: crudReadOneRequest.softDeleted,
                 relations: crudReadOneRequest.relations,

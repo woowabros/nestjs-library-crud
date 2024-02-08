@@ -9,6 +9,7 @@ import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS } from '../constants';
 import { CrudOptions, CrudUpdateOneRequest, EntityType, FactoryOption, GROUP, Method } from '../interface';
 
+const method = Method.UPDATE;
 export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         constructor() {
@@ -17,14 +18,18 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
+            const updatedOptions = crudOptions.routes?.[method] ?? {};
             const body = await this.validateBody(req.body);
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);
             const crudUpdateOneRequest: CrudUpdateOneRequest<typeof crudOptions.entity> = {
                 params,
                 body,
-                author: this.getAuthor(req, crudOptions, Method.UPDATE),
-                exclude: new Set(crudOptions.routes?.[Method.UPDATE]?.exclude ?? []),
+                author: this.getAuthor(req, crudOptions, method),
+                exclude: new Set(updatedOptions.exclude ?? []),
+                saveOptions: {
+                    listeners: updatedOptions.listeners,
+                },
             };
 
             this.crudLogger.logRequest(req, crudUpdateOneRequest);

@@ -81,7 +81,7 @@ export class CrudService<T extends EntityType> {
         }
 
         return this.repository
-            .save(entities)
+            .save(entities, crudCreateRequest.saveOptions)
             .then((result) => {
                 return isCrudCreateManyRequest<T>(crudCreateRequest)
                     ? result.map((entity) => this.excludeEntity(entity, crudCreateRequest.exclude))
@@ -102,7 +102,7 @@ export class CrudService<T extends EntityType> {
             }
 
             return this.repository
-                .save(_.assign(upsertEntity, crudUpsertRequest.body))
+                .save(_.assign(upsertEntity, crudUpsertRequest.body), crudUpsertRequest.saveOptions)
                 .then((entity) => this.excludeEntity(entity, crudUpsertRequest.exclude))
                 .catch(this.throwConflictException);
         });
@@ -119,7 +119,7 @@ export class CrudService<T extends EntityType> {
             }
 
             return this.repository
-                .save(_.assign(entity, crudUpdateOneRequest.body))
+                .save(_.assign(entity, crudUpdateOneRequest.body), crudUpdateOneRequest.saveOptions)
                 .then((entity) => this.excludeEntity(entity, crudUpdateOneRequest.exclude))
                 .catch(this.throwConflictException);
         });
@@ -136,10 +136,13 @@ export class CrudService<T extends EntityType> {
 
             if (crudDeleteOneRequest.author) {
                 _.merge(entity, { [crudDeleteOneRequest.author.property]: crudDeleteOneRequest.author.value });
-                await this.repository.save(entity);
+
+                await this.repository.save(entity, crudDeleteOneRequest.saveOptions);
             }
 
-            await (crudDeleteOneRequest.softDeleted ? this.repository.softRemove(entity) : this.repository.remove(entity));
+            await (crudDeleteOneRequest.softDeleted
+                ? this.repository.softRemove(entity, crudDeleteOneRequest.saveOptions)
+                : this.repository.remove(entity, crudDeleteOneRequest.saveOptions));
             return this.excludeEntity(entity, crudDeleteOneRequest.exclude);
         });
     };
@@ -149,7 +152,7 @@ export class CrudService<T extends EntityType> {
             if (!entity) {
                 throw new NotFoundException();
             }
-            await this.repository.recover(entity).catch(this.throwConflictException);
+            await this.repository.recover(entity, crudRecoverRequest.saveOptions).catch(this.throwConflictException);
             return this.excludeEntity(entity, crudRecoverRequest.exclude);
         });
     };

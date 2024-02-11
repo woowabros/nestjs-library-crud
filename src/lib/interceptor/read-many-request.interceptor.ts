@@ -46,14 +46,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
 
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
                 .setPrimaryKey(factoryOption.primaryKeys ?? [])
-                .setSelect(
-                    factoryOption.columns?.reduce((acc, { name }) => {
-                        if (readManyOptions.exclude?.includes(name)) {
-                            return acc;
-                        }
-                        return { ...acc, [name]: true };
-                    }, {}),
-                )
+                .setExcludeColumn(readManyOptions.exclude)
                 .setPagination(pagination)
                 .setWithDeleted(
                     _.isBoolean(customReadManyRequestOptions?.softDeleted)

@@ -20,19 +20,36 @@ export class CrudReadManyRequest<T> {
     private _sort: Sort;
     private _pagination: PaginationRequest;
     private _deserialize: (crudReadManyRequest: CrudReadManyRequest<T>) => Where<T>;
+    private _selectColumnSet: Set<string | number> = new Set();
+    private _excludeColumnSet: Set<string> = new Set();
 
     get primaryKeys() {
         return this._primaryKeys;
     }
+
     get findOptions() {
         return this._findOptions;
     }
+
     get pagination() {
         return this._pagination;
     }
 
     get sort() {
         return this._sort;
+    }
+
+    excludedColumns(columns: string[]): this {
+        this._findOptions.select = columns.filter((column) => {
+            if (this._excludeColumnSet.has(column)) {
+                return false;
+            }
+            if (this._selectColumnSet.size === 0) {
+                return true;
+            }
+            return this._selectColumnSet.has(column);
+        }) as unknown as FindOptionsSelect<T>;
+        return this;
     }
 
     setPagination(pagination: PaginationRequest): this {
@@ -50,8 +67,23 @@ export class CrudReadManyRequest<T> {
         return this;
     }
 
-    setSelect(select: FindOptionsSelect<T> | undefined): this {
-        this._findOptions.select = select;
+    setSelectColumn(columns: Array<string | number> | undefined): this {
+        if (!columns || columns.length === 0) {
+            return this;
+        }
+        for (const column of columns) {
+            this._selectColumnSet.add(column);
+        }
+        return this;
+    }
+
+    setExcludeColumn(columns: string[] | undefined): this {
+        if (!columns || columns.length === 0) {
+            return this;
+        }
+        for (const column of columns) {
+            this._excludeColumnSet.add(column);
+        }
         return this;
     }
 

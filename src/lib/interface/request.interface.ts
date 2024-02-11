@@ -15,7 +15,8 @@ export interface CrudReadRequestBase extends CrudRequestBase {
 }
 
 export interface CrudReadOneRequest<T> extends CrudReadRequestBase {
-    fields?: Partial<Record<keyof T, unknown>>;
+    selectColumns?: string[];
+    excludedColumns?: string[];
     params: Partial<Record<keyof T, unknown>>;
 }
 

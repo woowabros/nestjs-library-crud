@@ -31,6 +31,15 @@ interface RouteBaseOption {
     exclude?: string[];
 }
 
+export interface SaveOptions {
+    /**
+     * Indicates if listeners and subscribers are called for this operation.
+     * By default they are enabled, you can disable them by setting `{ listeners: false }` in save/remove options.
+     * refer to typeorm’s save option.
+     */
+    listeners?: boolean;
+}
+
 export interface PrimaryKey {
     name: string;
     type?: ColumnType;
@@ -144,7 +153,8 @@ export interface CrudOptions {
              * If `author.filter` is not found in the Request object, author.value will be used as default.
              */
             author?: Author;
-        } & RouteBaseOption;
+        } & RouteBaseOption &
+            SaveOptions;
         [Method.UPDATE]?: {
             /**
              * Array of path parameters to use for the route
@@ -169,7 +179,8 @@ export interface CrudOptions {
              * If `author.filter` is not found in the Request object, author.value will be used as default.
              */
             author?: Author;
-        } & RouteBaseOption;
+        } & RouteBaseOption &
+            SaveOptions;
         [Method.DELETE]?: {
             /**
              * Array of path parameters to use for the route
@@ -193,7 +204,8 @@ export interface CrudOptions {
              * If `author.filter` is not found in the Request object, author.value will be used as default.
              */
             author?: Author;
-        } & RouteBaseOption;
+        } & RouteBaseOption &
+            SaveOptions;
         [Method.UPSERT]?: {
             /**
              * Array of path parameters to use for the route
@@ -218,7 +230,8 @@ export interface CrudOptions {
              * If `author.filter` is not found in the Request object, author.value will be used as default.
              */
             author?: Author;
-        } & RouteBaseOption;
+        } & RouteBaseOption &
+            SaveOptions;
         [Method.RECOVER]?: {
             /**
              * Array of path parameters to use for the route
@@ -237,7 +250,8 @@ export interface CrudOptions {
              * If `author.filter` is not found in the Request object, author.value will be used as default.
              */
             author?: Author;
-        } & RouteBaseOption;
+        } & RouteBaseOption &
+            SaveOptions;
     };
     /**
      * An array of methods to generate routes for. If not specified, all routes will be generated.

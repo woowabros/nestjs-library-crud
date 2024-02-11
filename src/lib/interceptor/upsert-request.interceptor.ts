@@ -17,6 +17,7 @@ import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS } from '../constants';
 import { CrudOptions, CrudUpsertRequest, EntityType, FactoryOption, GROUP, Method } from '../interface';
 
+const method = Method.UPSERT;
 export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         constructor() {
@@ -25,6 +26,7 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
+            const upsertOptions = crudOptions.routes?.[method] ?? {};
 
             const params = await this.checkParams(
                 crudOptions.entity,
@@ -50,8 +52,11 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const crudUpsertRequest: CrudUpsertRequest<typeof crudOptions.entity> = {
                 params,
                 body,
-                author: this.getAuthor(req, crudOptions, Method.UPSERT),
-                exclude: new Set(crudOptions.routes?.[Method.UPSERT]?.exclude ?? []),
+                author: this.getAuthor(req, crudOptions, method),
+                exclude: new Set(upsertOptions.exclude ?? []),
+                saveOptions: {
+                    listeners: upsertOptions.listeners,
+                },
             };
 
             this.crudLogger.logRequest(req, crudUpsertRequest);

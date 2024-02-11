@@ -12,6 +12,7 @@ import { CrudOptions, FactoryOption, CrudCreateRequest, GROUP, Method, EntityTyp
 interface NestedBaseEntityArray extends Array<NestedBaseEntityArray | DeepPartial<EntityType>> {}
 type BaseEntityOrArray = DeepPartial<EntityType> | NestedBaseEntityArray;
 
+const method = Method.CREATE;
 export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
     class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         constructor() {
@@ -20,6 +21,7 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req = context.switchToHttp().getRequest<Request>();
+            const createOptions = crudOptions.routes?.[method] ?? {};
 
             if (req.params) {
                 Object.assign(req.body, req.params);
@@ -28,8 +30,11 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             const crudCreateRequest: CrudCreateRequest<typeof crudOptions.entity> = {
                 body,
-                author: this.getAuthor(req, crudOptions, Method.CREATE),
-                exclude: new Set(crudOptions.routes?.[Method.CREATE]?.exclude ?? []),
+                author: this.getAuthor(req, crudOptions, method),
+                exclude: new Set(createOptions.exclude ?? []),
+                saveOptions: {
+                    listeners: createOptions.listeners,
+                },
             };
 
             this.crudLogger.logRequest(req, crudCreateRequest);

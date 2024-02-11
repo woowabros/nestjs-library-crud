@@ -1,6 +1,6 @@
 import { DeepPartial } from 'typeorm';
 
-import { Author } from '.';
+import { Author, SaveOptions } from '.';
 import { RequestSearchDto } from '../dto/request-search.dto';
 
 export type CrudRequestId<T> = keyof T | Array<keyof T>;
@@ -27,11 +27,13 @@ export interface CrudSearchRequest<T> extends CrudRequestBase {
 export interface CrudCreateOneRequest<T> extends CrudRequestBase {
     body: DeepPartial<T>;
     exclude: Set<string>;
+    saveOptions?: SaveOptions;
 }
 
 export interface CrudCreateManyRequest<T> extends CrudRequestBase {
     body: Array<DeepPartial<T>>;
     exclude: Set<string>;
+    saveOptions?: SaveOptions;
 }
 
 export function isCrudCreateManyRequest<T>(x: CrudCreateOneRequest<T> | CrudCreateManyRequest<T>): x is CrudCreateManyRequest<T> {
@@ -42,19 +44,23 @@ export type CrudCreateRequest<T> = CrudCreateOneRequest<T> | CrudCreateManyReque
 
 export interface CrudUpsertRequest<T> extends CrudCreateOneRequest<T> {
     params: Partial<Record<keyof T, unknown>>;
+    saveOptions: SaveOptions;
 }
 
 export interface CrudUpdateOneRequest<T> extends CrudCreateOneRequest<T> {
     params: Partial<Record<keyof T, unknown>>;
+    saveOptions: SaveOptions;
 }
 
 export interface CrudDeleteOneRequest<T> extends CrudRequestBase {
     params: Partial<Record<keyof T, unknown>>;
     softDeleted: boolean;
     exclude: Set<string>;
+    saveOptions: SaveOptions;
 }
 
 export interface CrudRecoverRequest<T> extends CrudRequestBase {
     params: Partial<Record<keyof T, unknown>>;
     exclude: Set<string>;
+    saveOptions: SaveOptions;
 }

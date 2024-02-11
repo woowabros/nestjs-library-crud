@@ -51,6 +51,7 @@ describe('CrudService', () => {
                     params: {},
                     softDeleted: false,
                     exclude: new Set(),
+                    saveOptions: {},
                 }),
             ).rejects.toThrow(ConflictException);
         });

@@ -86,7 +86,7 @@
         "@types/node": "20.11.2",
         "@types/qs": "^6.9.10",
         "@types/supertest": "^6.0.2",
-        "@typescript-eslint/eslint-plugin": "^6.14.0",
+        "@typescript-eslint/eslint-plugin": "^7.0.0",
         "@typescript-eslint/parser": "^6.14.0",
         "commitizen": "^4.3.0",
         "commitlint": "^18.6.0",

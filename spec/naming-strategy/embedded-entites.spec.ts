@@ -5,6 +5,7 @@ import request from 'supertest';
 import { SnakeNamingStrategy } from './snake-naming.strategy';
 import { EmbeddedEntitiesModule } from '../embedded-entities/embedded-entities.module';
 import { EmployeeEntity } from '../embedded-entities/employee.entity';
+import { EmployeeService } from '../embedded-entities/employee.service';
 import { UserEntity } from '../embedded-entities/user.entity';
 import { TestHelper } from '../test.helper';
 
@@ -20,6 +21,9 @@ describe('Embedded-entities using NamingStrategy', () => {
     });
 
     afterAll(async () => {
+        const repository = app.get<EmployeeService>(EmployeeService).repository;
+        await repository.query('DROP TABLE IF EXISTS user_entity');
+        await repository.query('DROP TABLE IF EXISTS employee_entity');
         await app?.close();
     });
 

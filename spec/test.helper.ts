@@ -30,6 +30,9 @@ export class TestHelper {
         const tables = [...metadata.tables];
         while (tables.length > 0) {
             const table = tables.shift()!;
+            if (!table.name) {
+                return;
+            }
             const entity = table.target as typeof BaseEntity;
 
             await entity.query(`DROP TABLE ${table.name}`).catch((error) => {

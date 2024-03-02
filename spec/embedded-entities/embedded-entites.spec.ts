@@ -4,6 +4,7 @@ import request from 'supertest';
 
 import { EmbeddedEntitiesModule } from './embedded-entities.module';
 import { EmployeeEntity } from './employee.entity';
+import { EmployeeService } from './employee.service';
 import { UserEntity } from './user.entity';
 import { TestHelper } from '../test.helper';
 
@@ -19,6 +20,9 @@ describe('Embedded-entities', () => {
     });
 
     afterAll(async () => {
+        const repository = app.get<EmployeeService>(EmployeeService).repository;
+        await repository.query('DROP TABLE IF EXISTS user_entity');
+        await repository.query('DROP TABLE IF EXISTS employee_entity');
         await app?.close();
     });
 

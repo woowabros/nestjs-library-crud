@@ -55,7 +55,7 @@ export class TestHelper {
         });
     }
 
-    static getTypeOrmPgsqlModule(entities: TypeOrmModuleOptions['entities']) {
+    static getTypeOrmPgsqlModule(entities: TypeOrmModuleOptions['entities'], namingStrategy?: TypeOrmModuleOptions['namingStrategy']) {
         return TypeOrmModule.forRoot({
             type: 'postgres',
             database: process.env.POSTGRESQL_DATABASE_NAME,
@@ -65,6 +65,7 @@ export class TestHelper {
             synchronize: true,
             logging: true,
             logger: 'file',
+            namingStrategy,
         });
     }
 

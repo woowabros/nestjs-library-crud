@@ -261,7 +261,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             if (crudOptions.routes?.[method]?.relations === false) {
                 return [];
             }
-            if (crudOptions.routes?.[method] && Array.isArray(crudOptions.routes?.[method]?.relations)) {
+            if (crudOptions.routes?.[method] && Array.isArray(crudOptions.routes[method].relations)) {
                 return crudOptions.routes[method].relations;
             }
             return factoryOption.relations;

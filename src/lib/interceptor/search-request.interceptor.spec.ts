@@ -41,7 +41,7 @@ describe('SearchRequestInterceptor', () => {
     });
 
     describe('validateBody', () => {
-        it('should should throw when body is not an object', async () => {
+        it('should throw when body is not an object', async () => {
             const invalidBodyList = [null, undefined, 'string', 0, 1, true, false];
             for (const body of invalidBodyList) {
                 await expect(interceptor.validateBody(body)).rejects.toThrow(UnprocessableEntityException);
@@ -109,12 +109,13 @@ describe('SearchRequestInterceptor', () => {
 
         it('should throw when query filter is not an array', async () => {
             await expect(interceptor.validateBody({ where: {} })).rejects.toThrow(UnprocessableEntityException);
-            await expect(interceptor.validateBody({ where: [null] })).rejects.toThrow(UnprocessableEntityException);
-            await expect(interceptor.validateBody({ where: [undefined] })).rejects.toThrow(UnprocessableEntityException);
+            await expect(interceptor.validateBody({ where: null })).rejects.toThrow(UnprocessableEntityException);
+            await expect(interceptor.validateBody({ where: 'unknown' })).rejects.toThrow(UnprocessableEntityException);
         });
 
         it('should throw when invalid query filter is given', async () => {
             await expect(interceptor.validateBody({ where: [null] })).rejects.toThrow(UnprocessableEntityException);
+            await expect(interceptor.validateBody({ where: [undefined] })).rejects.toThrow(UnprocessableEntityException);
             await expect(interceptor.validateBody({ where: ['unknown'] })).rejects.toThrow(UnprocessableEntityException);
         });
 
@@ -163,6 +164,7 @@ describe('SearchRequestInterceptor', () => {
             const invalidWhereList = [
                 { where: [{ col3: { operator: 'IN' } }] },
                 { where: [{ col3: { operator: 'IN', operand: 0 } }] },
+                { where: [{ col3: { operator: 'IN', operand: [] } }] },
                 { where: [{ col3: { operator: 'IN', operand: [0, '1', 2] } }] },
                 { where: [{ col3: { operator: 'IN', operand: [0, 1, null] } }] },
             ];
@@ -182,7 +184,7 @@ describe('SearchRequestInterceptor', () => {
             });
         });
 
-        it('should support defined type only', async () => {
+        it('should support defined operator only', async () => {
             await expect(
                 interceptor.validateBody({
                     where: [{ col3: { operator: 'NOT IN', operand: [0, 1, 2] } }],
@@ -206,6 +208,19 @@ describe('SearchRequestInterceptor', () => {
                 take: 20,
                 withDeleted: false,
             });
+        });
+
+        it('should throw when operand type not equals entity field type', async () => {
+            const invalidWhereList = [
+                { where: [{ col1: { operator: 'BETWEEN', operand: [1, 2] } }] },
+                { where: [{ col1: { operator: 'IN', operand: [1] } }] },
+                { where: [{ col2: { operator: 'IN', operand: ['1'] } }] },
+                { where: [{ col1: { operator: '>', operand: 123 } }] },
+            ];
+
+            for (const where of invalidWhereList) {
+                await expect(interceptor.validateBody(where)).rejects.toThrow(UnprocessableEntityException);
+            }
         });
     });
 
@@ -238,7 +253,7 @@ describe('SearchRequestInterceptor', () => {
 
     describe('body.take', () => {
         it('should validate take', async () => {
-            const invalidList = [{ take: 0 }, { take: -10 }, { take: null }];
+            const invalidList = [{ take: 0 }, { take: -10 }, { take: null }, { take: 'unknown' }];
             for (const take of invalidList) {
                 await expect(interceptor.validateBody(take)).rejects.toThrow(UnprocessableEntityException);
             }
@@ -254,10 +269,27 @@ describe('SearchRequestInterceptor', () => {
         };
         const Interceptor = SearchRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
         const interceptor = new Interceptor() as InterceptorType;
-
         expect(interceptor.getRelations({ relations: [] })).toEqual([]);
         expect(interceptor.getRelations({ relations: ['table'] })).toEqual(['table']);
         expect(interceptor.getRelations({})).toEqual([]);
+
+        const InterceptorWithoutSearchRoute = SearchRequestInterceptor(
+            { entity: {} as typeof BaseEntity, routes: { readOne: { relations: false } } },
+            { relations: [], logger: new CrudLogger() },
+        );
+        const interceptorWithoutSearchRoute = new InterceptorWithoutSearchRoute() as InterceptorType;
+        expect(interceptorWithoutSearchRoute.getRelations({ relations: [] })).toEqual([]);
+        expect(interceptorWithoutSearchRoute.getRelations({ relations: ['table'] })).toEqual(['table']);
+        expect(interceptorWithoutSearchRoute.getRelations({})).toEqual([]);
+
+        const InterceptorWithoutRelations = SearchRequestInterceptor(
+            { entity: {} as typeof BaseEntity, routes: { search: {} } },
+            { relations: [], logger: new CrudLogger() },
+        );
+        const interceptorWithoutRelations = new InterceptorWithoutRelations() as InterceptorType;
+        expect(interceptorWithoutRelations.getRelations({ relations: [] })).toEqual([]);
+        expect(interceptorWithoutRelations.getRelations({ relations: ['table'] })).toEqual(['table']);
+        expect(interceptorWithoutRelations.getRelations({})).toEqual([]);
 
         const InterceptorWithOptions = SearchRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { search: { relations: ['option'] } } },

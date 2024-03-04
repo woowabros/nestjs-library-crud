@@ -26,9 +26,7 @@ export class CrudService<T extends EntityType> {
     constructor(public readonly repository: Repository<T>) {
         this.usableQueryRunner = SUPPORTED_REPLICATION_TYPES.has(this.repository.metadata.connection?.options.type);
         this.primaryKey = this.repository.metadata.primaryColumns?.map((columnMetadata) => columnMetadata.propertyName) ?? [];
-        this.columnNames = this.repository.metadata.columns.map((column) =>
-            column.embeddedMetadata ? column.propertyPath : column.databaseName,
-        );
+        this.columnNames = this.repository.metadata.columns.map((column) => column.propertyPath);
     }
 
     readonly reservedReadMany = async (crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> => {

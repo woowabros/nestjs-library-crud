@@ -2,18 +2,19 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
-import { EmbeddedEntitiesModule } from './embedded-entities.module';
-import { EmployeeEntity } from './employee.entity';
-import { EmployeeService } from './employee.service';
-import { UserEntity } from './user.entity';
+import { SnakeNamingStrategy } from './snake-naming.strategy';
+import { EmbeddedEntitiesModule } from '../embedded-entities/embedded-entities.module';
+import { EmployeeEntity } from '../embedded-entities/employee.entity';
+import { EmployeeService } from '../embedded-entities/employee.service';
+import { UserEntity } from '../embedded-entities/user.entity';
 import { TestHelper } from '../test.helper';
 
-describe('Embedded-entities', () => {
+describe('Embedded-entities using NamingStrategy', () => {
     let app: INestApplication;
 
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [EmbeddedEntitiesModule, TestHelper.getTypeOrmPgsqlModule([UserEntity, EmployeeEntity])],
+            imports: [EmbeddedEntitiesModule, TestHelper.getTypeOrmPgsqlModule([UserEntity, EmployeeEntity], new SnakeNamingStrategy())],
         }).compile();
         app = moduleFixture.createNestApplication();
         await app.init();

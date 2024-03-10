@@ -1,5 +1,10 @@
+# @nestjs-library/crud
+
 <p align="center">
     <img src="https://github.com/woowabros/nestjs-library-crud/actions/workflows/ci.yml/badge.svg" alt="Node.js CI">
+    <a href='https://coveralls.io/github/woowabros/nestjs-library-crud?branch=main'>
+        <img src='https://coveralls.io/repos/github/woowabros/nestjs-library-crud/badge.svg?branch=main' alt='Coverage Status' />
+    </a>
     <a href="https://www.npmjs.com/package/@nestjs-library/crud">
         <img src="https://img.shields.io/npm/v/@nestjs-library/crud">
     </a>
@@ -20,8 +25,6 @@
         <span>한국어<span>
     </a> 
 </p>
-
-# @nestjs-library/crud
 
 CRUD Rest API를 자동으로 생성하는 라이브러리입니다.
 
@@ -61,6 +64,9 @@ pnpm add @nestjs-library/crud
 
 ### Step 1. Entity를 정의합니다.
 
+Crud decorator를 사용하기 위해서는 먼저 TypeORM Entity를 정의해야 합니다.
+다음의 예시에서는 id, username, email 속성을 가진 User Entity를 정의합니다.
+
 ```typescript
 import { BaseEntity, Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
@@ -78,6 +84,9 @@ export class User extends BaseEntity {
 ```
 
 ### Step 2: Service provider를 생성합니다.
+
+TypeORM Entity에 대한 NestJS Service 를 생성합니다.
+이 때 Service 객체는 CrudService를 상속해야 합니다.
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -97,6 +106,9 @@ export class UserService extends CrudService<User> {
 
 ### Step 3. Controller를 생성합니다.
 
+TypeORM Entity에 대한 NestJS Controller 를 생성합니다.
+이 때 Controller 객체는 CrudController를 상속해야 합니다.
+
 ```typescript
 import { Controller } from '@nestjs/common';
 import { Crud, CrudController } from '@nestjs-library/crud';
@@ -111,7 +123,9 @@ export class UserController implements CrudController<User> {
 }
 ```
 
-### Step 4: Module에 생성된 Entity와 Service, Controller를 추가합니다.
+### Step 4: 생성된 Entity와 Service, Controller를 Module에 추가합니다.
+
+NestJS 모듈을 정의합니다. 위에서 생성한 Entity, Service, Controller를 각각 imports, controllers, providers에 추가합니다.
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -131,18 +145,63 @@ export class UserModule {}
 
 ### Step 5: Server를 시작하고 CRUD API를 확인할 수 있습니다.
 
--   `GET /users` - retrieves a list of users with pagination
--   `GET /users/:id` - retrieves a single user by ID
--   `POST /users` - creates single or multiple users
--   `PATCH /users/:id` - updates an existing user by ID
--   `DELETE /users/:id` - deletes an existing user by ID
--   `PUT /users/:id` - upserts (update or create) an existing user by ID
--   `POST /users/search` - retrieves a list of users based on complex search criteria
--   `POST /users/:id/recover` - recovers a soft deleted user by ID
+모듈이 초기화되면 다음의 endpoint가 자동으로 생성됩니다.
+
+-   `GET /users` - pagination을 적용하여 user의 목록을 조회합니다.
+-   `GET /users/:id` - ID를 기반으로 단일한 user를 조회합니다.
+-   `POST /users` - 단일한, 혹은 여러 명의 user를 생성합니다.
+-   `PATCH /users/:id` - ID를 기반으로 기존의 user를 수정합니다.
+-   `DELETE /users/:id` - ID를 기반으로 기존의 user를 삭제합니다.
+-   `PUT /users/:id` - ID를 기반으로 기존의 user를 upsert (수정하거나 생성) 합니다.
+-   `POST /users/search` - 복잡한 검색 조건을 적용하여 user의 목록을 조회합니다.
+-   `POST /users/:id/recover` - ID를 기반으로 soft delete 된 user를 복구합니다.
 
 ---
 
-## [Contributors](https://github.com/type-challenges/type-challenges/graphs/contributors)
+## 설정
+
+Crud decorator는 다음과 같은 옵션을 제공합니다.
+
+### entity
+
+(required) controller가 다룰 TypeORM Entity를 지정합니다.
+
+### routes
+
+(optional) 각각의 route를 설정합니다.
+
+모든 route는 다음의 기본 옵션들을 가질 수 있습니다.
+
+```typescript
+import { NestInterceptor, Type } from '@nestjs/common';
+
+interface RouteBaseOption {
+    decorators?: Array<PropertyDecorator | MethodDecorator>;
+    interceptors?: Array<Type<NestInterceptor>>;
+    swagger?: {
+        hide?: boolean;
+        response?: Type<unknown>;
+    };
+}
+```
+
+각각의 route는 아래와 같은 옵션을 가질 수 있습니다.
+
+(추가 예정)
+
+### only
+
+(optional) route를 생성할 Method 목록을 지정합니다.
+
+예를 들어 Create와 ReadOne에 대한 route만 생성하고 싶다면 다음과 같이 설정할 수 있습니다.
+
+```typescript
+import { Crud, Method } from '@nestjs-library/crud';
+
+@Crud({ entity: User, only: [Method.CREATE,  Method.READ_ONE] })
+```
+
+## [Contributors](https://github.com/woowabros/nestjs-library-crud/graphs/contributors)
 
 ![Contributors](https://contrib.rocks/image?repo=woowabros/nestjs-library-crud)
 

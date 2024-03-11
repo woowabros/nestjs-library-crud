@@ -330,6 +330,10 @@ export class CrudRouteFactory {
         }
         if (CRUD_POLICY[method].useBody) {
             const bodyType = (() => {
+                const customBody = this.crudOptions.routes?.[method]?.swagger?.body;
+                if (customBody != null) {
+                    return customBody;
+                }
                 if (method === Method.SEARCH) {
                     return RequestSearchDto;
                 }

@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { ApiParam } from '@nestjs/swagger';
 
 import { ParamsRequestInterceptor } from './params.request.interceptor';
+import { UpdateRequestDto } from './update-request.dto';
 import { Crud } from '../../src/lib/crud.decorator';
 import { CrudController } from '../../src/lib/interface';
 import { BaseEntity } from '../base/base.entity';
@@ -21,6 +22,11 @@ import { BaseService } from '../base/base.service';
         create: {
             interceptors: [ParamsRequestInterceptor],
             decorators: [ApiParam({ name: 'key', required: true })],
+        },
+        update: {
+            swagger: {
+                body: UpdateRequestDto,
+            },
         },
     },
 })

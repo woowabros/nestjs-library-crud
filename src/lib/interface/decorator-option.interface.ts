@@ -24,6 +24,10 @@ interface RouteBaseOption {
          * Configures the Swagger documentation for the route's response
          */
         response?: Type<unknown>;
+        /**
+         * Configures the Swagger documentation for the route's request body
+         */
+        body?: Type<unknown>;
     };
     /**
      * Configures the keys of entity to exclude from the route's response

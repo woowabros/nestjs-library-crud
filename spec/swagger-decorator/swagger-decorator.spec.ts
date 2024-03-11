@@ -1,13 +1,18 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
+import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
+import { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
+import { RequestBodyObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
+import { SwaggerDecoratorController } from './swagger-decorator.controller';
 import { SwaggerDecoratorModule } from './swagger-decorator.module';
 import { BaseEntity } from '../base/base.entity';
 import { TestHelper } from '../test.helper';
 
 describe('SwaggerDecorator', () => {
     let app: INestApplication;
+    let routeSet: Record<string, DenormalizedDoc>;
 
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -15,8 +20,14 @@ describe('SwaggerDecorator', () => {
         }).compile();
 
         app = moduleFixture.createNestApplication();
+        const controller = moduleFixture.get<SwaggerDecoratorController>(SwaggerDecoratorController);
 
         await app.init();
+
+        routeSet = TestHelper.getSwaggerExplorer({
+            instance: controller,
+            metatype: SwaggerDecoratorController,
+        } as InstanceWrapper<SwaggerDecoratorController>);
     });
 
     afterAll(async () => {
@@ -42,5 +53,11 @@ describe('SwaggerDecorator', () => {
             .get(`/swagger-decorator/456/${readManyBody.id}`)
             .expect(HttpStatus.OK);
         expect(readOneBody.name).toEqual('name');
+    });
+
+    it('should be override swagger decorator', async () => {
+        expect((routeSet['patch /swagger-decorator/{key}/{id}'].root?.requestBody as RequestBodyObject)?.description).toEqual(
+            'UpdateBaseDto',
+        );
     });
 });

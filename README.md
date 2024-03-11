@@ -151,7 +151,20 @@ The Crud decorator supports the following configuration options:
 
 ### routes
 
-(optional) You can configure each route by specifying the routes option. Every route has the following base options.
+(optional) You can configure each route by specifying the routes option.
+
+For example, if you want to set the default pagination size for a search route, you can specify option as below.
+
+```typescript
+@Crud({
+    entity: User,
+    routes: {
+        search: { numberOfTake: 5 },
+    },
+})
+```
+
+Every route has the following base options.
 
 ```typescript
 import { NestInterceptor, Type } from '@nestjs/common';
@@ -167,9 +180,115 @@ interface RouteBaseOption {
 }
 ```
 
+`CREATE`, `UPDATE`, `DELETE`, `UPSERT`, and `RECOVER` routes can have the following options.
+
+```typescript
+interface SaveOptions {
+    listeners?: boolean;
+}
+```
+
 And each route has its own options as below.
 
-(To be added)
+#### `READ_ONE`
+
+```typescript
+interface ReadOneOptions {
+    params?: string[];
+    softDelete?: boolean;
+    relations?: false | string[];
+}
+```
+
+#### `READ_MANY`
+
+```typescript
+import { Sort, PaginationType } from 'src/lib/interface';
+
+interface ReadManyOptions {
+    sort?: Sort | `${Sort}`;
+    paginationType?: PaginationType | `${PaginationType}`;
+    numberOfTake?: number;
+    relations?: false | string[];
+    softDelete?: boolean;
+}
+```
+
+#### `SEARCH`
+
+```typescript
+import { PaginationType } from 'src/lib/interface';
+
+interface SearchOptions {
+    paginationType?: PaginationType | `${PaginationType}`;
+    numberOfTake?: number;
+    limitOfTake?: number;
+    relations?: false | string[];
+    softDelete?: boolean;
+}
+```
+
+#### `CREATE`
+
+```typescript
+import { Type } from '@nestjs/common';
+import { Author } from 'src/lib/interface';
+
+interface CreateOptions {
+    swagger?: {
+        body?: Type<unknown>;
+    };
+    author?: Author;
+}
+```
+
+#### `UPDATE`
+
+```typescript
+import { Type } from '@nestjs/common';
+import { Author } from 'src/lib/interface';
+
+interface UpdateOptions {
+    params?: string[];
+    swagger?: {
+        body?: Type<unknown>;
+    };
+    author?: Author;
+}
+```
+
+#### `DELETE`
+
+```typescript
+import { Author } from 'src/lib/interface';
+
+interface DeleteOptions {
+    params?: string[];
+    softDelete?: boolean;
+    author?: Author;
+}
+```
+
+#### `UPSERT`
+
+```typescript
+interface UpsertOptions {
+    params?: string[];
+    swagger?: {
+        body?: Type<unknown>;
+    };
+    author?: Author;
+}
+```
+
+#### `RECOVER`
+
+```typescript
+interface RecoverOptions {
+    params?: string[];
+    author?: Author;
+}
+```
 
 ### only
 

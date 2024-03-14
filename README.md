@@ -306,6 +306,10 @@ import { Crud, Method } from '@nestjs-library/crud';
 
 ![Contributors](https://contrib.rocks/image?repo=woowabros/nestjs-library-crud)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=woowabros/nestjs-library-crud&type=Date)](https://star-history.com/#woowabros/nestjs-library-crud&Date)
+
 ## License
 
 This library is licensed under the MIT License. See the [LICENSE](./LICENSE.md) file for details.

@@ -3658,7 +3658,7 @@ flatted@^3.2.7:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.2.9.tgz#7eb4c67ca1ba34232ca9d2d93e9886e611ad7daf"
   integrity sha512-36yxDn5H7OFZQla0/jFJmbIKTdZAQHngCedGxiMmpNfEZM0sdEeT+WczLQrjK6D7o2aiyLYDnkw0R3JK0Qv1RQ==
 
-follow-redirects@^1.15.3:
+follow-redirects@^1.15.6:
   version "1.15.6"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.6.tgz#7f815c0cda4249c74ff09e95ef97c23b5fd0399b"
   integrity sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==
@@ -5817,16 +5817,16 @@ mongodb-connection-string-url@^2.6.0:
     "@types/whatwg-url" "^8.2.1"
     whatwg-url "^11.0.0"
 
-mongodb-memory-server-core@9.1.7:
-  version "9.1.7"
-  resolved "https://registry.yarnpkg.com/mongodb-memory-server-core/-/mongodb-memory-server-core-9.1.7.tgz#f920a5dd4ecbdeb846323a935e2cc08b03dffb56"
-  integrity sha512-q8geqCmt5hGuxaDhRo03ZUB0ITr6lnJ3jffdNiC4nDq13WbHUfY2A1RQq3OHDbdrY6aRYvZphx2bcXYBFRis3A==
+mongodb-memory-server-core@9.1.8:
+  version "9.1.8"
+  resolved "https://registry.yarnpkg.com/mongodb-memory-server-core/-/mongodb-memory-server-core-9.1.8.tgz#b281015aada6f228203f4e9bb56eca43ed76d3f5"
+  integrity sha512-iCWwaP7De4lm1lRCUKB2ffUYr6GB0I/cj6fK0NV9dgwc9fA3xapHTTT/cPYRNx29M5gmAOSaOpUgjP7i2GZ/LQ==
   dependencies:
     async-mutex "^0.4.0"
     camelcase "^6.3.0"
     debug "^4.3.4"
     find-cache-dir "^3.3.2"
-    follow-redirects "^1.15.3"
+    follow-redirects "^1.15.6"
     https-proxy-agent "^7.0.2"
     mongodb "^5.9.1"
     new-find-package-json "^2.0.0"
@@ -5836,11 +5836,11 @@ mongodb-memory-server-core@9.1.7:
     yauzl "^2.10.0"
 
 mongodb-memory-server@^9.1.3:
-  version "9.1.7"
-  resolved "https://registry.yarnpkg.com/mongodb-memory-server/-/mongodb-memory-server-9.1.7.tgz#550de40dd77ccb8892fe23c0523c8cafbaab5751"
-  integrity sha512-Yxw1cUMoCKTK6jxk4cKG07P+Z/qOmuCVyt3ScIDaoHeOCbOlg2sEtXYO9vEK/tzpj/1KHdDStU2oYrsJ8Fvm0A==
+  version "9.1.8"
+  resolved "https://registry.yarnpkg.com/mongodb-memory-server/-/mongodb-memory-server-9.1.8.tgz#165979e1da6aaec2d71694592a37d621182625b3"
+  integrity sha512-QumPTOlWWWzgW6dtV4bf+ZFdTxenHSSGS4ZT85Vbb+FzPVoOtfcFwYlSfC9IM4e2nw7xvnQZvWtILYseO6HE9Q==
   dependencies:
-    mongodb-memory-server-core "9.1.7"
+    mongodb-memory-server-core "9.1.8"
     tslib "^2.6.2"
 
 mongodb@^5.9.1:

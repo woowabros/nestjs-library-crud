@@ -1330,9 +1330,9 @@
   integrity sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==
 
 "@types/qs@*", "@types/qs@^6.9.10":
-  version "6.9.12"
-  resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.12.tgz#afa96b383a3a6fdc859453a1892d41b607fc7756"
-  integrity sha512-bZcOkJ6uWrL0Qb2NAWKa7TBU+mJHPzhx9jjLL1KHF+XpzEcR7EXHvjbHlGtR/IsP1vyPrehuS6XqkmaePy//mg==
+  version "6.9.14"
+  resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.14.tgz#169e142bfe493895287bee382af6039795e9b75b"
+  integrity sha512-5khscbd3SwWMhFqylJBLQ0zIu7c1K6Vz0uBIt915BI3zV0q1nfjRQD3RqSBcPaO6PHEF4ov/t9y89fSiyThlPA==
 
 "@types/range-parser@*":
   version "1.2.4"

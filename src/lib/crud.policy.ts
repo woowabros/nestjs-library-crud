@@ -27,7 +27,7 @@ type MethodPolicy<T extends Method> = {
     uriParameter: (crudOptions: CrudOptions, primaryKeys?: PrimaryKey[]) => { path: string; params: string[] };
     swagger: {
         operationMetadata: (tableName: string) => { summary: string; description: string };
-        responseMetadata: (opts: { type: Type<unknown>; tableName: string; paginationType: PaginationType }) => {
+        responseMetadata: (opts: { type: Type<unknown>; tableName: string; paginationType?: PaginationType }) => {
             [key in HttpStatus]?: { description: string; type?: Type<unknown>; schema?: unknown };
         };
     };
@@ -108,7 +108,7 @@ export const CRUD_POLICY: CrudMethodPolicy = {
                 summary: `Search from '${capitalizeFirstLetter(tableName)}' Table`,
                 description: `Fetch multiple entities in '${capitalizeFirstLetter(tableName)}' Table via custom query in body`,
             }),
-            responseMetadata: ({ type, tableName }) => ({
+            responseMetadata: ({ type, tableName, paginationType }) => ({
                 [HttpStatus.OK]: {
                     description: `Fetch multiple entities from '${capitalizeFirstLetter(tableName)}' table`,
                     schema: {
@@ -119,6 +119,10 @@ export const CRUD_POLICY: CrudMethodPolicy = {
                                 items: {
                                     $ref: `#/components/schemas/${type.name}`,
                                 },
+                            },
+                            metadata: paginationType && {
+                                type: 'object',
+                                properties: metaProperties(paginationType),
                             },
                         },
                     },
@@ -162,7 +166,7 @@ export const CRUD_POLICY: CrudMethodPolicy = {
                                                 $ref: `#/components/schemas/${type.name}`,
                                             },
                                         },
-                                        metadata: {
+                                        metadata: paginationType && {
                                             type: 'object',
                                             properties: metaProperties(paginationType),
                                         },

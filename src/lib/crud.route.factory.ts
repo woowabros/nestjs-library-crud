@@ -67,7 +67,6 @@ export class CrudRouteFactory {
     } = {
         tableName: '',
     };
-    private paginationType: PaginationType;
 
     constructor(
         protected target: any,
@@ -75,16 +74,6 @@ export class CrudRouteFactory {
     ) {
         this.entityInformation(crudOptions.entity);
 
-        const paginationType = crudOptions.routes?.readMany?.paginationType ?? CRUD_POLICY[Method.READ_MANY].default.paginationType;
-        const isPaginationType = (
-            <TEnum extends Record<string, unknown>>(enumType: TEnum) =>
-            (nextCursor: unknown): nextCursor is TEnum[keyof TEnum] =>
-                Object.values(enumType).includes(nextCursor as TEnum[keyof TEnum])
-        )(PaginationType);
-        if (!isPaginationType(paginationType)) {
-            throw new TypeError(`invalid PaginationType ${paginationType}`);
-        }
-        this.paginationType = paginationType;
         this.crudLogger = new CrudLogger(crudOptions.logging);
     }
 
@@ -219,6 +208,19 @@ export class CrudRouteFactory {
             logger: this.crudLogger,
         };
 
+        let paginationType;
+        if (crudMethod === Method.READ_MANY || crudMethod === Method.SEARCH) {
+            paginationType = this.crudOptions.routes?.[crudMethod]?.paginationType ?? CRUD_POLICY[crudMethod].default.paginationType;
+            const isPaginationType = (
+                <TEnum extends Record<string, unknown>>(enumType: TEnum) =>
+                (nextCursor: unknown): nextCursor is TEnum[keyof TEnum] =>
+                    Object.values(enumType).includes(nextCursor as TEnum[keyof TEnum])
+            )(PaginationType);
+            if (!isPaginationType(paginationType)) {
+                throw new TypeError(`invalid PaginationType ${paginationType}`);
+            }
+        }
+
         Reflect.defineMetadata(
             INTERCEPTORS_METADATA,
             [
@@ -228,7 +230,7 @@ export class CrudRouteFactory {
             targetMethod,
         );
 
-        this.applySwaggerDecorator(crudMethod, params, targetMethod);
+        this.applySwaggerDecorator(crudMethod, params, targetMethod, paginationType);
 
         const requestArg = this.createCrudRouteArg();
         Reflect.defineMetadata(ROUTE_ARGS_METADATA, requestArg, this.target, methodNameOnController);
@@ -255,14 +257,14 @@ export class CrudRouteFactory {
         Reflect.defineMetadata(METHOD_METADATA, CRUD_POLICY[crudMethod].method, targetMethod);
     }
 
-    private applySwaggerDecorator(method: Method, params: string[], target: Object) {
+    private applySwaggerDecorator(method: Method, params: string[], target: Object, paginationType?: PaginationType) {
         if (this.crudOptions.routes?.[method]?.swagger?.hide) {
             Reflect.defineMetadata(DECORATORS.API_EXCLUDE_ENDPOINT, { disable: true }, target);
             return;
         }
 
         Reflect.defineMetadata(DECORATORS.API_OPERATION, CRUD_POLICY[method].swagger.operationMetadata(this.tableName), target);
-        this.defineParameterSwagger(method, params, target);
+        this.defineParameterSwagger(method, params, target, paginationType);
 
         if (this.crudOptions.routes?.[method]?.swagger?.response) {
             const responseDto = this.generalTypeGuard(this.crudOptions.routes?.[method]?.swagger?.response!, method, 'response');
@@ -278,7 +280,7 @@ export class CrudRouteFactory {
             CRUD_POLICY[method].swagger.responseMetadata({
                 type: swaggerResponse,
                 tableName: this.tableName,
-                paginationType: this.paginationType,
+                paginationType: paginationType,
             }),
             target,
         );
@@ -289,7 +291,7 @@ export class CrudRouteFactory {
         }
     }
 
-    private defineParameterSwagger(method: Method, params: string[], target: Object) {
+    private defineParameterSwagger(method: Method, params: string[], target: Object, paginationType?: PaginationType) {
         const parameterDecorators: ParameterDecorators[] = params.map((param) => ({
             name: param,
             required: true,
@@ -298,15 +300,20 @@ export class CrudRouteFactory {
             isArray: false,
         }));
 
-        if (method === Method.READ_MANY) {
+        if (paginationType) {
             parameterDecorators.push(
-                ...PAGINATION_SWAGGER_QUERY[this.paginationType].map(({ name, type }) => ({
+                ...PAGINATION_SWAGGER_QUERY[paginationType].map(({ name, type }) => ({
                     name,
                     type,
                     in: 'query',
                     required: false,
-                    description: `Query parameters for ${capitalizeFirstLetter(this.paginationType)} Pagination`,
+                    description: `Query parameters for ${capitalizeFirstLetter(paginationType)} Pagination`,
                 })),
+            );
+        }
+
+        if (method === Method.READ_MANY) {
+            parameterDecorators.push(
                 ...getPropertyNamesFromMetadata(this.crudOptions.entity, method).map((property) => ({
                     name: property,
                     type: 'string',

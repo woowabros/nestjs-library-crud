@@ -11,16 +11,27 @@ describe('CrudRouteFactory', () => {
         expect(() => new CrudRouteFactory({ prototype: {} }, { entity: {} as typeof BaseEntity })).toThrow(Error);
     });
 
-    it('should be checked paginationType', () => {
-        expect(
-            () =>
-                new CrudRouteFactory(
-                    { prototype: {} },
-                    {
-                        entity: TestEntity,
-                        routes: { readMany: { paginationType: 'wrong' as unknown as PaginationType } },
-                    },
-                ),
+    it('should be checked paginationType of readMany route', () => {
+        expect(() =>
+            new CrudRouteFactory(
+                { prototype: {} },
+                {
+                    entity: TestEntity,
+                    routes: { readMany: { paginationType: 'wrong' as unknown as PaginationType } },
+                },
+            ).init(),
+        ).toThrow(TypeError);
+    });
+
+    it('should be checked paginationType of search route', () => {
+        expect(() =>
+            new CrudRouteFactory(
+                { prototype: {} },
+                {
+                    entity: TestEntity,
+                    routes: { search: { paginationType: 'wrong' as unknown as PaginationType } },
+                },
+            ).init(),
         ).toThrow(TypeError);
     });
 });

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { ExecutionContext, HttpStatus, Type } from '@nestjs/common';
+import { ExecutionContext, HttpStatus, Type, UnprocessableEntityException } from '@nestjs/common';
 import {
     CUSTOM_ROUTE_ARGS_METADATA,
     HTTP_CODE_METADATA,
@@ -219,6 +219,8 @@ export class CrudRouteFactory {
             if (!isPaginationType(paginationType)) {
                 throw new TypeError(`invalid PaginationType ${paginationType}`);
             }
+
+            this.validatePaginationKeys(this.crudOptions.routes?.[crudMethod]?.paginationKeys);
         }
 
         Reflect.defineMetadata(
@@ -255,6 +257,18 @@ export class CrudRouteFactory {
 
         Reflect.defineMetadata(PATH_METADATA, path, targetMethod);
         Reflect.defineMetadata(METHOD_METADATA, CRUD_POLICY[crudMethod].method, targetMethod);
+    }
+
+    private validatePaginationKeys(paginationKeys: string[] | undefined) {
+        if (!paginationKeys) {
+            return;
+        }
+
+        for (const key of paginationKeys) {
+            if (!this.entity.columns?.some((column) => column.name === key)) {
+                throw new UnprocessableEntityException(`pagination key ${key} is unknown`);
+            }
+        }
     }
 
     private applySwaggerDecorator(method: Method, params: string[], target: Object, paginationType?: PaginationType) {

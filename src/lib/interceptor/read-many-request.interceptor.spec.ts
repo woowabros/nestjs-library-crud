@@ -55,7 +55,7 @@ describe('ReadManyRequestInterceptor', () => {
             col3: number;
         }
 
-        const Interceptor = ReadManyRequestInterceptor({ entity: QueryDto }, { relations: [], logger: new CrudLogger() });
+        const Interceptor = ReadManyRequestInterceptor({ entity: QueryDto }, { relations: [], logger: new CrudLogger(), primaryKeys: [] });
         const interceptor = new Interceptor() as InterceptorType;
 
         expect(await interceptor.validateQuery(undefined as any)).toEqual({});
@@ -91,7 +91,10 @@ describe('ReadManyRequestInterceptor', () => {
         type InterceptorType = NestInterceptor<any, any> & {
             getRelations: (customReadManyRequestOptions: CustomReadManyRequestOptions) => string[];
         };
-        const Interceptor = ReadManyRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
+        const Interceptor = ReadManyRequestInterceptor(
+            { entity: {} as typeof BaseEntity },
+            { relations: [], logger: new CrudLogger(), primaryKeys: [] },
+        );
         const interceptor = new Interceptor() as InterceptorType;
 
         expect(interceptor.getRelations({ relations: [] })).toEqual([]);
@@ -100,7 +103,7 @@ describe('ReadManyRequestInterceptor', () => {
 
         const InterceptorWithOptions = ReadManyRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { readMany: { relations: ['option'] } } },
-            { relations: [], logger: new CrudLogger() },
+            { relations: [], logger: new CrudLogger(), primaryKeys: [] },
         );
         const interceptorWithOptions = new InterceptorWithOptions() as InterceptorType;
         expect(interceptorWithOptions.getRelations({ relations: [] })).toEqual([]);
@@ -109,7 +112,7 @@ describe('ReadManyRequestInterceptor', () => {
 
         const InterceptorWithFalseOptions = ReadManyRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { readMany: { relations: false } } },
-            { relations: [], logger: new CrudLogger() },
+            { relations: [], logger: new CrudLogger(), primaryKeys: [] },
         );
         const interceptorWithFalseOptions = new InterceptorWithFalseOptions() as InterceptorType;
         expect(interceptorWithFalseOptions.getRelations({ relations: [] })).toEqual([]);

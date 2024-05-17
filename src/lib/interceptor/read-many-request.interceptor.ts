@@ -43,7 +43,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 pagination.setWhere(PaginationHelper.serialize(query));
                 return query;
             })();
-            const paginationKeys = readManyOptions.paginationKeys ?? factoryOption.primaryKeys?.map(({ name }) => name) ?? [];
+            const paginationKeys = readManyOptions.paginationKeys ?? factoryOption.primaryKeys.map(({ name }) => name);
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
                 .setPaginationKeys(paginationKeys)
                 .setExcludeColumn(readManyOptions.exclude)

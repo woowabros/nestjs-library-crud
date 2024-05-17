@@ -64,7 +64,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                       )
                     : [];
 
-            const paginationKeys = searchOptions.paginationKeys ?? factoryOption.primaryKeys?.map(({ name }) => name) ?? [];
+            const paginationKeys = searchOptions.paginationKeys ?? factoryOption.primaryKeys.map(({ name }) => name);
             requestSearchDto.order ??= paginationKeys.reduce((acc, key) => ({ ...acc, [key]: CRUD_POLICY[method].default.sort }), {});
 
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()

@@ -12,5 +12,5 @@ export interface FactoryOption {
     logger: CrudLogger;
     columns?: Column[];
     relations: string[];
-    primaryKeys?: Array<Omit<Column, 'isPrimary'>>;
+    primaryKeys: Array<Omit<Column, 'isPrimary'>>;
 }

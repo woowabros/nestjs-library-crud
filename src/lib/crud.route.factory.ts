@@ -208,18 +208,24 @@ export class CrudRouteFactory {
             logger: this.crudLogger,
         };
 
-        let paginationType;
-        if (crudMethod === Method.READ_MANY || crudMethod === Method.SEARCH) {
-            paginationType = this.crudOptions.routes?.[crudMethod]?.paginationType ?? CRUD_POLICY[crudMethod].default.paginationType;
+        const needPagination = crudMethod === Method.READ_MANY || crudMethod === Method.SEARCH;
+        const paginationType = (() => {
+            if (!needPagination) {
+                return undefined;
+            }
+            const input = this.crudOptions.routes?.[crudMethod]?.paginationType ?? CRUD_POLICY[crudMethod].default.paginationType;
             const isPaginationType = (
                 <TEnum extends Record<string, unknown>>(enumType: TEnum) =>
                 (nextCursor: unknown): nextCursor is TEnum[keyof TEnum] =>
                     Object.values(enumType).includes(nextCursor as TEnum[keyof TEnum])
             )(PaginationType);
-            if (!isPaginationType(paginationType)) {
-                throw new TypeError(`invalid PaginationType ${paginationType}`);
+            if (!isPaginationType(input)) {
+                throw new TypeError(`invalid PaginationType ${input}`);
             }
+            return input;
+        })();
 
+        if (needPagination) {
             this.validatePaginationKeys(this.crudOptions.routes?.[crudMethod]?.paginationKeys);
         }
 

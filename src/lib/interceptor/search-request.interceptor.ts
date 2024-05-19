@@ -64,11 +64,11 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                       )
                     : [];
 
-            const primaryKeys = factoryOption.primaryKeys ?? [];
-            requestSearchDto.order ??= primaryKeys.reduce((acc, { name }) => ({ ...acc, [name]: CRUD_POLICY[method].default.sort }), {});
+            const paginationKeys = searchOptions.paginationKeys ?? factoryOption.primaryKeys.map(({ name }) => name);
+            requestSearchDto.order ??= paginationKeys.reduce((acc, key) => ({ ...acc, [key]: CRUD_POLICY[method].default.sort }), {});
 
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
-                .setPrimaryKey(primaryKeys)
+                .setPaginationKeys(paginationKeys)
                 .setPagination(pagination)
                 .setSelectColumn(requestSearchDto.select)
                 .setExcludeColumn(searchOptions.exclude)

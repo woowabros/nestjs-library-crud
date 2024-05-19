@@ -35,6 +35,7 @@ describe('SearchRequestInterceptor', () => {
                 ],
                 relations: [],
                 logger: new CrudLogger(),
+                primaryKeys: [],
             },
         );
         interceptor = new Interceptor();
@@ -267,7 +268,10 @@ describe('SearchRequestInterceptor', () => {
         type InterceptorType = NestInterceptor<any, any> & {
             getRelations: (customSearchRequestOptions: CustomSearchRequestOptions) => string[];
         };
-        const Interceptor = SearchRequestInterceptor({ entity: {} as typeof BaseEntity }, { relations: [], logger: new CrudLogger() });
+        const Interceptor = SearchRequestInterceptor(
+            { entity: {} as typeof BaseEntity },
+            { relations: [], logger: new CrudLogger(), primaryKeys: [] },
+        );
         const interceptor = new Interceptor() as InterceptorType;
         expect(interceptor.getRelations({ relations: [] })).toEqual([]);
         expect(interceptor.getRelations({ relations: ['table'] })).toEqual(['table']);
@@ -275,7 +279,7 @@ describe('SearchRequestInterceptor', () => {
 
         const InterceptorWithoutSearchRoute = SearchRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { readOne: { relations: false } } },
-            { relations: [], logger: new CrudLogger() },
+            { relations: [], logger: new CrudLogger(), primaryKeys: [] },
         );
         const interceptorWithoutSearchRoute = new InterceptorWithoutSearchRoute() as InterceptorType;
         expect(interceptorWithoutSearchRoute.getRelations({ relations: [] })).toEqual([]);
@@ -284,7 +288,7 @@ describe('SearchRequestInterceptor', () => {
 
         const InterceptorWithoutRelations = SearchRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { search: {} } },
-            { relations: [], logger: new CrudLogger() },
+            { relations: [], logger: new CrudLogger(), primaryKeys: [] },
         );
         const interceptorWithoutRelations = new InterceptorWithoutRelations() as InterceptorType;
         expect(interceptorWithoutRelations.getRelations({ relations: [] })).toEqual([]);
@@ -293,7 +297,7 @@ describe('SearchRequestInterceptor', () => {
 
         const InterceptorWithOptions = SearchRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { search: { relations: ['option'] } } },
-            { relations: [], logger: new CrudLogger() },
+            { relations: [], logger: new CrudLogger(), primaryKeys: [] },
         );
         const interceptorWithOptions = new InterceptorWithOptions() as InterceptorType;
         expect(interceptorWithOptions.getRelations({ relations: [] })).toEqual([]);
@@ -302,7 +306,7 @@ describe('SearchRequestInterceptor', () => {
 
         const InterceptorWithFalseOptions = SearchRequestInterceptor(
             { entity: {} as typeof BaseEntity, routes: { search: { relations: false } } },
-            { relations: [], logger: new CrudLogger() },
+            { relations: [], logger: new CrudLogger(), primaryKeys: [] },
         );
         const interceptorWithFalseOptions = new InterceptorWithFalseOptions() as InterceptorType;
         expect(interceptorWithFalseOptions.getRelations({ relations: [] })).toEqual([]);

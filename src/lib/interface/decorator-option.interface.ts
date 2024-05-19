@@ -116,6 +116,11 @@ export interface CrudOptions {
              * @default true
              */
             softDelete?: boolean;
+            /**
+             * Keys to use for pagination.
+             * If not set, the keys will be taken from the entity's primary keys.
+             */
+            paginationKeys?: string[];
         } & Omit<RouteBaseOption, 'response'>;
         [Method.SEARCH]?: {
             /**
@@ -143,6 +148,11 @@ export interface CrudOptions {
              * @default true
              */
             softDelete?: boolean;
+            /**
+             * Keys to use for pagination.
+             * If not set, the keys will be taken from the entity's primary keys.
+             */
+            paginationKeys?: string[];
         } & RouteBaseOption;
         [Method.CREATE]?: {
             swagger?: {

@@ -227,6 +227,7 @@ interface ReadManyOptions {
     numberOfTake?: number;
     relations?: false | string[];
     softDelete?: boolean;
+    paginationKeys?: string[];
 }
 ```
 
@@ -241,6 +242,7 @@ interface SearchOptions {
     limitOfTake?: number;
     relations?: false | string[];
     softDelete?: boolean;
+    paginationKeys?: string[];
 }
 ```
 

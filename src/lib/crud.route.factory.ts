@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { ExecutionContext, HttpStatus, Type } from '@nestjs/common';
+import { ExecutionContext, HttpStatus, Type, UnprocessableEntityException } from '@nestjs/common';
 import {
     CUSTOM_ROUTE_ARGS_METADATA,
     HTTP_CODE_METADATA,
@@ -208,17 +208,25 @@ export class CrudRouteFactory {
             logger: this.crudLogger,
         };
 
-        let paginationType;
-        if (crudMethod === Method.READ_MANY || crudMethod === Method.SEARCH) {
-            paginationType = this.crudOptions.routes?.[crudMethod]?.paginationType ?? CRUD_POLICY[crudMethod].default.paginationType;
+        const needPagination = crudMethod === Method.READ_MANY || crudMethod === Method.SEARCH;
+        const paginationType = (() => {
+            if (!needPagination) {
+                return undefined;
+            }
+            const input = this.crudOptions.routes?.[crudMethod]?.paginationType ?? CRUD_POLICY[crudMethod].default.paginationType;
             const isPaginationType = (
                 <TEnum extends Record<string, unknown>>(enumType: TEnum) =>
                 (nextCursor: unknown): nextCursor is TEnum[keyof TEnum] =>
                     Object.values(enumType).includes(nextCursor as TEnum[keyof TEnum])
             )(PaginationType);
-            if (!isPaginationType(paginationType)) {
-                throw new TypeError(`invalid PaginationType ${paginationType}`);
+            if (!isPaginationType(input)) {
+                throw new TypeError(`invalid PaginationType ${input}`);
             }
+            return input;
+        })();
+
+        if (needPagination) {
+            this.validatePaginationKeys(this.crudOptions.routes?.[crudMethod]?.paginationKeys);
         }
 
         Reflect.defineMetadata(
@@ -255,6 +263,18 @@ export class CrudRouteFactory {
 
         Reflect.defineMetadata(PATH_METADATA, path, targetMethod);
         Reflect.defineMetadata(METHOD_METADATA, CRUD_POLICY[crudMethod].method, targetMethod);
+    }
+
+    private validatePaginationKeys(paginationKeys: string[] | undefined) {
+        if (!paginationKeys) {
+            return;
+        }
+
+        for (const key of paginationKeys) {
+            if (!this.entity.columns?.some((column) => column.name === key)) {
+                throw new UnprocessableEntityException(`pagination key ${key} is unknown`);
+            }
+        }
     }
 
     private applySwaggerDecorator(method: Method, params: string[], target: Object, paginationType?: PaginationType) {

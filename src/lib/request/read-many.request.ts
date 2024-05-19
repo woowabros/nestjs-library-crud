@@ -2,12 +2,12 @@ import _ from 'lodash';
 import { FindManyOptions, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere } from 'typeorm';
 
 import { CRUD_POLICY } from '../crud.policy';
-import { Method, PaginationRequest, PaginationResponse, PaginationType, PrimaryKey, Sort } from '../interface';
+import { Method, PaginationRequest, PaginationResponse, PaginationType, Sort } from '../interface';
 import { PaginationHelper } from '../provider';
 
 type Where<T> = FindOptionsWhere<T> | Array<FindOptionsWhere<T>>;
 export class CrudReadManyRequest<T> {
-    private _primaryKeys: PrimaryKey[] = [];
+    private _paginationKeys: string[] = [];
     private _findOptions: FindManyOptions<T> & {
         where: Where<T>;
         take: number;
@@ -23,8 +23,8 @@ export class CrudReadManyRequest<T> {
     private _selectColumnSet: Set<string | number> = new Set();
     private _excludeColumnSet: Set<string> = new Set();
 
-    get primaryKeys() {
-        return this._primaryKeys;
+    get paginationKeys() {
+        return this._paginationKeys;
     }
 
     get findOptions() {
@@ -57,8 +57,8 @@ export class CrudReadManyRequest<T> {
         return this;
     }
 
-    setPrimaryKey(primaryKeys: PrimaryKey[]): this {
-        this._primaryKeys = primaryKeys;
+    setPaginationKeys(paginationKeys: string[]): this {
+        this._paginationKeys = paginationKeys;
         return this;
     }
 
@@ -99,7 +99,7 @@ export class CrudReadManyRequest<T> {
 
     setSort(sort: Sort): this {
         this._sort = sort;
-        this._findOptions.order = this._primaryKeys.reduce((order, primaryKey) => ({ ...order, [primaryKey.name]: sort }), {});
+        this._findOptions.order = this._paginationKeys.reduce((order, paginationKey) => ({ ...order, [paginationKey]: sort }), {});
         return this;
     }
 
@@ -144,12 +144,8 @@ export class CrudReadManyRequest<T> {
     toResponse(data: T[], total: number): PaginationResponse<T> {
         const take = this.findOptions.take;
         const dataLength = data.length;
-        const nextCursor = PaginationHelper.serialize(
-            _.pick(
-                data.at(-1),
-                this.primaryKeys.map(({ name }) => name),
-            ) as FindOptionsWhere<T>,
-        );
+        const orderKeys = Object.keys(this._findOptions.order);
+        const nextCursor = PaginationHelper.serialize(_.pick(data.at(-1), orderKeys) as FindOptionsWhere<T>);
 
         if (this.pagination.type === PaginationType.OFFSET) {
             return {

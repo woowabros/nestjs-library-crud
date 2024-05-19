@@ -79,7 +79,7 @@ describe('Logging', () => {
         expect(loggerSpy).toHaveBeenNthCalledWith(
             2,
             JSON.stringify({
-                _primaryKeys: [{ name: 'col1', isPrimary: true }],
+                _paginationKeys: ['col1'],
                 _findOptions: {
                     where: {},
                     take: 20,

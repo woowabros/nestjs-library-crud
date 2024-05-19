@@ -13,7 +13,7 @@ describe('DeleteRequestInterceptor', () => {
             col1: string;
         }
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const Interceptor = DeleteRequestInterceptor({ entity: BodyDto }, { relations: [], logger: new CrudLogger() });
+        const Interceptor = DeleteRequestInterceptor({ entity: BodyDto }, { relations: [], logger: new CrudLogger(), primaryKeys: [] });
         const interceptor = new Interceptor();
 
         const handler: CallHandler = {

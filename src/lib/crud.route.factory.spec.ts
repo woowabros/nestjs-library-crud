@@ -1,3 +1,4 @@
+import { UnprocessableEntityException } from '@nestjs/common';
 import { BaseEntity, Entity } from 'typeorm';
 
 import { CrudRouteFactory } from './crud.route.factory';
@@ -33,5 +34,27 @@ describe('CrudRouteFactory', () => {
                 },
             ).init(),
         ).toThrow(TypeError);
+    });
+
+    it('should be checked paginationKeys included in entity columns', () => {
+        expect(() =>
+            new CrudRouteFactory(
+                { prototype: {} },
+                {
+                    entity: TestEntity,
+                    routes: { search: { paginationKeys: ['wrong'] } },
+                },
+            ).init(),
+        ).toThrow(UnprocessableEntityException);
+
+        expect(() =>
+            new CrudRouteFactory(
+                { prototype: {} },
+                {
+                    entity: TestEntity,
+                    routes: { readMany: { paginationKeys: ['wrong'] } },
+                },
+            ).init(),
+        ).toThrow(UnprocessableEntityException);
     });
 });

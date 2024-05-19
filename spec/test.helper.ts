@@ -34,7 +34,9 @@ export class TestHelper {
                 return;
             }
             const entity = table.target as typeof BaseEntity;
-
+            if (!entity.query) {
+                return;
+            }
             await entity.query(`DROP TABLE ${table.name}`).catch((error) => {
                 if (failCount++ > 10) {
                     throw error;

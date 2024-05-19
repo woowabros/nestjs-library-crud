@@ -84,7 +84,7 @@ describe('Pagination with paginationKeys option', () => {
             const { body: firstResponseBody } = await request(app.getHttpServer()).get(`/${PaginationType.CURSOR}`).expect(HttpStatus.OK);
             expect(firstResponseBody.data).toHaveLength(defaultLimit);
             for (const number of Array.from({ length: defaultLimit }, (_, index) => index)) {
-                expect(firstResponseBody.data[number].name).toEqual(`name-${(100 - number).toString().padStart(3, '0')}`);
+                expect(firstResponseBody.data[number].name).toEqual(`name-${(totalCount - number).toString().padStart(3, '0')}`);
             }
         });
 
@@ -115,6 +115,34 @@ describe('Pagination with paginationKeys option', () => {
             const firstOneOfNextResponse = nextResponseBody.data.shift();
             expect(lastOneOfFirstResponse.id - 1).toEqual(firstOneOfNextResponse.id);
             expect(lastOneOfFirstResponse.name).not.toEqual(firstOneOfNextResponse.name);
+        });
+
+        it('should return next 20 entities after cursor with order', async () => {
+            const { body: firstResponseBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.CURSOR}/search`)
+                .send({ order: { category: 'ASC' }, limit: 50 })
+                .expect(HttpStatus.OK);
+
+            const { body: nextResponseBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.CURSOR}/search`)
+                .send({
+                    nextCursor: firstResponseBody.metadata.nextCursor,
+                })
+                .expect(HttpStatus.OK);
+
+            expect(firstResponseBody.metadata.nextCursor).not.toEqual(nextResponseBody.metadata.nextCursor);
+
+            expect(nextResponseBody.data).toHaveLength(defaultLimit);
+            expect(nextResponseBody.metadata).toEqual({
+                nextCursor: expect.any(String),
+                limit: defaultLimit,
+                total: totalCount,
+            });
+
+            const lastOneOfFirstResponse = firstResponseBody.data.pop();
+            const firstOneOfNextResponse = nextResponseBody.data.shift();
+            expect(lastOneOfFirstResponse.category).toEqual(0);
+            expect(firstOneOfNextResponse.category).toEqual(1);
         });
     });
 
@@ -195,10 +223,41 @@ describe('Pagination with paginationKeys option', () => {
             expect(nextResponseBody.metadata).toEqual({
                 page: 2,
                 pages: 5,
-                total: 100,
+                total: totalCount,
                 offset: defaultLimit * 2,
                 nextCursor: expect.any(String),
             });
+        });
+
+        it('should return next page from offset with order', async () => {
+            const { body: firstResponseBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.OFFSET}/search`)
+                .send({ order: { category: 'ASC' }, offset: 30 })
+                .expect(HttpStatus.OK);
+
+            const { body: nextResponseBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.OFFSET}/search`)
+                .send({
+                    nextCursor: firstResponseBody.metadata.nextCursor,
+                    offset: firstResponseBody.metadata.offset,
+                })
+                .expect(HttpStatus.OK);
+
+            expect(firstResponseBody.metadata.nextCursor).not.toEqual(nextResponseBody.metadata.nextCursor);
+
+            expect(nextResponseBody.data).toHaveLength(defaultLimit);
+            expect(nextResponseBody.metadata).toEqual({
+                page: 3,
+                pages: 5,
+                total: totalCount,
+                offset: 70,
+                nextCursor: expect.any(String),
+            });
+
+            const lastOneOfFirstResponse = firstResponseBody.data.pop();
+            const firstOneOfNextResponse = nextResponseBody.data.shift();
+            expect(lastOneOfFirstResponse.category).toEqual(0);
+            expect(firstOneOfNextResponse.category).toEqual(1);
         });
     });
 });

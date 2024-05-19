@@ -144,7 +144,8 @@ export class CrudReadManyRequest<T> {
     toResponse(data: T[], total: number): PaginationResponse<T> {
         const take = this.findOptions.take;
         const dataLength = data.length;
-        const nextCursor = PaginationHelper.serialize(_.pick(data.at(-1), this.paginationKeys) as FindOptionsWhere<T>);
+        const orderKeys = Object.keys(this._findOptions.order);
+        const nextCursor = PaginationHelper.serialize(_.pick(data.at(-1), orderKeys) as FindOptionsWhere<T>);
 
         if (this.pagination.type === PaginationType.OFFSET) {
             return {

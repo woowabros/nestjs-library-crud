@@ -41,7 +41,10 @@ describe('Pagination', () => {
     beforeEach(async () => {
         await service.repository.delete({});
         await service.repository.save(
-            Array.from({ length: totalCount }, (_, index) => index).map((number) => ({ name: `name-${number}` })),
+            Array.from({ length: totalCount }, (_, index) => index).map((number) => ({
+                name: `name-${number}`,
+                type: number % 2,
+            })),
         );
     });
 
@@ -211,6 +214,34 @@ describe('Pagination', () => {
                 })
                 .expect(HttpStatus.OK);
             expect(metadata.total).toEqual(1);
+        });
+
+        it('should return next 20 entities after cursor with order', async () => {
+            const { body: firstResponseBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.CURSOR}/search`)
+                .send({ order: { type: 'ASC' }, limit: 50 })
+                .expect(HttpStatus.OK);
+
+            const { body: nextResponseBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.CURSOR}/search`)
+                .send({
+                    nextCursor: firstResponseBody.metadata.nextCursor,
+                })
+                .expect(HttpStatus.OK);
+
+            expect(firstResponseBody.metadata.nextCursor).not.toEqual(nextResponseBody.metadata.nextCursor);
+
+            expect(nextResponseBody.data).toHaveLength(defaultLimit);
+            expect(nextResponseBody.metadata).toEqual({
+                nextCursor: expect.any(String),
+                limit: defaultLimit,
+                total: totalCount,
+            });
+
+            const lastOneOfFirstResponse = firstResponseBody.data.pop();
+            const firstOneOfNextResponse = nextResponseBody.data.shift();
+            expect(lastOneOfFirstResponse.type).toEqual(0);
+            expect(firstOneOfNextResponse.type).toEqual(1);
         });
     });
 
@@ -470,6 +501,37 @@ describe('Pagination', () => {
             expect((nextResponseBody.data as Array<{ name: string }>).map(({ name }) => name)).toEqual(
                 entities.slice(20, 40).map(({ name }) => name),
             );
+        });
+
+        it('should return next page from offset with order', async () => {
+            const { body: firstResponseBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.OFFSET}/search`)
+                .send({ order: { type: 'ASC' }, offset: 30 })
+                .expect(HttpStatus.OK);
+
+            const { body: nextResponseBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.OFFSET}/search`)
+                .send({
+                    nextCursor: firstResponseBody.metadata.nextCursor,
+                    offset: firstResponseBody.metadata.offset,
+                })
+                .expect(HttpStatus.OK);
+
+            expect(firstResponseBody.metadata.nextCursor).not.toEqual(nextResponseBody.metadata.nextCursor);
+
+            expect(nextResponseBody.data).toHaveLength(defaultLimit);
+            expect(nextResponseBody.metadata).toEqual({
+                page: 3,
+                pages: 5,
+                total: totalCount,
+                offset: 70,
+                nextCursor: expect.any(String),
+            });
+
+            const lastOneOfFirstResponse = firstResponseBody.data.pop();
+            const firstOneOfNextResponse = nextResponseBody.data.shift();
+            expect(lastOneOfFirstResponse.type).toEqual(0);
+            expect(firstOneOfNextResponse.type).toEqual(1);
         });
     });
 });

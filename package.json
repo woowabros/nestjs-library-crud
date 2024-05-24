@@ -1,6 +1,6 @@
 {
     "name": "@nestjs-library/crud",
-    "version": "0.12.1",
+    "version": "0.12.2",
     "description": "Automatically generate CRUD Rest API based on NestJS and TypeOrm",
     "homepage": "https://github.com/woowabros/nestjs-library-crud",
     "repository": {
@@ -83,7 +83,7 @@
         "@types/express": "^4.17.21",
         "@types/jest": "29.5.12",
         "@types/lodash": "^4.14.202",
-        "@types/node": "20.12.11",
+        "@types/node": "20.12.12",
         "@types/qs": "^6.9.10",
         "@types/supertest": "^6.0.2",
         "@typescript-eslint/eslint-plugin": "^7.0.0",

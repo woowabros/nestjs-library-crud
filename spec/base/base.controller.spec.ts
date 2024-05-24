@@ -31,7 +31,7 @@ describe('BaseController', () => {
     });
 
     it('dynamic method on controller', async () => {
-        const controllerPrototype = Object.getPrototypeOf(controller);
+        const controllerPrototype = Object.getPrototypeOf(Object.getPrototypeOf(controller));
         const propertyNames = Object.getOwnPropertyNames(controllerPrototype).filter((name) => name !== 'constructor');
 
         const expectedMethods = [

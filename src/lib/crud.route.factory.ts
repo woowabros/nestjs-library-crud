@@ -280,8 +280,9 @@ export class CrudRouteFactory {
         Reflect.defineMetadata(DECORATORS.API_OPERATION, CRUD_POLICY[method].swagger.operationMetadata(this.tableName), target);
         this.defineParameterSwagger(method, params, target, paginationType);
 
-        if (this.crudOptions.routes?.[method]?.swagger?.response) {
-            const responseDto = this.generalTypeGuard(this.crudOptions.routes?.[method]?.swagger?.response!, method, 'response');
+        const routeConfig = this.crudOptions.routes?.[method];
+        if (routeConfig?.swagger?.response) {
+            const responseDto = this.generalTypeGuard(routeConfig.swagger.response, method, 'response');
             const extraModels: Array<{ name: string }> = Reflect.getMetadata(DECORATORS.API_EXTRA_MODELS, target) ?? [];
             if (!extraModels.some((model) => model.name === responseDto.name)) {
                 Reflect.defineMetadata(DECORATORS.API_EXTRA_MODELS, [...extraModels, responseDto], target);
@@ -351,18 +352,13 @@ export class CrudRouteFactory {
         }
         if (CRUD_POLICY[method].useBody) {
             const bodyType = (() => {
-                const customBody = this.crudOptions.routes?.[method]?.swagger?.body;
-                if (customBody != null) {
-                    return customBody;
+                const routeConfig = this.crudOptions.routes?.[method];
+                if (routeConfig?.swagger?.body) {
+                    return this.generalTypeGuard(routeConfig.swagger.body, method, 'body');
                 }
                 if (method === Method.SEARCH) {
                     return RequestSearchDto;
                 }
-                const routeConfig = this.crudOptions.routes?.[method];
-                if (routeConfig?.swagger && 'body' in routeConfig.swagger) {
-                    return this.generalTypeGuard(routeConfig.swagger['body']!, method, 'body');
-                }
-
                 return CreateRequestDto(this.crudOptions.entity, method);
             })();
 

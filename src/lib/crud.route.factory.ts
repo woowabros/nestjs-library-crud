@@ -101,11 +101,8 @@ export class CrudRouteFactory {
                 return namingStrategy(typeof discriminatorValue === 'string' ? discriminatorValue : discriminatorValue?.name);
             }
 
-            return namingStrategy(table?.name);
+            return namingStrategy(table.name);
         })();
-        if (!tableName) {
-            throw new Error('Cannot find Entity name from TypeORM');
-        }
         this.entity.tableName = tableName;
 
         const inheritanceTree = MetadataUtils.getInheritanceTree(entity as Function);
@@ -194,9 +191,6 @@ export class CrudRouteFactory {
         }
 
         const methodName = this.writeMethodOnController(crudMethod);
-        if (!methodName) {
-            throw new Error(`Required Method Name of ${crudMethod}`);
-        }
 
         const targetMethod = this.targetPrototype[methodName];
         const { path, params } = CRUD_POLICY[crudMethod].uriParameter(this.crudOptions, this.entity.primaryKeys);

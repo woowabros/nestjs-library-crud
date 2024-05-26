@@ -32,29 +32,23 @@ export class CrudService<T extends EntityType> {
 
     readonly reservedReadMany = async (crudReadManyRequest: CrudReadManyRequest<T>): Promise<PaginationResponse<T>> => {
         crudReadManyRequest.excludedColumns(this.columnNames);
-        try {
-            const { entities, total } = await (async () => {
-                const findEntities = this.repository.find({ ...crudReadManyRequest.findOptions });
+        const { entities, total } = await (async () => {
+            const findEntities = this.repository.find({ ...crudReadManyRequest.findOptions });
 
-                if (crudReadManyRequest.pagination.isNext) {
-                    const entities = await findEntities;
-                    return { entities, total: crudReadManyRequest.pagination.nextTotal() };
-                }
-                const [entities, total] = await Promise.all([
-                    findEntities,
-                    this.repository.count({
-                        where: crudReadManyRequest.findOptions.where,
-                        withDeleted: crudReadManyRequest.findOptions.withDeleted,
-                    }),
-                ]);
-                return { entities, total };
-            })();
-            return crudReadManyRequest.toResponse(entities, total);
-        } catch (error) {
-            Logger.error(JSON.stringify(crudReadManyRequest));
-            Logger.error(error);
-            throw error;
-        }
+            if (crudReadManyRequest.pagination.isNext) {
+                const entities = await findEntities;
+                return { entities, total: crudReadManyRequest.pagination.nextTotal() };
+            }
+            const [entities, total] = await Promise.all([
+                findEntities,
+                this.repository.count({
+                    where: crudReadManyRequest.findOptions.where,
+                    withDeleted: crudReadManyRequest.findOptions.withDeleted,
+                }),
+            ]);
+            return { entities, total };
+        })();
+        return crudReadManyRequest.toResponse(entities, total);
     };
 
     readonly reservedReadOne = async (crudReadOneRequest: CrudReadOneRequest<T>): Promise<T> => {

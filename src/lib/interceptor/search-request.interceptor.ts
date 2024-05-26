@@ -17,14 +17,15 @@ import { CrudReadManyRequest } from '../request';
 import type { CustomSearchRequestOptions } from './custom-request.interceptor';
 import type { CrudOptions, EntityType, FactoryOption } from '../interface';
 import type { OperatorUnion } from '../interface/query-operation.interface';
-import type { CallHandler, ExecutionContext, NestInterceptor, Type } from '@nestjs/common';
+import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
 import type { Request } from 'express';
 import type { Observable } from 'rxjs';
 import type { FindOptionsOrder, FindOptionsWhere, FindOperator } from 'typeorm';
 
 const method = Method.SEARCH;
-export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
-    class MixinInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption) {
+    class MixinSearchRequestInterceptor extends RequestAbstractInterceptor implements NestInterceptor {
         constructor() {
             super(factoryOption.logger);
         }
@@ -95,7 +96,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
         }
 
         async validateBody(body: unknown): Promise<RequestSearchDto<typeof crudOptions.entity>> {
-            const isObject = body !== null && typeof body === 'object';
+            const isObject = body !== null && typeof body === 'object' && !Array.isArray(body);
             if (!isObject) {
                 throw new UnprocessableEntityException('body should be object');
             }
@@ -139,29 +140,32 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             }
             const differenceKeys = _.difference(select, factoryOption.columns?.map((column) => column.name) ?? []);
             if (differenceKeys.length > 0) {
-                throw new UnprocessableEntityException(`${differenceKeys.toLocaleString()} is unknown`);
+                throw new UnprocessableEntityException(`select key ${differenceKeys.toLocaleString()} is not included in entity fields`);
             }
         }
 
         async validateQueryFilterList(value: unknown): Promise<void> {
             if (!Array.isArray(value)) {
-                throw new UnprocessableEntityException('incorrect query format');
+                throw new UnprocessableEntityException('where must be array type');
             }
             for (const queryFilter of value) {
                 const query: Record<string, unknown> = {};
                 if (typeof queryFilter !== 'object' || queryFilter == null) {
-                    throw new UnprocessableEntityException('incorrect queryFilter format');
+                    throw new UnprocessableEntityException('items of where must be object type');
                 }
                 for (const [key, operation] of Object.entries(queryFilter)) {
-                    if (typeof operation !== 'object' || operation == null || !('operator' in operation)) {
-                        throw new UnprocessableEntityException('operator is required');
-                    }
                     if (!factoryOption.columns?.some((column) => column.name === key)) {
-                        throw new UnprocessableEntityException(`${key} is unknown key`);
+                        throw new UnprocessableEntityException(`where key ${key} is not included in entity's fields`);
+                    }
+                    if (typeof operation !== 'object' || operation == null) {
+                        throw new UnprocessableEntityException(`where.${key} is not object type`);
+                    }
+                    if (!('operator' in operation)) {
+                        throw new UnprocessableEntityException(`where.${key} not have operator`);
                     }
 
                     if ('not' in operation && typeof operation.not !== 'boolean') {
-                        throw new UnprocessableEntityException('Type `not` should be Boolean type');
+                        throw new UnprocessableEntityException(`where.${key} has 'not' value of non-boolean type`);
                     }
                     switch (operation.operator) {
                         case operatorBetween:
@@ -170,10 +174,13 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                                     'operand' in operation &&
                                     Array.isArray(operation.operand) &&
                                     operation.operand.length === 2 &&
-                                    typeof operation.operand[0] === typeof operation.operand[1]
+                                    typeof operation.operand[0] === 'number' &&
+                                    typeof operation.operand[1] === 'number'
                                 )
                             ) {
-                                throw new UnprocessableEntityException(`${operation.operator} allows only array length of 2`);
+                                throw new UnprocessableEntityException(
+                                    `operand for ${operatorBetween} should be array of two numbers, but where.${key} not satisfy it`,
+                                );
                             }
                             query[key] = operation.operand[0];
                             break;
@@ -187,19 +194,21 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                                 )
                             ) {
                                 throw new UnprocessableEntityException(
-                                    `${operation.operator} allows only array contains item in identical type`,
+                                    `operand for ${operatorIn} should be array consisting of same type items, but where.${key} not satisfy it`,
                                 );
                             }
                             query[key] = operation.operand[0];
                             break;
                         case operatorNull:
                             if ('operand' in operation) {
-                                throw new UnprocessableEntityException();
+                                throw new UnprocessableEntityException(
+                                    `operand for ${operatorNull} should not be defined, but where.${key} not satisfy it`,
+                                );
                             }
                             break;
                         default:
                             if (!('operand' in operation && operatorList.includes(operation.operator as OperatorUnion))) {
-                                throw new UnprocessableEntityException(`${operation.operator} is not support operation type`);
+                                throw new UnprocessableEntityException(`operator ${operation.operator} for where.${key} is not supported`);
                             }
                             query[key] = operation.operand;
                     }
@@ -225,17 +234,17 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
         }
 
         validateOrder(order: RequestSearchDto<typeof crudOptions.entity>['order']): void {
-            if (typeof order !== 'object') {
+            if (typeof order !== 'object' || order === null || Array.isArray(order)) {
                 throw new UnprocessableEntityException('order must be object type');
             }
 
             const sortOptions = Object.values(Sort);
             for (const [key, sort] of Object.entries(order)) {
                 if (!factoryOption.columns?.some((column) => column.name === key)) {
-                    throw new UnprocessableEntityException(`${key} is unknown key`);
+                    throw new UnprocessableEntityException(`order key ${key} is not included in entity's fields`);
                 }
                 if (!sortOptions.includes(sort as Sort)) {
-                    throw new UnprocessableEntityException(`${sort} is unknown Order Type`);
+                    throw new UnprocessableEntityException(`order type ${sort} is not supported`);
                 }
             }
         }
@@ -247,12 +256,9 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
         }
 
         validateTake(take: RequestSearchDto<typeof crudOptions.entity>['take'], limitOfTake: number | undefined): number | undefined {
-            if (take == null) {
-                throw new UnprocessableEntityException('take must be positive number type');
-            }
             const takeNumber = Number(take);
-            if (!Number.isInteger(takeNumber) || takeNumber < 1) {
-                throw new UnprocessableEntityException('take must be positive number type');
+            if (take == null || Array.isArray(take) || !Number.isInteger(takeNumber) || takeNumber < 1) {
+                throw new UnprocessableEntityException('take must be positive number');
             }
             if (limitOfTake !== undefined && takeNumber > limitOfTake) {
                 throw new UnprocessableEntityException(`take must be less than ${limitOfTake}`);
@@ -264,11 +270,15 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             if (Array.isArray(customSearchRequestOptions?.relations)) {
                 return customSearchRequestOptions.relations;
             }
-            if (crudOptions.routes?.[method]?.relations === false) {
+            const routeOptions = crudOptions.routes?.[method];
+            if (!routeOptions) {
+                return factoryOption.relations;
+            }
+            if (routeOptions.relations === false) {
                 return [];
             }
-            if (crudOptions.routes?.[method] && Array.isArray(crudOptions.routes[method].relations)) {
-                return crudOptions.routes[method].relations;
+            if (Array.isArray(routeOptions.relations)) {
+                return routeOptions.relations;
             }
             return factoryOption.relations;
         }
@@ -313,5 +323,5 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
         }
     }
 
-    return mixin(MixinInterceptor);
+    return mixin(MixinSearchRequestInterceptor);
 }

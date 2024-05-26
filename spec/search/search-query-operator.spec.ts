@@ -182,4 +182,9 @@ describe('Search Query Operator', () => {
             expect(metadata.nextCursor).toBeDefined();
         }
     });
+
+    it('should be able to return error when operand is invalid for operator BETWEEN', async () => {
+        const requestSearchDto: RequestSearchDto<TestEntity> = { where: [{ col2: { operator: 'BETWEEN', operand: [5, undefined] } }] };
+        await request(app.getHttpServer()).post('/base/search').send(requestSearchDto).expect(HttpStatus.UNPROCESSABLE_ENTITY);
+    });
 });

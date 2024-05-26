@@ -101,14 +101,14 @@ describe('exclude swagger by route', () => {
                 content: {
                     'application/json': {
                         schema: {
-                            $ref: '#/components/schemas/PickTypeClass',
+                            $ref: '#/components/schemas/CreateBaseBodyDto',
                             anyOf: [
                                 {
-                                    $ref: '#/components/schemas/PickTypeClass',
+                                    $ref: '#/components/schemas/CreateBaseBodyDto',
                                 },
                                 {
                                     items: {
-                                        $ref: '#/components/schemas/PickTypeClass',
+                                        $ref: '#/components/schemas/CreateBaseBodyDto',
                                     },
                                     type: 'array',
                                 },

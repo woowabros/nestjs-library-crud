@@ -101,11 +101,8 @@ export class CrudRouteFactory {
                 return namingStrategy(typeof discriminatorValue === 'string' ? discriminatorValue : discriminatorValue?.name);
             }
 
-            return namingStrategy(table?.name);
+            return namingStrategy(table.name);
         })();
-        if (!tableName) {
-            throw new Error('Cannot find Entity name from TypeORM');
-        }
         this.entity.tableName = tableName;
 
         const inheritanceTree = MetadataUtils.getInheritanceTree(entity as Function);
@@ -194,9 +191,6 @@ export class CrudRouteFactory {
         }
 
         const methodName = this.writeMethodOnController(crudMethod);
-        if (!methodName) {
-            throw new Error(`Required Method Name of ${crudMethod}`);
-        }
 
         const targetMethod = this.targetPrototype[methodName];
         const { path, params } = CRUD_POLICY[crudMethod].uriParameter(this.crudOptions, this.entity.primaryKeys);
@@ -286,8 +280,9 @@ export class CrudRouteFactory {
         Reflect.defineMetadata(DECORATORS.API_OPERATION, CRUD_POLICY[method].swagger.operationMetadata(this.tableName), target);
         this.defineParameterSwagger(method, params, target, paginationType);
 
-        if (this.crudOptions.routes?.[method]?.swagger?.response) {
-            const responseDto = this.generalTypeGuard(this.crudOptions.routes?.[method]?.swagger?.response!, method, 'response');
+        const routeConfig = this.crudOptions.routes?.[method];
+        if (routeConfig?.swagger?.response) {
+            const responseDto = this.generalTypeGuard(routeConfig.swagger.response, method, 'response');
             const extraModels: Array<{ name: string }> = Reflect.getMetadata(DECORATORS.API_EXTRA_MODELS, target) ?? [];
             if (!extraModels.some((model) => model.name === responseDto.name)) {
                 Reflect.defineMetadata(DECORATORS.API_EXTRA_MODELS, [...extraModels, responseDto], target);
@@ -357,18 +352,13 @@ export class CrudRouteFactory {
         }
         if (CRUD_POLICY[method].useBody) {
             const bodyType = (() => {
-                const customBody = this.crudOptions.routes?.[method]?.swagger?.body;
-                if (customBody != null) {
-                    return customBody;
+                const routeConfig = this.crudOptions.routes?.[method];
+                if (routeConfig?.swagger?.body) {
+                    return this.generalTypeGuard(routeConfig.swagger.body, method, 'body');
                 }
                 if (method === Method.SEARCH) {
                     return RequestSearchDto;
                 }
-                const routeConfig = this.crudOptions.routes?.[method];
-                if (routeConfig?.swagger && 'body' in routeConfig.swagger) {
-                    return this.generalTypeGuard(routeConfig.swagger['body']!, method, 'body');
-                }
-
                 return CreateRequestDto(this.crudOptions.entity, method);
             })();
 

@@ -1,4 +1,4 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import request from 'supertest';
@@ -6,6 +6,8 @@ import request from 'supertest';
 import { BaseEntity } from '../base/base.entity';
 import { BaseModule } from '../base/base.module';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
 
 describe('replication', () => {
     let app: INestApplication;

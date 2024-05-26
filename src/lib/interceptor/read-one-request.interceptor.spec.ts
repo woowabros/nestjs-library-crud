@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { CallHandler, HttpStatus, NestInterceptor, UnprocessableEntityException } from '@nestjs/common';
+import { HttpStatus, UnprocessableEntityException } from '@nestjs/common';
 import { of } from 'rxjs';
-import { BaseEntity } from 'typeorm';
 
 import { ReadOneRequestInterceptor } from './read-one-request.interceptor';
 import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { Method } from '../interface';
 import { ExecutionContextHost } from '../provider';
 import { CrudLogger } from '../provider/crud-logger';
+
+import type { CallHandler, NestInterceptor } from '@nestjs/common';
+import type { BaseEntity } from 'typeorm';
 
 describe('ReadOneRequestInterceptor', () => {
     const handler: CallHandler = {

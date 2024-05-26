@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { INestApplication } from '@nestjs/common';
-import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
-import { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 import { ExcludeSwaggerController } from './exclude-swagger.controller';
 import { ExcludeSwaggerModule } from './exclude-swagger.module';
 import { BaseEntity } from '../base/base.entity';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
+import type { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('exclude swagger by route', () => {
     let app: INestApplication;

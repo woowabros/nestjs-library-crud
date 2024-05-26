@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable import/no-default-export */
+/* eslint-disable @typescript-eslint/naming-convention  */
 import type { Config } from 'jest';
 
 const config: Config = {

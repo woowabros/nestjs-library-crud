@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import { Request } from 'express';
 import { Entity, PrimaryGeneratedColumn } from 'typeorm';
 

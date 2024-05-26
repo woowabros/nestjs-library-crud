@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { ContextType, ExecutionContext, Type } from '@nestjs/common';
-import { HttpArgumentsHost, RpcArgumentsHost, WsArgumentsHost } from '@nestjs/common/interfaces';
+import type { ContextType, ExecutionContext, Type } from '@nestjs/common';
+import type { HttpArgumentsHost, RpcArgumentsHost, WsArgumentsHost } from '@nestjs/common/interfaces';
 
 /**
  * util class to mocking ExecutionContext
@@ -15,7 +15,7 @@ export class ExecutionContextHost implements ExecutionContext {
         private readonly handler?: Function,
     ) {}
 
-    setType<TContext extends string = ContextType>(type: TContext) {
+    setType<TContext extends string = ContextType>(type: TContext): void {
         type && (this.contextType = type);
     }
 

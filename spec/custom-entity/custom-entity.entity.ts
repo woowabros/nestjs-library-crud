@@ -27,7 +27,7 @@ export class CustomEntity extends BaseEntity {
     deletedAt?: Date;
 
     @BeforeInsert()
-    setPrimaryKey() {
+    setPrimaryKey(): void {
         this.uuid = this.uuid ?? `${Date.now()}${crypto.getRandomValues(new Uint16Array(1))[0]}`;
     }
 }

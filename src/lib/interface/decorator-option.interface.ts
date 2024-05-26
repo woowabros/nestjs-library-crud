@@ -1,7 +1,6 @@
-import { NestInterceptor, Type } from '@nestjs/common';
-import { ColumnType } from 'typeorm';
-
-import { Method, Sort, PaginationType, Author, EntityType } from '.';
+import type { Method, Sort, PaginationType, Author, EntityType } from '.';
+import type { NestInterceptor, Type } from '@nestjs/common';
+import type { ColumnType } from 'typeorm';
 
 interface RouteBaseOption {
     /**

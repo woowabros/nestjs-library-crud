@@ -1,18 +1,23 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type, UnprocessableEntityException } from '@nestjs/common';
-import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { mixin, UnprocessableEntityException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { Request } from 'express';
 import _ from 'lodash';
-import { Observable } from 'rxjs';
-import { FindOptionsWhere, LessThan, MoreThan } from 'typeorm';
+import { LessThan, MoreThan } from 'typeorm';
 
-import { CustomReadManyRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
-import { CrudOptions, FactoryOption, Method, Sort, GROUP, PaginationType, EntityType } from '../interface';
+import { Method, Sort, GROUP, PaginationType } from '../interface';
 import { PaginationHelper } from '../provider';
 import { CrudReadManyRequest } from '../request';
+
+import type { CustomReadManyRequestOptions } from './custom-request.interceptor';
+import type { CrudOptions, FactoryOption, EntityType } from '../interface';
+import type { CallHandler, ExecutionContext, NestInterceptor, Type } from '@nestjs/common';
+import type { ClassConstructor } from 'class-transformer';
+import type { Request } from 'express';
+import type { Observable } from 'rxjs';
+import type { FindOptionsWhere } from 'typeorm';
 
 const method = Method.READ_MANY;
 export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
@@ -22,6 +27,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
         }
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const readManyOptions = crudOptions.routes?.[method] ?? {};
 

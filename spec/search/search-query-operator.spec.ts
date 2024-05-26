@@ -1,10 +1,13 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { TestEntity, TestModule, TestService } from './module';
-import { RequestSearchDto } from '../../src/lib/dto/request-search.dto';
 import { TestHelper } from '../test.helper';
+
+import type { RequestSearchDto } from '../../src/lib/dto/request-search.dto';
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('Search Query Operator', () => {
     let app: INestApplication;

@@ -1,10 +1,13 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type } from '@nestjs/common';
-import { Request } from 'express';
-import { Observable } from 'rxjs';
+import { mixin } from '@nestjs/common';
 
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
-import { CrudOptions, CrudRecoverRequest, FactoryOption, Method } from '../interface';
+import { Method } from '../interface';
+
+import type { CrudOptions, CrudRecoverRequest, FactoryOption } from '../interface';
+import type { CallHandler, ExecutionContext, NestInterceptor, Type } from '@nestjs/common';
+import type { Request } from 'express';
+import type { Observable } from 'rxjs';
 
 const method = Method.RECOVER;
 export function RecoverRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
@@ -14,6 +17,7 @@ export function RecoverRequestInterceptor(crudOptions: CrudOptions, factoryOptio
         }
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const recoverOptions = crudOptions.routes?.[method] ?? {};
 

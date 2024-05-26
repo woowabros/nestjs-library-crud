@@ -1,12 +1,14 @@
 import { NotFoundException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { Request } from 'express';
 import _ from 'lodash';
 
 import { CreateParamsDto } from '../dto/params.dto';
-import { Author, Column, CrudOptions, EntityType, GROUP, Method } from '../interface';
-import { CrudLogger } from '../provider/crud-logger';
+import { GROUP } from '../interface';
+
+import type { Author, Column, CrudOptions, EntityType, Method } from '../interface';
+import type { CrudLogger } from '../provider/crud-logger';
+import type { Request } from 'express';
 
 export abstract class RequestAbstractInterceptor {
     constructor(public readonly crudLogger: CrudLogger) {}

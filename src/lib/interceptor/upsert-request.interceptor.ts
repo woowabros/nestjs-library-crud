@@ -1,21 +1,17 @@
-import {
-    CallHandler,
-    ConflictException,
-    ExecutionContext,
-    mixin,
-    NestInterceptor,
-    Type,
-    UnprocessableEntityException,
-} from '@nestjs/common';
-import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { ConflictException, mixin, UnprocessableEntityException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { Request } from 'express';
 import _ from 'lodash';
-import { Observable } from 'rxjs';
 
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS } from '../constants';
-import { CrudOptions, CrudUpsertRequest, EntityType, FactoryOption, GROUP, Method } from '../interface';
+import { GROUP, Method } from '../interface';
+
+import type { CrudOptions, CrudUpsertRequest, EntityType, FactoryOption } from '../interface';
+import type { CallHandler, ExecutionContext, NestInterceptor, Type } from '@nestjs/common';
+import type { ClassConstructor } from 'class-transformer';
+import type { Request } from 'express';
+import type { Observable } from 'rxjs';
 
 const method = Method.UPSERT;
 export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
@@ -25,7 +21,7 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
         }
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
-            const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
+            const req = context.switchToHttp().getRequest<Request>();
             const upsertOptions = crudOptions.routes?.[method] ?? {};
 
             const params = await this.checkParams(
@@ -60,7 +56,7 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
             };
 
             this.crudLogger.logRequest(req, crudUpsertRequest);
-            req[CRUD_ROUTE_ARGS] = crudUpsertRequest;
+            (req as unknown as Record<string, unknown>)[CRUD_ROUTE_ARGS] = crudUpsertRequest;
 
             return next.handle();
         }

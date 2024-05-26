@@ -1,6 +1,6 @@
-import { PaginationAbstractResponse } from '../abstract';
-import { PaginationCursorDto } from '../dto/pagination-cursor.dto';
-import { PaginationOffsetDto } from '../dto/pagination-offset.dto';
+import type { PaginationAbstractResponse } from '../abstract';
+import type { PaginationCursorDto } from '../dto/pagination-cursor.dto';
+import type { PaginationOffsetDto } from '../dto/pagination-offset.dto';
 
 export enum PaginationType {
     OFFSET = 'offset',

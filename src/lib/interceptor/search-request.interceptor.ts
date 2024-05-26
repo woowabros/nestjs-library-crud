@@ -1,21 +1,26 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type, UnprocessableEntityException } from '@nestjs/common';
+import { mixin, UnprocessableEntityException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { Request } from 'express';
 import _ from 'lodash';
-import { Observable } from 'rxjs';
-import { FindOptionsOrder, FindOptionsWhere, LessThan, MoreThan, And, FindOperator } from 'typeorm';
+import { LessThan, MoreThan, And } from 'typeorm';
 
-import { CustomSearchRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { CreateParamsDto } from '../dto/params.dto';
 import { RequestSearchDto } from '../dto/request-search.dto';
-import { CrudOptions, EntityType, FactoryOption, GROUP, Method, PaginationType, Sort } from '../interface';
-import { operatorBetween, operatorIn, operatorNull, operatorList, OperatorUnion } from '../interface/query-operation.interface';
+import { GROUP, Method, PaginationType, Sort } from '../interface';
+import { operatorBetween, operatorIn, operatorNull, operatorList } from '../interface/query-operation.interface';
 import { PaginationHelper, TypeOrmQueryBuilderHelper } from '../provider';
 import { CrudReadManyRequest } from '../request';
+
+import type { CustomSearchRequestOptions } from './custom-request.interceptor';
+import type { CrudOptions, EntityType, FactoryOption } from '../interface';
+import type { OperatorUnion } from '../interface/query-operation.interface';
+import type { CallHandler, ExecutionContext, NestInterceptor, Type } from '@nestjs/common';
+import type { Request } from 'express';
+import type { Observable } from 'rxjs';
+import type { FindOptionsOrder, FindOptionsWhere, FindOperator } from 'typeorm';
 
 const method = Method.SEARCH;
 export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
@@ -25,6 +30,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
         }
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const searchOptions = crudOptions.routes?.[method] ?? {};
             const customSearchRequestOptions: CustomSearchRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
@@ -112,7 +118,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             if ('withDeleted' in requestSearchDto) {
                 this.validateWithDeleted(requestSearchDto.withDeleted);
             } else {
-                requestSearchDto.withDeleted = searchOptions.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean);
+                requestSearchDto.withDeleted = searchOptions.softDelete ?? CRUD_POLICY[method].default.softDeleted;
             }
 
             if ('take' in requestSearchDto) {
@@ -122,7 +128,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             requestSearchDto.take =
                 'take' in requestSearchDto
                     ? this.validateTake(requestSearchDto.take, searchOptions.limitOfTake)
-                    : searchOptions.numberOfTake ?? (CRUD_POLICY[method].default.numberOfTake as number);
+                    : searchOptions.numberOfTake ?? CRUD_POLICY[method].default.numberOfTake;
 
             return requestSearchDto;
         }
@@ -177,7 +183,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                                     'operand' in operation &&
                                     Array.isArray(operation.operand) &&
                                     operation.operand.length > 0 &&
-                                    operation.operand.every((operand) => typeof operand === typeof (operation.operand as any)[0])
+                                    operation.operand.every((operand) => typeof operand === typeof (operation.operand as unknown[])[0])
                                 )
                             ) {
                                 throw new UnprocessableEntityException(
@@ -284,7 +290,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 {},
             );
 
-            let mergedKeySet: Set<string> = new Set();
+            const mergedKeySet: Set<string> = new Set();
             for (const queryFilter of where) {
                 for (const [key, operation] of Object.entries(cursorCondition)) {
                     mergedKeySet.add(key);

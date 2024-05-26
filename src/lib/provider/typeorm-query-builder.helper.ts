@@ -1,21 +1,11 @@
 import { UnprocessableEntityException } from '@nestjs/common';
-import {
-    Not,
-    MoreThan,
-    MoreThanOrEqual,
-    LessThan,
-    LessThanOrEqual,
-    Like,
-    ILike,
-    Between,
-    In,
-    IsNull,
-    Raw,
-    FindOptionsWhere,
-} from 'typeorm';
+import { Not, MoreThan, MoreThanOrEqual, LessThan, LessThanOrEqual, Like, ILike, Between, In, IsNull, Raw } from 'typeorm';
 
-import { EntityType } from '../interface';
-import { QueryFilter, operatorBetween, operatorIn, operatorNull } from '../interface/query-operation.interface';
+import { operatorBetween, operatorIn, operatorNull } from '../interface/query-operation.interface';
+
+import type { EntityType } from '../interface';
+import type { QueryFilter } from '../interface/query-operation.interface';
+import type { FindOptionsWhere } from 'typeorm';
 
 export class TypeOrmQueryBuilderHelper {
     static queryFilterToFindOptionsWhere<T extends EntityType>(filter: QueryFilter<T>, index: number): FindOptionsWhere<T> {
@@ -87,8 +77,7 @@ export class TypeOrmQueryBuilderHelper {
                                 if (!Array.isArray(operand) || operand.length !== 2) {
                                     throw new UnprocessableEntityException(`Invalid operand for operator ${operatorBetween}`);
                                 }
-                                const [min, max] = operand;
-                                findOptionsWhere[field] = Between(min, max);
+                                findOptionsWhere[field] = Between(operand[0], operand[1]);
                                 break;
                             case operatorIn:
                                 if (!Array.isArray(operand)) {

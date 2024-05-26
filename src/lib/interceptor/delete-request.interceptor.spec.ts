@@ -1,4 +1,3 @@
-import { CallHandler } from '@nestjs/common';
 import { of } from 'rxjs';
 import { BaseEntity } from 'typeorm';
 
@@ -6,6 +5,8 @@ import { DeleteRequestInterceptor } from './delete-request.interceptor';
 import { CRUD_ROUTE_ARGS } from '../constants';
 import { ExecutionContextHost } from '../provider';
 import { CrudLogger } from '../provider/crud-logger';
+
+import type { CallHandler } from '@nestjs/common';
 
 describe('DeleteRequestInterceptor', () => {
     it('should intercept', async () => {

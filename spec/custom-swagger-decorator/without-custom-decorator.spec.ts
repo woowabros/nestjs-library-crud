@@ -1,10 +1,12 @@
-import { INestApplication } from '@nestjs/common';
 import { SwaggerScanner } from '@nestjs/swagger/dist/swagger-scanner';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 import { ExtraModel } from './extra-model';
 import { DynamicCrudModule } from '../dynamic-crud.module';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('No custom Swagger Decorator', () => {
     let app: INestApplication;

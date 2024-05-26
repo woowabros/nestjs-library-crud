@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import { BaseEntity, Entity, Repository } from 'typeorm';
 
 import { Crud } from './crud.decorator';

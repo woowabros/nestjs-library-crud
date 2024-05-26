@@ -1,5 +1,5 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { EmbeddedEntitiesModule } from './embedded-entities.module';
@@ -7,6 +7,9 @@ import { EmployeeEntity } from './employee.entity';
 import { EmployeeService } from './employee.service';
 import { UserEntity } from './user.entity';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('Embedded-entities', () => {
     let app: INestApplication;

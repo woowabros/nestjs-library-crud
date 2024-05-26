@@ -1,10 +1,13 @@
-import { INestApplication, HttpStatus } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { DepthOneEntity } from './depth-one.entity';
 import { SubPathModule } from './sub-path.module';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('Subpath - one parent parameter', () => {
     let app: INestApplication;

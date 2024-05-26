@@ -1,10 +1,13 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { MultiplePrimaryKeyEntity } from './multiple-primary-key.entity';
 import { MultiplePrimaryKeyModule } from './multiple-primary-key.module';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('MultiplePrimaryKey - Create', () => {
     let app: INestApplication;

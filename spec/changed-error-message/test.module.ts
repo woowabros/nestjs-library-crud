@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import {
     ArgumentsHost,
     Catch,
@@ -22,7 +21,7 @@ import { CrudController, GROUP, Method } from '../../src/lib/interface';
 @Catch(ConflictException)
 export class HttpExceptionFilter implements ExceptionFilter {
     constructor(private readonly message: string) {}
-    catch(exception: HttpException, host: ArgumentsHost) {
+    catch(exception: HttpException, host: ArgumentsHost): void {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
         const status = exception.getStatus();

@@ -1,11 +1,14 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { CustomEntity } from './custom-entity.entity';
 import { CustomEntityModule } from './custom-entity.module';
 import { CustomEntityService } from './custom-entity.service';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('CustomEntity - ReadOne', () => {
     let app: INestApplication;

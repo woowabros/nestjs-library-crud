@@ -1,13 +1,14 @@
-/* eslint-disable max-classes-per-file */
 import { Controller, Injectable, Module } from '@nestjs/common';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsOptional } from 'class-validator';
-import { Entity, BaseEntity, Repository, PrimaryColumn, Column } from 'typeorm';
+import { Entity, BaseEntity, PrimaryColumn, Column } from 'typeorm';
 
 import { Crud } from '../../src/lib/crud.decorator';
 import { CrudService } from '../../src/lib/crud.service';
 import { GROUP } from '../../src/lib/interface';
-import { CrudController } from '../../src/lib/interface';
+
+import type { CrudController } from '../../src/lib/interface';
+import type { Repository } from 'typeorm';
 
 @Entity('test')
 export class TestEntity extends BaseEntity {

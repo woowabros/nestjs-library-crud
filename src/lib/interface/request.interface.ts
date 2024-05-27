@@ -1,7 +1,6 @@
-import { DeepPartial } from 'typeorm';
-
-import { Author, SaveOptions } from '.';
-import { RequestSearchDto } from '../dto/request-search.dto';
+import type { Author, SaveOptions } from '.';
+import type { RequestSearchDto } from '../dto/request-search.dto';
+import type { DeepPartial } from 'typeorm';
 
 export type CrudRequestId<T> = keyof T | Array<keyof T>;
 

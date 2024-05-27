@@ -1,13 +1,16 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type } from '@nestjs/common';
-import { Request } from 'express';
+import { mixin } from '@nestjs/common';
 import _ from 'lodash';
-import { Observable } from 'rxjs';
 
-import { CustomDeleteRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
-import { CrudDeleteOneRequest, CrudOptions, Method, FactoryOption } from '../interface';
+import { Method } from '../interface';
+
+import type { CustomDeleteRequestOptions } from './custom-request.interceptor';
+import type { CrudDeleteOneRequest, CrudOptions, FactoryOption } from '../interface';
+import type { CallHandler, ExecutionContext, NestInterceptor, Type } from '@nestjs/common';
+import type { Request } from 'express';
+import type { Observable } from 'rxjs';
 
 const method = Method.DELETE;
 export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
@@ -17,6 +20,7 @@ export function DeleteRequestInterceptor(crudOptions: CrudOptions, factoryOption
         }
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const deleteOptions = crudOptions.routes?.[method] ?? {};
             const customDeleteRequestOptions: CustomDeleteRequestOptions = req[CUSTOM_REQUEST_OPTIONS];

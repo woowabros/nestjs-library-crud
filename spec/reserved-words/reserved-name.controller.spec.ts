@@ -1,4 +1,4 @@
-import { CrudAbstractEntity } from '../crud.abstract.entity';
+import type { CrudAbstractEntity } from '../crud.abstract.entity';
 
 describe('ReservedNameController', () => {
     it('should be do not use reserved name on controller', () => {

@@ -1,13 +1,17 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type, UnprocessableEntityException } from '@nestjs/common';
-import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { mixin, UnprocessableEntityException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { Request } from 'express';
 import _ from 'lodash';
-import { Observable } from 'rxjs';
 
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS } from '../constants';
-import { CrudOptions, CrudUpdateOneRequest, EntityType, FactoryOption, GROUP, Method } from '../interface';
+import { GROUP, Method } from '../interface';
+
+import type { CrudOptions, CrudUpdateOneRequest, EntityType, FactoryOption } from '../interface';
+import type { CallHandler, ExecutionContext, NestInterceptor, Type } from '@nestjs/common';
+import type { ClassConstructor } from 'class-transformer';
+import type { Request } from 'express';
+import type { Observable } from 'rxjs';
 
 const method = Method.UPDATE;
 export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
@@ -17,7 +21,7 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
         }
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
-            const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
+            const req = context.switchToHttp().getRequest<Request>();
             const updatedOptions = crudOptions.routes?.[method] ?? {};
             const body = await this.validateBody(req.body);
 
@@ -33,7 +37,7 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
             };
 
             this.crudLogger.logRequest(req, crudUpdateOneRequest);
-            req[CRUD_ROUTE_ARGS] = crudUpdateOneRequest;
+            (req as unknown as Record<string, unknown>)[CRUD_ROUTE_ARGS] = crudUpdateOneRequest;
 
             return next.handle();
         }

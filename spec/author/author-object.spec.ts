@@ -1,9 +1,13 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
-import { Author, TestEntity, TestModule } from './author-object.module';
+import { TestEntity, TestModule } from './author-object.module';
 import { TestHelper } from '../test.helper';
+
+import type { Author } from './author-object.module';
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('Author - object', () => {
     let app: INestApplication;

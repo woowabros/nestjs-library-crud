@@ -1,12 +1,15 @@
 import 'mysql2';
 
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { fixtures } from './fixture';
 import { JsonColumnEntity, JsonColumnModule, JsonColumnService } from './json.module';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('Search JSON column - MySQL', () => {
     let app: INestApplication;

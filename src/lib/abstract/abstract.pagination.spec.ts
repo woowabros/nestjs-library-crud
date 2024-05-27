@@ -1,5 +1,6 @@
 import { AbstractPaginationRequest } from './abstract.pagination';
-import { PaginationResponse } from '../interface';
+
+import type { PaginationResponse } from '../interface';
 
 describe('AbstractPaginationRequest', () => {
     class PaginationRequest extends AbstractPaginationRequest {

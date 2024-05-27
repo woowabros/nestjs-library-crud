@@ -1,11 +1,14 @@
-import { ConsoleLogger, HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { ConsoleLogger, HttpStatus } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { ViewEntityPaginationModule } from './view-entity-pagination.module';
 import { PaginationType } from '../../src';
 import { BaseService } from '../base/base.service';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('Pagination with paginationKeys option', () => {
     let app: INestApplication;

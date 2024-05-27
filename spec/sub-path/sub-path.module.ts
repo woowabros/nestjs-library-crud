@@ -1,5 +1,3 @@
-/* eslint-disable unicorn/consistent-function-scoping */
-/* eslint-disable max-classes-per-file */
 import { Controller, forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 

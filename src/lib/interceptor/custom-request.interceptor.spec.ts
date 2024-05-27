@@ -1,9 +1,10 @@
-import { CallHandler } from '@nestjs/common';
 import { of } from 'rxjs';
 
 import { CustomRequestInterceptor } from './custom-request.interceptor';
 import { CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { ExecutionContextHost } from '../provider';
+
+import type { CallHandler } from '@nestjs/common';
 
 describe('CustomRequestInterceptor', () => {
     it('should intercept', async () => {

@@ -1,11 +1,14 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { BaseModule } from './response-interceptor.module';
 import { BaseEntity } from '../base/base.entity';
 import { BaseService } from '../base/base.service';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('Response Interceptor', () => {
     let app: INestApplication;

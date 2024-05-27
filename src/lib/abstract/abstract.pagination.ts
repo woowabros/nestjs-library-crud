@@ -27,7 +27,7 @@ export abstract class AbstractPaginationRequest {
     @IsOptional()
     query: string;
 
-    setWhere(where: string | undefined) {
+    setWhere(where: string | undefined): void {
         if (!where) {
             return;
         }
@@ -57,19 +57,19 @@ export abstract class AbstractPaginationRequest {
         }
     }
 
-    protected get total() {
+    protected get total(): number {
         return this._total;
     }
 
-    get where() {
+    get where(): string {
         return this._where;
     }
 
-    get isNext() {
+    get isNext(): boolean {
         return this._isNext && this.total != null;
     }
 
-    get nextCursor() {
+    get nextCursor(): string {
         return this._nextCursor;
     }
 

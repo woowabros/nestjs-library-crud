@@ -1,14 +1,11 @@
-/* eslint-disable max-classes-per-file */
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Controller, Injectable, Module } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus, Controller, Injectable, Module } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsOptional } from 'class-validator';
 import request from 'supertest';
 import {
     Entity,
     BaseEntity,
-    Repository,
     PrimaryColumn,
     DeleteDateColumn,
     CreateDateColumn,
@@ -23,8 +20,12 @@ import {
 
 import { Crud } from '../../src/lib/crud.decorator';
 import { CrudService } from '../../src/lib/crud.service';
-import { CrudController } from '../../src/lib/interface';
 import { TestHelper } from '../test.helper';
+
+import type { CrudController } from '../../src/lib/interface';
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import type { Repository } from 'typeorm';
 
 @Entity('listeners-on')
 class TestEntity extends BaseEntity {

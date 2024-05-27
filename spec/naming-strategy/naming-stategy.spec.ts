@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import { Controller, HttpStatus, INestApplication, Injectable, Module } from '@nestjs/common';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { TestingModule, Test } from '@nestjs/testing';

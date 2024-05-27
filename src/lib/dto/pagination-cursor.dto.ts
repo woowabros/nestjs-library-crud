@@ -1,5 +1,7 @@
 import { AbstractPaginationRequest } from '../abstract';
-import { CursorPaginationResponse, PaginationType } from '../interface';
+import { PaginationType } from '../interface';
+
+import type { CursorPaginationResponse } from '../interface';
 
 export class PaginationCursorDto extends AbstractPaginationRequest {
     type: PaginationType.CURSOR = PaginationType.CURSOR;

@@ -1,13 +1,17 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type, UnprocessableEntityException } from '@nestjs/common';
-import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { mixin, UnprocessableEntityException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { Request } from 'express';
-import { Observable } from 'rxjs';
-import { DeepPartial } from 'typeorm';
 
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS } from '../constants';
-import { CrudOptions, FactoryOption, CrudCreateRequest, GROUP, Method, EntityType } from '../interface';
+import { GROUP, Method } from '../interface';
+
+import type { CrudOptions, FactoryOption, CrudCreateRequest, EntityType } from '../interface';
+import type { CallHandler, ExecutionContext, NestInterceptor, Type } from '@nestjs/common';
+import type { ClassConstructor } from 'class-transformer';
+import type { Request } from 'express';
+import type { Observable } from 'rxjs';
+import type { DeepPartial } from 'typeorm';
 
 interface NestedBaseEntityArray extends Array<NestedBaseEntityArray | DeepPartial<EntityType>> {}
 type BaseEntityOrArray = DeepPartial<EntityType> | NestedBaseEntityArray;
@@ -38,7 +42,7 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption
             };
 
             this.crudLogger.logRequest(req, crudCreateRequest);
-            (req as Record<string, any>)[CRUD_ROUTE_ARGS] = crudCreateRequest;
+            (req as unknown as Record<string, unknown>)[CRUD_ROUTE_ARGS] = crudCreateRequest;
             return next.handle();
         }
 

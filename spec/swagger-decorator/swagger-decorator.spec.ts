@@ -1,14 +1,17 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
-import { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
-import { RequestBodyObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { SwaggerDecoratorController } from './swagger-decorator.controller';
 import { SwaggerDecoratorModule } from './swagger-decorator.module';
 import { BaseEntity } from '../base/base.entity';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
+import type { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
+import type { RequestBodyObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('SwaggerDecorator', () => {
     let app: INestApplication;

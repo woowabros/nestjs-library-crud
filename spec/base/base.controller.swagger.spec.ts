@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { INestApplication } from '@nestjs/common';
-import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
-import { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 import { BaseController } from './base.controller';
 import { BaseEntity } from './base.entity';
 import { BaseModule } from './base.module';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
+import type { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('BaseController Swagger Decorator', () => {
     let app: INestApplication;

@@ -1,20 +1,21 @@
 import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
-import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
 
-import {
+import { isCrudCreateManyRequest } from './interface';
+
+import type {
     CrudReadOneRequest,
     CrudDeleteOneRequest,
     CrudUpdateOneRequest,
     CrudUpsertRequest,
     CrudRecoverRequest,
     PaginationResponse,
-    isCrudCreateManyRequest,
     CrudCreateOneRequest,
     CrudCreateManyRequest,
     EntityType,
 } from './interface';
-import { CrudReadManyRequest } from './request';
+import type { CrudReadManyRequest } from './request';
+import type { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
 
 const SUPPORTED_REPLICATION_TYPES = new Set(['mysql', 'mariadb', 'postgres', 'aurora-postgres', 'aurora-mysql']);
 

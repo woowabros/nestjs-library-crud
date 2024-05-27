@@ -1,12 +1,15 @@
 import { ApplicationConfig } from '@nestjs/core';
-import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
-import { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
 import { ModelPropertiesAccessor } from '@nestjs/swagger/dist/services/model-properties-accessor';
 import { SchemaObjectFactory } from '@nestjs/swagger/dist/services/schema-object-factory';
 import { SwaggerTypesMapper } from '@nestjs/swagger/dist/services/swagger-types-mapper';
 import { SwaggerExplorer } from '@nestjs/swagger/dist/swagger-explorer';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { BaseEntity, getMetadataArgsStorage } from 'typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { getMetadataArgsStorage } from 'typeorm';
+
+import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
+import type { DenormalizedDoc } from '@nestjs/swagger/dist/interfaces/denormalized-doc.interface';
+import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import type { BaseEntity } from 'typeorm';
 
 export class TestHelper {
     static getRoutePath(httpServer: any): Record<string, string[]> {

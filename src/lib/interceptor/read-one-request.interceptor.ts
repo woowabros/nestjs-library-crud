@@ -1,17 +1,20 @@
-import { CallHandler, ExecutionContext, mixin, NestInterceptor, Type, UnprocessableEntityException } from '@nestjs/common';
+import { mixin, UnprocessableEntityException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
-import { Request } from 'express';
 import _ from 'lodash';
-import QueryString from 'qs';
-import { Observable } from 'rxjs';
 
-import { CustomReadOneRequestOptions } from './custom-request.interceptor';
 import { RequestAbstractInterceptor } from '../abstract';
 import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { RequestFieldsDto } from '../dto/request-fields.dto';
-import { CrudOptions, Method, FactoryOption, CrudReadOneRequest } from '../interface';
+import { Method } from '../interface';
+
+import type { CustomReadOneRequestOptions } from './custom-request.interceptor';
+import type { CrudOptions, FactoryOption, CrudReadOneRequest } from '../interface';
+import type { CallHandler, ExecutionContext, NestInterceptor, Type } from '@nestjs/common';
+import type { Request } from 'express';
+import type QueryString from 'qs';
+import type { Observable } from 'rxjs';
 
 const method = Method.READ_ONE;
 export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOption: FactoryOption): Type<NestInterceptor> {
@@ -21,6 +24,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
         }
 
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const readOneOptions = crudOptions.routes?.[method] ?? {};
             const customReadOneRequestOptions: CustomReadOneRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
@@ -29,7 +33,7 @@ export function ReadOneRequestInterceptor(crudOptions: CrudOptions, factoryOptio
 
             const softDeleted = _.isBoolean(customReadOneRequestOptions?.softDeleted)
                 ? customReadOneRequestOptions.softDeleted
-                : readOneOptions.softDelete ?? (CRUD_POLICY[method].default.softDeleted as boolean);
+                : readOneOptions.softDelete ?? CRUD_POLICY[method].default.softDeleted;
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);
             const crudReadOneRequest: CrudReadOneRequest<typeof crudOptions.entity> = {

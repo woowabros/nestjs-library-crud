@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/naming-convention, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any */
 import { CrudRouteFactory } from './crud.route.factory';
 import { CrudService } from './crud.service';
-import { CrudOptions } from './interface';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+import type { CrudOptions } from './interface';
+
+type Constructor = new (...args: any[]) => any;
+
 export const Crud =
     (options: CrudOptions) =>
-    <T extends { new (...args: any[]): any }>(target: T) => {
+    <T extends Constructor>(target: T) => {
         const crudRouteFactory = new CrudRouteFactory(target, options);
         crudRouteFactory.init();
 

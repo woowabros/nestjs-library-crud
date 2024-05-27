@@ -1,9 +1,11 @@
 import _ from 'lodash';
-import { FindManyOptions, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere } from 'typeorm';
 
 import { CRUD_POLICY } from '../crud.policy';
-import { Method, PaginationRequest, PaginationResponse, PaginationType, Sort } from '../interface';
+import { Method, PaginationType } from '../interface';
 import { PaginationHelper } from '../provider';
+
+import type { PaginationRequest, PaginationResponse, Sort } from '../interface';
+import type { FindManyOptions, FindOptionsOrder, FindOptionsSelect, FindOptionsWhere } from 'typeorm';
 
 type Where<T> = FindOptionsWhere<T> | Array<FindOptionsWhere<T>>;
 export class CrudReadManyRequest<T> {
@@ -23,19 +25,23 @@ export class CrudReadManyRequest<T> {
     private _selectColumnSet: Set<string | number> = new Set();
     private _excludeColumnSet: Set<string> = new Set();
 
-    get paginationKeys() {
+    get paginationKeys(): string[] {
         return this._paginationKeys;
     }
 
-    get findOptions() {
+    get findOptions(): FindManyOptions<T> & {
+        where: Where<T>;
+        take: number;
+        order: FindOptionsOrder<T>;
+    } {
         return this._findOptions;
     }
 
-    get pagination() {
+    get pagination(): PaginationRequest {
         return this._pagination;
     }
 
-    get sort() {
+    get sort(): Sort {
         return this._sort;
     }
 

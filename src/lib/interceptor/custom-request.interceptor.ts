@@ -1,8 +1,8 @@
-import { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
-import { Request } from 'express';
-import { Observable } from 'rxjs';
-
 import { CUSTOM_REQUEST_OPTIONS } from '../constants';
+
+import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
+import type { Request } from 'express';
+import type { Observable } from 'rxjs';
 
 export interface CustomReadOneRequestOptions {
     fields?: string[];
@@ -23,7 +23,7 @@ export interface CustomSearchRequestOptions {
 export class CustomRequestInterceptor implements NestInterceptor {
     async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
         const req = context.switchToHttp().getRequest<Request>();
-        (req as Record<string, any>)[CUSTOM_REQUEST_OPTIONS] = await this.overrideOptions(req);
+        (req as unknown as Record<string, unknown>)[CUSTOM_REQUEST_OPTIONS] = await this.overrideOptions(req);
         return next.handle();
     }
 

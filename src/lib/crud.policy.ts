@@ -1,4 +1,4 @@
-import { HttpStatus, NestInterceptor, RequestMethod, Type } from '@nestjs/common';
+import { HttpStatus, RequestMethod } from '@nestjs/common';
 
 import { capitalizeFirstLetter } from './capitalize-first-letter';
 import { ReadOneRequestInterceptor, CreateRequestInterceptor } from './interceptor';
@@ -8,7 +8,10 @@ import { RecoverRequestInterceptor } from './interceptor/recover-request.interce
 import { SearchRequestInterceptor } from './interceptor/search-request.interceptor';
 import { UpdateRequestInterceptor } from './interceptor/update-request.interceptor';
 import { UpsertRequestInterceptor } from './interceptor/upsert-request.interceptor';
-import { CrudOptions, Method, PrimaryKey, FactoryOption, Sort, PaginationType } from './interface';
+import { Method, Sort, PaginationType } from './interface';
+
+import type { CrudOptions, PrimaryKey, FactoryOption } from './interface';
+import type { NestInterceptor, Type } from '@nestjs/common';
 
 type CrudMethodPolicy = {
     [Method.READ_ONE]: MethodPolicy<Method.READ_ONE>;

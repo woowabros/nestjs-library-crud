@@ -1,6 +1,5 @@
-import { ColumnType } from 'typeorm';
-
-import { CrudLogger } from '../provider/crud-logger';
+import type { CrudLogger } from '../provider/crud-logger';
+import type { ColumnType } from 'typeorm';
 
 export interface Column {
     name: string;

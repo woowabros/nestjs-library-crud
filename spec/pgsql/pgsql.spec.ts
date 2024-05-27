@@ -1,18 +1,21 @@
-/* eslint-disable max-classes-per-file */
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Controller, Injectable, Module } from '@nestjs/common';
+import { HttpStatus, Controller, Injectable, Module } from '@nestjs/common';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { Exclude, Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 import request from 'supertest';
-import { Entity, BaseEntity, Repository, Column, PrimaryGeneratedColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, DeleteDateColumn } from 'typeorm';
 
 import { Crud } from '../../src/lib/crud.decorator';
 import { CrudService } from '../../src/lib/crud.service';
-import { CrudController, GROUP } from '../../src/lib/interface';
+import { GROUP } from '../../src/lib/interface';
 import { TestHelper } from '../test.helper';
+
+import type { CrudController } from '../../src/lib/interface';
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import type { Repository } from 'typeorm';
 
 @Entity('test')
 class TestEntity extends BaseEntity {

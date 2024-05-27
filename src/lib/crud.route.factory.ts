@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/ban-types */
-import { ExecutionContext, HttpStatus, Type, UnprocessableEntityException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any */
+import { HttpStatus, UnprocessableEntityException } from '@nestjs/common';
 import {
     CUSTOM_ROUTE_ARGS_METADATA,
     HTTP_CODE_METADATA,
@@ -18,7 +18,10 @@ import { CRUD_ROUTE_ARGS } from './constants';
 import { CRUD_POLICY } from './crud.policy';
 import { RequestSearchDto } from './dto/request-search.dto';
 import { CreateRequestDto, getPropertyNamesFromMetadata } from './dto/request.dto';
-import {
+import { Method, PaginationType, PAGINATION_SWAGGER_QUERY } from './interface';
+import { CrudLogger } from './provider/crud-logger';
+
+import type {
     Column,
     CrudCreateRequest,
     CrudDeleteOneRequest,
@@ -27,14 +30,11 @@ import {
     CrudRecoverRequest,
     CrudUpdateOneRequest,
     FactoryOption,
-    Method,
-    PaginationType,
-    PAGINATION_SWAGGER_QUERY,
     PrimaryKey,
     EntityType,
 } from './interface';
-import { CrudLogger } from './provider/crud-logger';
-import { CrudReadManyRequest } from './request';
+import type { CrudReadManyRequest } from './request';
+import type { ExecutionContext, Type } from '@nestjs/common';
 
 type ParameterDecorators =
     | {
@@ -77,7 +77,7 @@ export class CrudRouteFactory {
         this.crudLogger = new CrudLogger(crudOptions.logging);
     }
 
-    init() {
+    init(): void {
         for (const method of Object.values(Method)) {
             if (!this.enabledMethod(method)) {
                 continue;
@@ -130,53 +130,53 @@ export class CrudRouteFactory {
         return this.entity.tableName;
     }
 
-    protected get targetPrototype() {
+    protected get targetPrototype(): any {
         return this.target.prototype;
     }
 
-    protected readOne<T>(controllerMethodName: string) {
+    protected readOne<T>(controllerMethodName: string): void {
         this.targetPrototype[controllerMethodName] = function reservedReadOne(crudReadOneRequest: CrudReadOneRequest<T>) {
             return this.crudService.reservedReadOne(crudReadOneRequest);
         };
     }
 
-    protected readMany<T>(controllerMethodName: string) {
+    protected readMany<T>(controllerMethodName: string): void {
         this.targetPrototype[controllerMethodName] = function reservedReadMany(crudReadManyRequest: CrudReadManyRequest<T>) {
             return this.crudService.reservedReadMany(crudReadManyRequest);
         };
     }
 
-    protected search<T>(controllerMethodName: string) {
+    protected search<T>(controllerMethodName: string): void {
         this.targetPrototype[controllerMethodName] = function reservedSearch(crudReadManyRequest: CrudReadManyRequest<T>) {
             return this.crudService.reservedReadMany(crudReadManyRequest);
         };
     }
 
-    protected create<T>(controllerMethodName: string) {
+    protected create<T>(controllerMethodName: string): void {
         this.targetPrototype[controllerMethodName] = function reservedCreate(crudCreateRequest: CrudCreateRequest<T>) {
             return this.crudService.reservedCreate(crudCreateRequest);
         };
     }
 
-    protected upsert<T>(controllerMethodName: string) {
+    protected upsert<T>(controllerMethodName: string): void {
         this.targetPrototype[controllerMethodName] = function reservedUpsert(crudCreateRequest: CrudCreateRequest<T>) {
             return this.crudService.reservedUpsert(crudCreateRequest);
         };
     }
 
-    protected update<T>(controllerMethodName: string) {
+    protected update<T>(controllerMethodName: string): void {
         this.targetPrototype[controllerMethodName] = function reservedUpdate(crudUpdateOneRequest: CrudUpdateOneRequest<T>) {
             return this.crudService.reservedUpdate(crudUpdateOneRequest);
         };
     }
 
-    protected delete<T>(controllerMethodName: string) {
+    protected delete<T>(controllerMethodName: string): void {
         this.targetPrototype[controllerMethodName] = function reservedDelete(crudDeleteOneRequest: CrudDeleteOneRequest<T>) {
             return this.crudService.reservedDelete(crudDeleteOneRequest);
         };
     }
 
-    protected recover<T>(controllerMethodName: string) {
+    protected recover<T>(controllerMethodName: string): void {
         this.targetPrototype[controllerMethodName] = function reservedRecover(crudRecoverRequest: CrudRecoverRequest<T>) {
             return this.crudService.reservedRecover(crudRecoverRequest);
         };

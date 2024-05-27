@@ -1,4 +1,4 @@
-import { Address, Person } from './interface';
+import type { Address, Person } from './interface';
 
 export const fixtures = [
     {

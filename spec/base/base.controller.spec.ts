@@ -1,11 +1,13 @@
-import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 
 import { BaseController } from './base.controller';
 import { BaseEntity } from './base.entity';
 import { BaseModule } from './base.module';
 import { BaseService } from './base.service';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('BaseController', () => {
     let app: INestApplication;

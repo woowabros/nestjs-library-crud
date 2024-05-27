@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import { Controller, Injectable, Module } from '@nestjs/common';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsInt, IsOptional, IsString } from 'class-validator';

@@ -1,10 +1,13 @@
-import { INestApplication, HttpStatus, ConsoleLogger } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus, ConsoleLogger } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { TestEntity, TestModule, TestService } from './module';
 import { PaginationHelper } from '../../src/lib/provider';
 import { TestHelper } from '../test.helper';
+
+import type { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
 
 describe('Search Cursor Pagination', () => {
     let app: INestApplication;

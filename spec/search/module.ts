@@ -23,6 +23,10 @@ export class TestEntity extends BaseEntity {
     @Column({ nullable: true })
     @IsOptional({ groups: [GROUP.SEARCH] })
     col3: number;
+
+    @Column({ nullable: true })
+    @IsOptional({ groups: [GROUP.SEARCH] })
+    col4: Date;
 }
 
 @Injectable()

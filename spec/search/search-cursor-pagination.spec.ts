@@ -197,11 +197,11 @@ describe('Search Cursor Pagination', () => {
 
         expect(body).toEqual({
             data: [
-                { col1: 'col1_1', col2: 1, col3: 49 },
-                { col1: 'col1_11', col2: 11, col3: 39 },
-                { col1: 'col1_13', col2: 13, col3: 37 },
-                { col1: 'col1_15', col2: 15, col3: 35 },
-                { col1: 'col1_17', col2: 17, col3: 33 },
+                { col1: 'col1_1', col2: 1, col3: 49, col4: null },
+                { col1: 'col1_11', col2: 11, col3: 39, col4: null },
+                { col1: 'col1_13', col2: 13, col3: 37, col4: null },
+                { col1: 'col1_15', col2: 15, col3: 35, col4: null },
+                { col1: 'col1_17', col2: 17, col3: 33, col4: null },
             ],
             metadata: {
                 limit: 5,
@@ -216,11 +216,11 @@ describe('Search Cursor Pagination', () => {
             .expect(HttpStatus.OK);
         expect(nextBody).toEqual({
             data: [
-                { col1: 'col1_19', col2: 19, col3: 31 },
-                { col1: 'col1_21', col2: 21, col3: 29 },
-                { col1: 'col1_23', col2: 23, col3: 27 },
-                { col1: 'col1_25', col2: 25, col3: null },
-                { col1: 'col1_27', col2: 27, col3: null },
+                { col1: 'col1_19', col2: 19, col3: 31, col4: null },
+                { col1: 'col1_21', col2: 21, col3: 29, col4: null },
+                { col1: 'col1_23', col2: 23, col3: 27, col4: null },
+                { col1: 'col1_25', col2: 25, col3: null, col4: null },
+                { col1: 'col1_27', col2: 27, col3: null, col4: null },
             ],
             metadata: {
                 limit: 5,
@@ -234,16 +234,16 @@ describe('Search Cursor Pagination', () => {
             .send({ where: [{ col1: { operator: 'IN', operand: ['col1_19', 'col1_21', 'col1_23', 'col1_25', 'col1_27'] } }], take: 2 })
             .expect(HttpStatus.OK);
         expect(searchInBody.data).toEqual([
-            { col1: 'col1_27', col2: 27, col3: null },
-            { col1: 'col1_25', col2: 25, col3: null },
+            { col1: 'col1_27', col2: 27, col3: null, col4: null },
+            { col1: 'col1_25', col2: 25, col3: null, col4: null },
         ]);
         const { body: nextInBody } = await request(app.getHttpServer())
             .post('/base/search')
             .send({ nextCursor: searchInBody.metadata.nextCursor })
             .expect(HttpStatus.OK);
         expect(nextInBody.data).toEqual([
-            { col1: 'col1_23', col2: 23, col3: 27 },
-            { col1: 'col1_21', col2: 21, col3: 29 },
+            { col1: 'col1_23', col2: 23, col3: 27, col4: null },
+            { col1: 'col1_21', col2: 21, col3: 29, col4: null },
         ]);
     });
 

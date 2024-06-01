@@ -187,10 +187,12 @@ describe('SearchRequestInterceptor', () => {
             });
         });
 
-        describe('throw when operand for BETWEEN is not array of two numbers', () => {
-            test.each([undefined, 0, [1, 2, 3], ['1', '2'], [1, '2']])('operand(%p)', async (operand) => {
+        describe('throw when operand for BETWEEN is not array of identical type 2 values', () => {
+            test.each([undefined, 0, [1, 2, 3], [1, '2']])('operand(%p)', async (operand) => {
                 await expect(interceptor.validateBody({ where: [{ col3: { operator: 'BETWEEN', operand } }] })).rejects.toThrow(
-                    new UnprocessableEntityException('operand for BETWEEN should be array of two numbers, but where.col3 not satisfy it'),
+                    new UnprocessableEntityException(
+                        'operand for BETWEEN should be array of identical type 2 values, but where.col3 not satisfy it',
+                    ),
                 );
             });
         });

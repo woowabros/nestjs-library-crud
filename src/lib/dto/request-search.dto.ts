@@ -4,7 +4,7 @@ import { Sort } from '../interface';
 import { QueryFilter, operators } from '../interface/query-operation.interface';
 
 export class RequestSearchDto<T> {
-    @ApiPropertyOptional({ description: 'select fields', isArray: true, type: [String] })
+    @ApiPropertyOptional({ description: 'select fields', isArray: true, type: String })
     select?: Array<keyof Partial<T>>;
 
     @ApiPropertyOptional({
@@ -39,7 +39,7 @@ export class RequestSearchDto<T> {
     @ApiPropertyOptional({ description: 'withDeleted', type: Boolean })
     withDeleted?: boolean;
 
-    @ApiPropertyOptional({ description: 'take', type: Number })
+    @ApiPropertyOptional({ description: 'take', type: Number, example: 20 })
     take?: number;
 
     @ApiPropertyOptional({ description: 'Use to search the next page', type: String })

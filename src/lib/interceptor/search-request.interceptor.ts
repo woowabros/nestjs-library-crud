@@ -174,12 +174,13 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                                     'operand' in operation &&
                                     Array.isArray(operation.operand) &&
                                     operation.operand.length === 2 &&
-                                    typeof operation.operand[0] === 'number' &&
-                                    typeof operation.operand[1] === 'number'
+                                    operation.operand.every(
+                                        (operand) => operand != null && typeof operand === typeof (operation.operand as unknown[])[0],
+                                    )
                                 )
                             ) {
                                 throw new UnprocessableEntityException(
-                                    `operand for ${operatorBetween} should be array of two numbers, but where.${key} not satisfy it`,
+                                    `operand for ${operatorBetween} should be array of identical type 2 values, but where.${key} not satisfy it`,
                                 );
                             }
                             query[key] = operation.operand[0];

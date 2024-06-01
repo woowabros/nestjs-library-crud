@@ -536,5 +536,37 @@ describe('Pagination', () => {
             expect(lastOneOfFirstResponse.type).toEqual(0);
             expect(firstOneOfNextResponse.type).toEqual(1);
         });
+
+        it('should return items queried based on request when nextCursor is invalid', async () => {
+            // readMany
+            const { body: readManyResponseBody } = await request(app.getHttpServer())
+                .get(`/${PaginationType.OFFSET}`)
+                .query({
+                    nextCursor: 'invalid',
+                    type: 1,
+                })
+                .expect(HttpStatus.OK);
+
+            expect(readManyResponseBody.metadata).toEqual({
+                page: 1,
+                pages: 3,
+                total: 50,
+                offset: 20,
+                nextCursor: expect.any(String),
+            });
+
+            // search
+            const { body: searchResponseBody } = await request(app.getHttpServer())
+                .post(`/${PaginationType.OFFSET}/search`)
+                .send({ where: [{ type: { operator: '=', operand: 1 } }], nextCursor: 'invalid' })
+                .expect(HttpStatus.OK);
+            expect(searchResponseBody.metadata).toEqual({
+                page: 1,
+                pages: 3,
+                total: 50,
+                offset: 20,
+                nextCursor: expect.any(String),
+            });
+        });
     });
 });

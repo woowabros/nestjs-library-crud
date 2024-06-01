@@ -43,7 +43,7 @@ export abstract class RequestAbstractInterceptor {
         crudOptions: CrudOptions,
         method: Exclude<Method, Method.READ_MANY | Method.READ_ONE | Method.SEARCH>,
     ): Author | undefined {
-        const author = crudOptions?.routes?.[method]?.author;
+        const author = crudOptions.routes?.[method]?.author;
 
         if (!author) {
             return;

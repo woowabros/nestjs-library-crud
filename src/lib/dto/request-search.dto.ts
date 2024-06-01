@@ -44,7 +44,4 @@ export class RequestSearchDto<T> {
 
     @ApiPropertyOptional({ description: 'Use to search the next page', type: String })
     nextCursor?: string;
-
-    @ApiPropertyOptional({ description: 'Use to search the next page under the same conditions', type: String })
-    query?: string;
 }

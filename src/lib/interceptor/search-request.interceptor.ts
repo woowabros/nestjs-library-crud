@@ -51,8 +51,10 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             const requestSearchDto = await (async () => {
                 if (isNextPage) {
-                    pagination.setQuery(pagination.query ?? btoa('{}'));
-                    return PaginationHelper.deserialize<RequestSearchDto<EntityType>>(pagination.where);
+                    const isQueryValid = pagination.setQuery(pagination.query);
+                    if (isQueryValid) {
+                        return PaginationHelper.deserialize<RequestSearchDto<EntityType>>(pagination.where);
+                    }
                 }
                 const searchBody = await this.validateBody(req.body);
                 pagination.setWhere(PaginationHelper.serialize((searchBody ?? {}) as FindOptionsWhere<typeof crudOptions.entity>));

@@ -1,6 +1,7 @@
 import { Controller } from '@nestjs/common';
-import { PickType } from '@nestjs/swagger';
+import { IntersectionType, PickType } from '@nestjs/swagger';
 
+import { AdditionalBaseInfo } from './additional-base-info';
 import { CustomResponseDto } from './custom-response.dto';
 import { Crud } from '../../src/lib/crud.decorator';
 import { CrudController } from '../../src/lib/interface';
@@ -12,6 +13,7 @@ import { BaseService } from '../base/base.service';
     routes: {
         recover: { swagger: { hide: true } },
         readOne: { swagger: { response: PickType(BaseEntity, ['name']) } },
+        readMany: { swagger: { response: IntersectionType(BaseEntity, AdditionalBaseInfo) } },
         create: { swagger: { body: PickType(BaseEntity, ['name']) } },
         update: { swagger: { response: CustomResponseDto } },
     },

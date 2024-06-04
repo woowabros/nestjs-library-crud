@@ -354,9 +354,7 @@ export class CrudRouteFactory {
             const bodyType = (() => {
                 const customBody = this.crudOptions.routes?.[method]?.swagger?.body;
                 if (customBody) {
-                    return ['PickTypeClass', 'OmitTypeClass'].includes(customBody.name)
-                        ? this.generalTypeGuard(customBody, method, 'body')
-                        : customBody;
+                    return this.generalTypeGuard(customBody, method, 'body');
                 }
                 if (method === Method.SEARCH) {
                     return RequestSearchDto;

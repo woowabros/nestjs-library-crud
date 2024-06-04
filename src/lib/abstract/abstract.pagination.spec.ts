@@ -25,7 +25,8 @@ describe('AbstractPaginationRequest', () => {
 
     it('should do nothing when query is invalid', () => {
         const paginationRequest = new PaginationRequest();
-        paginationRequest.setQuery('invalid');
+        const isQueryValid = paginationRequest.setQuery('invalid');
+        expect(isQueryValid).toEqual(false);
         expect(paginationRequest.isNext).toBeFalsy();
     });
 });

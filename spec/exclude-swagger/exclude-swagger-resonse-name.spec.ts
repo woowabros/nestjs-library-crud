@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Controller, Module, type INestApplication } from '@nestjs/common';
-import { OmitType, PickType } from '@nestjs/swagger';
+import { IntersectionType, OmitType, PickType } from '@nestjs/swagger';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AdditionalBaseInfo } from './additional-base-info';
 import { Crud } from '../../src/lib/crud.decorator';
 import { CrudController } from '../../src/lib/interface';
 import { BaseEntity } from '../base/base.entity';
@@ -16,6 +17,7 @@ import type { TestingModule } from '@nestjs/testing';
 
 class OmitTypeDto extends OmitType(BaseEntity, ['description']) {}
 class PickTypeDto extends PickType(BaseEntity, ['name']) {}
+class IntersectionTypeDto extends IntersectionType(BaseEntity, AdditionalBaseInfo) {}
 
 @Crud({
     entity: BaseEntity,
@@ -23,7 +25,7 @@ class PickTypeDto extends PickType(BaseEntity, ['name']) {}
         recover: { swagger: { hide: true } },
         readOne: { swagger: { response: OmitTypeDto } },
         create: { swagger: { body: PickTypeDto } },
-        update: { swagger: { response: OmitTypeDto } },
+        update: { swagger: { response: IntersectionTypeDto } },
     },
 })
 @Controller('exclude-swagger')
@@ -98,7 +100,7 @@ describe('exclude swagger > defined name', () => {
             '200': {
                 content: {
                     'application/json': {
-                        schema: { $ref: '#/components/schemas/OmitTypeDto' },
+                        schema: { $ref: '#/components/schemas/IntersectionTypeDto' },
                     },
                 },
                 description: 'Updated ok',
@@ -120,7 +122,7 @@ describe('exclude swagger > defined name', () => {
         expect(routeSet[create].root).toEqual({
             method: 'post',
             path: '/exclude-swagger',
-            operationId: 'reservedCreate',
+            operationId: 'ExcludeSwaggerController_reservedCreate',
             summary: "create one to 'Base' Table",
             description: "Create an entity in 'Base' Table",
             parameters: [],

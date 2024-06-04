@@ -42,8 +42,10 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
 
             const query = await (async () => {
                 if (PaginationHelper.isNextPage(pagination)) {
-                    pagination.setQuery(pagination.query ?? btoa('{}'));
-                    return {};
+                    const isQueryValid = pagination.setQuery(pagination.query);
+                    if (isQueryValid) {
+                        return {};
+                    }
                 }
                 const query = await this.validateQuery(req.query);
                 pagination.setWhere(PaginationHelper.serialize(query));
@@ -82,6 +84,9 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             }
             if ('offset' in query) {
                 delete query.offset;
+            }
+            if ('nextCursor' in query) {
+                delete query.nextCursor;
             }
 
             const transformed = plainToInstance(crudOptions.entity as ClassConstructor<EntityType>, query, {

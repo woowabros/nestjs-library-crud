@@ -44,17 +44,25 @@ export abstract class AbstractPaginationRequest {
         ).toString(encoding);
     }
 
-    setQuery(query: string): void {
-        try {
-            const paginationType: PaginationQuery = JSON.parse(Buffer.from(query, encoding).toString());
-            this._where = paginationType.where;
-            this._total = paginationType.total;
-            this._nextCursor = paginationType.nextCursor;
-
-            this._isNext = true;
-        } catch {
-            //
+    setQuery(query: string): boolean {
+        const paginationQuery: PaginationQuery | null = (() => {
+            try {
+                return JSON.parse(Buffer.from(query, encoding).toString());
+            } catch {
+                return null;
+            }
+        })();
+        if (paginationQuery == null) {
+            return false;
         }
+
+        this._where = paginationQuery.where;
+        this._total = paginationQuery.total;
+        this._nextCursor = paginationQuery.nextCursor;
+
+        this._isNext = true;
+
+        return true;
     }
 
     protected get total(): number {

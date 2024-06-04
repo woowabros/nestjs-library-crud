@@ -122,4 +122,54 @@ describe('exclude swagger by route', () => {
             },
         });
     });
+
+    it('Should be changed swagger readMany response interface', () => {
+        const readMany = 'get /exclude-swagger';
+        expect(routeSet[readMany].responses).toEqual({
+            '200': {
+                content: {
+                    'application/json': {
+                        schema: {
+                            allOf: [
+                                {
+                                    properties: {
+                                        data: {
+                                            items: {
+                                                $ref: '#/components/schemas/IntersectionBaseEntityAdditionalBaseInfo',
+                                            },
+                                            type: 'array',
+                                        },
+                                        metadata: {
+                                            properties: {
+                                                limit: {
+                                                    example: 20,
+                                                    type: 'number',
+                                                },
+                                                nextCursor: {
+                                                    example: 'cursorToken',
+                                                    type: 'string',
+                                                },
+                                                total: {
+                                                    example: 100,
+                                                    type: 'number',
+                                                },
+                                            },
+                                            type: 'object',
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+                description: 'Fetch many entities from Base table',
+            },
+            '422': {
+                description: 'Invalid query',
+            },
+        });
+        expect(routeSet[readMany].root?.method).toEqual('get');
+        expect(routeSet[readMany].root?.summary).toEqual("read many from 'Base' Table");
+        expect(routeSet[readMany].root?.description).toEqual("Fetch multiple entities in 'Base' Table");
+    });
 });

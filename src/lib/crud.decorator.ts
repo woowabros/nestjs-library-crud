@@ -12,7 +12,7 @@ export const Crud =
         const crudRouteFactory = new CrudRouteFactory(target, options);
         crudRouteFactory.init();
 
-        return class extends target {
+        const ValidatedController = class extends target {
             constructor(...args: any[]) {
                 super(...args);
                 if (!(this.crudService instanceof CrudService)) {
@@ -20,4 +20,6 @@ export const Crud =
                 }
             }
         };
+        Object.defineProperty(ValidatedController, 'name', { value: target.name });
+        return ValidatedController;
     };

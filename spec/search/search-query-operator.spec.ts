@@ -33,15 +33,23 @@ describe('Search Query Operator', () => {
          * col3
          * - when index is [0-4], it has [10-6]
          * - when index is [5-9], is has null
+         *
+         * col4
+         * - when index is [0-9], it has [2000-01-01 ~ 2000-10-01]
          */
         await service.repository.save(
             Array.from({ length: 5 }, (_, index) => index).map((no: number) =>
-                service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no, col3: 10 - no }),
+                service.repository.create({
+                    col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`,
+                    col2: no,
+                    col3: 10 - no,
+                    col4: new Date(2000, no, 1),
+                }),
             ),
         );
         await service.repository.save(
             Array.from({ length: 5 }, (_, index) => index + 5).map((no: number) =>
-                service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no }),
+                service.repository.create({ col1: `col${no % 2 === 0 ? '0' : '1'}_${no}`, col2: no, col4: new Date(2000, no, 1) }),
             ),
         );
 
@@ -77,21 +85,27 @@ describe('Search Query Operator', () => {
         const fixtures: Array<[RequestSearchDto<TestEntity>, number[]]> = [
             [{ where: [{ col2: { operator: '=', operand: 5 } }] }, [5]],
             [{ where: [{ col2: { operator: '=', operand: 5, not: true } }] }, [0, 1, 2, 3, 4, 6, 7, 8, 9]],
+            [{ where: [{ col4: { operator: '=', operand: '2000-06-01' } }] }, [5]],
 
             [{ where: [{ col2: { operator: '!=', operand: 5 } }] }, [1, 2, 3, 4, 0, 6, 7, 8, 9]],
             [{ where: [{ col2: { operator: '!=', operand: 5, not: true } }] }, [5]],
+            [{ where: [{ col4: { operator: '!=', operand: '2000-06-01' } }] }, [1, 2, 3, 4, 0, 6, 7, 8, 9]],
 
             [{ where: [{ col2: { operator: '>', operand: 5 } }] }, [6, 7, 8, 9]],
             [{ where: [{ col2: { operator: '>', operand: 5, not: true } }] }, [0, 1, 2, 3, 4, 5]],
+            [{ where: [{ col4: { operator: '>', operand: '2000-06-01' } }] }, [6, 7, 8, 9]],
 
             [{ where: [{ col2: { operator: '>=', operand: 5 } }] }, [5, 6, 7, 8, 9]],
             [{ where: [{ col2: { operator: '>=', operand: 5, not: true } }] }, [0, 1, 2, 3, 4]],
+            [{ where: [{ col4: { operator: '>=', operand: '2000-06-01' } }] }, [5, 6, 7, 8, 9]],
 
             [{ where: [{ col2: { operator: '<', operand: 5 } }] }, [0, 1, 2, 3, 4]],
             [{ where: [{ col2: { operator: '<', operand: 5, not: true } }] }, [5, 6, 7, 8, 9]],
+            [{ where: [{ col4: { operator: '<', operand: '2000-06-01' } }] }, [0, 1, 2, 3, 4]],
 
             [{ where: [{ col2: { operator: '<=', operand: 5 } }] }, [0, 1, 2, 3, 4, 5]],
             [{ where: [{ col2: { operator: '<=', operand: 5, not: true } }] }, [6, 7, 8, 9]],
+            [{ where: [{ col4: { operator: '<=', operand: '2000-06-01' } }] }, [0, 1, 2, 3, 4, 5]],
 
             [{ where: [{ col1: { operator: 'LIKE', operand: 'col0_%' } }] }, [0, 2, 4, 6, 8]],
             [{ where: [{ col1: { operator: 'LIKE', operand: 'col0_%', not: true } }] }, [1, 3, 5, 7, 9]],
@@ -101,6 +115,7 @@ describe('Search Query Operator', () => {
 
             [{ where: [{ col2: { operator: 'BETWEEN', operand: [5, 7] } }] }, [5, 6, 7]],
             [{ where: [{ col2: { operator: 'BETWEEN', operand: [5, 7], not: true } }] }, [0, 1, 2, 3, 4, 8, 9]],
+            [{ where: [{ col4: { operator: 'BETWEEN', operand: ['2000-03-01', '2000-05-02'] } }] }, [2, 3, 4]],
 
             [{ where: [{ col2: { operator: 'IN', operand: [5, 7, 9] } }] }, [5, 7, 9]],
             [{ where: [{ col2: { operator: 'IN', operand: [5, 7, 9], not: true } }] }, [0, 1, 2, 3, 4, 6, 8]],

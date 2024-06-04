@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { UnprocessableEntityException } from '@nestjs/common';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { BaseEntity } from 'typeorm';
 
 import { SearchRequestInterceptor } from './search-request.interceptor';
@@ -20,6 +21,11 @@ describe('SearchRequestInterceptor', () => {
         @IsNumber({}, { groups: ['search'] })
         @IsOptional({ groups: ['search'] })
         col3: number;
+
+        @Type(() => Date)
+        @IsDate({ groups: ['search'] })
+        @IsOptional({ groups: ['search'] })
+        col4: Date;
     }
 
     let interceptor: InstanceType<ReturnType<typeof SearchRequestInterceptor>>;
@@ -38,6 +44,7 @@ describe('SearchRequestInterceptor', () => {
                     { name: 'col1', type: 'string', isPrimary: false },
                     { name: 'col2', type: 'number', isPrimary: false },
                     { name: 'col3', type: 'number', isPrimary: false },
+                    { name: 'col4', type: 'datetime', isPrimary: false },
                 ],
                 relations: [],
                 logger: new CrudLogger(),
@@ -81,15 +88,29 @@ describe('SearchRequestInterceptor', () => {
 
     describe('body.where', () => {
         describe('return search request dto when input is valid', () => {
-            it('BETWEEN', async () => {
-                expect(
-                    await interceptor.validateBody({
+            describe('BETWEEN', () => {
+                it('number type', async () => {
+                    expect(
+                        await interceptor.validateBody({
+                            where: [{ col3: { operator: 'BETWEEN', operand: [0, 5] } }],
+                        }),
+                    ).toEqual({
                         where: [{ col3: { operator: 'BETWEEN', operand: [0, 5] } }],
-                    }),
-                ).toEqual({
-                    where: [{ col3: { operator: 'BETWEEN', operand: [0, 5] } }],
-                    take: 20,
-                    withDeleted: false,
+                        take: 20,
+                        withDeleted: false,
+                    });
+                });
+
+                it('date type', async () => {
+                    expect(
+                        await interceptor.validateBody({
+                            where: [{ col4: { operator: 'BETWEEN', operand: ['2000-01-01', '2000-02-01'] } }],
+                        }),
+                    ).toEqual({
+                        where: [{ col4: { operator: 'BETWEEN', operand: ['2000-01-01', '2000-02-01'] } }],
+                        take: 20,
+                        withDeleted: false,
+                    });
                 });
             });
             it('IN', async () => {

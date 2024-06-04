@@ -93,7 +93,7 @@ describe('exclude swagger by route', () => {
         expect(routeSet[create].root).toEqual({
             method: 'post',
             path: '/exclude-swagger',
-            operationId: 'reservedCreate',
+            operationId: 'ExcludeSwaggerController_reservedCreate',
             summary: "create one to 'Base' Table",
             description: "Create an entity in 'Base' Table",
             parameters: [],

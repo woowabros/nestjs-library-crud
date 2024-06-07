@@ -16,7 +16,8 @@ import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 import { capitalizeFirstLetter } from './capitalize-first-letter';
 import { CRUD_ROUTE_ARGS } from './constants';
 import { CRUD_POLICY } from './crud.policy';
-import { RequestSearchDto } from './dto/request-search.dto';
+import { RequestSearchDto } from './dto';
+import { RequestSearchOffsetDto } from './dto/request-search-offset.dto';
 import { CreateRequestDto, getPropertyNamesFromMetadata } from './dto/request.dto';
 import { Method, PaginationType, PAGINATION_SWAGGER_QUERY } from './interface';
 import { CrudLogger } from './provider/crud-logger';
@@ -315,7 +316,7 @@ export class CrudRouteFactory {
             isArray: false,
         }));
 
-        if (paginationType) {
+        if (method === Method.READ_MANY && paginationType) {
             parameterDecorators.push(
                 ...PAGINATION_SWAGGER_QUERY[paginationType].map(({ name, type }) => ({
                     name,
@@ -324,11 +325,6 @@ export class CrudRouteFactory {
                     required: false,
                     description: `Query parameters for ${capitalizeFirstLetter(paginationType)} Pagination`,
                 })),
-            );
-        }
-
-        if (method === Method.READ_MANY) {
-            parameterDecorators.push(
                 ...getPropertyNamesFromMetadata(this.crudOptions.entity, method).map((property) => ({
                     name: property,
                     type: 'string',
@@ -357,7 +353,7 @@ export class CrudRouteFactory {
                     return this.generalTypeGuard(customBody, method, 'body');
                 }
                 if (method === Method.SEARCH) {
-                    return RequestSearchDto;
+                    return paginationType === PaginationType.OFFSET ? RequestSearchOffsetDto : RequestSearchDto;
                 }
                 return CreateRequestDto(this.crudOptions.entity, method);
             })();

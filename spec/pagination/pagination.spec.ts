@@ -24,11 +24,11 @@ describe('Pagination', () => {
                 PaginationModule({
                     cursor: {
                         readMany: { paginationType: 'cursor', numberOfTake: defaultLimit },
-                        search: { paginationType: 'cursor', limitOfTake: defaultLimit },
+                        search: { paginationType: 'cursor', limitOfTake: totalCount },
                     },
                     offset: {
                         readMany: { paginationType: 'offset', numberOfTake: defaultLimit },
-                        search: { paginationType: 'offset', limitOfTake: defaultLimit },
+                        search: { paginationType: 'offset', limitOfTake: totalCount },
                     },
                 }),
             ],
@@ -219,10 +219,10 @@ describe('Pagination', () => {
             expect(metadata.total).toEqual(1);
         });
 
-        it('should return next 20 entities after cursor with order', async () => {
+        it('should return next entities after cursor with order', async () => {
             const { body: firstResponseBody } = await request(app.getHttpServer())
                 .post(`/${PaginationType.CURSOR}/search`)
-                .send({ order: { type: 'ASC' }, limit: 50 })
+                .send({ order: { type: 'ASC', id: 'ASC' }, take: 50 })
                 .expect(HttpStatus.OK);
 
             const { body: nextResponseBody } = await request(app.getHttpServer())
@@ -234,10 +234,10 @@ describe('Pagination', () => {
 
             expect(firstResponseBody.metadata.nextCursor).not.toEqual(nextResponseBody.metadata.nextCursor);
 
-            expect(nextResponseBody.data).toHaveLength(defaultLimit);
+            expect(nextResponseBody.data).toHaveLength(50);
             expect(nextResponseBody.metadata).toEqual({
                 nextCursor: expect.any(String),
-                limit: defaultLimit,
+                limit: 50,
                 total: totalCount,
             });
 
@@ -540,7 +540,7 @@ describe('Pagination', () => {
         it('should return next page from offset with order', async () => {
             const { body: firstResponseBody } = await request(app.getHttpServer())
                 .post(`/${PaginationType.OFFSET}/search`)
-                .send({ order: { type: 'ASC' }, offset: 30 })
+                .send({ order: { type: 'ASC', id: 'ASC' }, offset: 30 })
                 .expect(HttpStatus.OK);
 
             const { body: nextResponseBody } = await request(app.getHttpServer())

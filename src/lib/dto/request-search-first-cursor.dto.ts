@@ -1,8 +1,8 @@
-import { OmitType } from '@nestjs/swagger';
+import { PickType } from '@nestjs/swagger';
 
 import { RequestSearchDto } from './request-search.dto';
 
-export class RequestSearchFirstCursorDto extends OmitType(RequestSearchDto, ['nextCursor']) {
+export class RequestSearchFirstCursorDto extends PickType(RequestSearchDto, ['select', 'where', 'order', 'withDeleted', 'take']) {
     static getExample(): RequestSearchFirstCursorDto {
         return {
             select: ['field1'] as Array<keyof Partial<unknown>>,

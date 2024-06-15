@@ -1,8 +1,15 @@
-import { OmitType } from '@nestjs/swagger';
+import { PickType } from '@nestjs/swagger';
 
-import { RequestSearchOffsetDto } from './request-search-offset.dto';
+import { RequestSearchDto } from './request-search.dto';
 
-export class RequestSearchFirstOffsetDto extends OmitType(RequestSearchOffsetDto, ['nextCursor']) {
+export class RequestSearchFirstOffsetDto extends PickType(RequestSearchDto, [
+    'select',
+    'where',
+    'order',
+    'withDeleted',
+    'limit',
+    'offset',
+]) {
     static getExample(): RequestSearchFirstOffsetDto {
         return {
             select: ['field1'] as Array<keyof Partial<unknown>>,

@@ -41,14 +41,4 @@ export class PaginationHelper {
 
         return transformed;
     }
-
-    /**
-     * [EN] Check if the request is requesting the next page.
-     * [KR] Request 요청이 다음 페이지를 요청하는지 확인합니다.
-     * @param paginationRequest
-     * @returns boolean
-     */
-    static isNextPage(paginationRequest: PaginationRequest): boolean {
-        return paginationRequest.query != null;
-    }
 }

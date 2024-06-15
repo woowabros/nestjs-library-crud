@@ -41,7 +41,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             const pagination = PaginationHelper.getPaginationRequest(paginationType, req.query);
 
             const query = await (async () => {
-                if (PaginationHelper.isNextPage(pagination)) {
+                if (pagination.isNextPage()) {
                     const isQueryValid = pagination.setQuery(pagination.query);
                     if (isQueryValid) {
                         return {};

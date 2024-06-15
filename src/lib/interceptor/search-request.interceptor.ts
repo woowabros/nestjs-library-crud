@@ -47,10 +47,9 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             }
             const paginationType = (searchOptions.paginationType ?? CRUD_POLICY[method].default.paginationType) as PaginationType;
             const pagination = PaginationHelper.getPaginationRequest(paginationType, req.body);
-            const isNextPage = PaginationHelper.isNextPage(pagination);
 
             const requestSearchDto = await (async () => {
-                if (isNextPage) {
+                if (pagination.isNextPage()) {
                     const isQueryValid = pagination.setQuery(pagination.query);
                     if (isQueryValid) {
                         return PaginationHelper.deserialize<RequestSearchDto<EntityType>>(pagination.where);

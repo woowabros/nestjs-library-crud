@@ -25,7 +25,14 @@ export abstract class AbstractPaginationRequest {
     @Expose({ name: 'nextCursor' })
     @IsString()
     @IsOptional()
-    query: string;
+    query?: string;
+
+    /**
+     * Check if the request is requesting the next page.
+     */
+    isNextPage(): this is { query: string } {
+        return this.query != null;
+    }
 
     setWhere(where: string | undefined): void {
         if (!where) {

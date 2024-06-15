@@ -271,7 +271,6 @@ describe('BaseController Swagger Decorator', () => {
                         NextRequest: {
                             value: {
                                 nextCursor: 'next_cursor',
-                                take: 20,
                             },
                         },
                     },

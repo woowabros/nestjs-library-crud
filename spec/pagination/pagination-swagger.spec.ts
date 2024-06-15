@@ -191,7 +191,6 @@ describe('Swagger for pagination', () => {
                                 NextRequest: {
                                     value: {
                                         nextCursor: 'next_cursor',
-                                        take: 20,
                                     },
                                 },
                             },

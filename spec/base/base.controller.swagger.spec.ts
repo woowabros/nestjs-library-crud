@@ -262,7 +262,7 @@ describe('BaseController Swagger Decorator', () => {
                         FirstRequest: {
                             value: {
                                 select: ['field1'],
-                                where: [{ field: 'field1', operator: 'eq', operand: 'value', not: true }],
+                                where: [{ field1: { operator: 'eq', operand: 'value', not: true } }],
                                 order: { field1: 'ASC' },
                                 withDeleted: false,
                                 take: 20,

@@ -13,7 +13,7 @@ export class RequestSearchFirstOffsetDto extends PickType(RequestSearchDto, [
     static getExample(): RequestSearchFirstOffsetDto {
         return {
             select: ['field1'] as Array<keyof Partial<unknown>>,
-            where: [{ field1: { operator: 'eq', operand: 'value', not: true } }],
+            where: [{ field1: { operator: '=', operand: 'value', not: true } }],
             order: { field1: 'ASC' },
             withDeleted: false,
             limit: 20,

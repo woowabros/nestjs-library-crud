@@ -60,9 +60,8 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 return searchBody;
             })();
 
-            pagination.query =
-                pagination.query ??
-                PaginationHelper.serialize((requestSearchDto.where ?? {}) as FindOptionsWhere<typeof crudOptions.entity>);
+            pagination.query ??= PaginationHelper.serialize((requestSearchDto.where ?? {}) as FindOptionsWhere<typeof crudOptions.entity>);
+
             const where:
                 | Array<FindOptionsWhere<typeof crudOptions.entity>>
                 | (FindOptionsWhere<typeof crudOptions.entity> & Partial<typeof crudOptions.entity>) =
@@ -71,9 +70,15 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                           TypeOrmQueryBuilderHelper.queryFilterToFindOptionsWhere(queryFilter, index),
                       )
                     : [];
-
             const paginationKeys = searchOptions.paginationKeys ?? factoryOption.primaryKeys.map(({ name }) => name);
-            requestSearchDto.order ??= paginationKeys.reduce((acc, key) => ({ ...acc, [key]: CRUD_POLICY[method].default.sort }), {});
+            const sort = CRUD_POLICY[method].default.sort;
+            const order = requestSearchDto.order ?? paginationKeys.reduce((acc, key) => ({ ...acc, [key]: sort }), {});
+            const numberOfTake =
+                (pagination.type === PaginationType.CURSOR ? requestSearchDto.take : pagination.limit) ??
+                searchOptions.numberOfTake ??
+                CRUD_POLICY[method].default.numberOfTake;
+            const withDeleted =
+                requestSearchDto.withDeleted ?? crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted;
 
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
                 .setPaginationKeys(paginationKeys)
@@ -81,11 +86,10 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 .setSelectColumn(requestSearchDto.select)
                 .setExcludeColumn(searchOptions.exclude)
                 .setWhere(where)
-                .setTake(requestSearchDto.take ?? CRUD_POLICY[method].default.numberOfTake)
-                .setOrder(requestSearchDto.order as FindOptionsOrder<typeof crudOptions.entity>, CRUD_POLICY[method].default.sort)
-                .setWithDeleted(
-                    requestSearchDto.withDeleted ?? crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted,
-                )
+                .setTake(numberOfTake)
+                .setSort(CRUD_POLICY[method].default.sort)
+                .setOrder(order as FindOptionsOrder<typeof crudOptions.entity>)
+                .setWithDeleted(withDeleted)
                 .setRelations(this.getRelations(customSearchRequestOptions))
                 .setDeserialize(this.deserialize)
                 .generate();
@@ -119,18 +123,11 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
             if ('withDeleted' in requestSearchDto) {
                 this.validateWithDeleted(requestSearchDto.withDeleted);
-            } else {
-                requestSearchDto.withDeleted = searchOptions.softDelete ?? CRUD_POLICY[method].default.softDeleted;
             }
 
             if ('take' in requestSearchDto) {
                 this.validateTake(requestSearchDto.take, searchOptions.limitOfTake);
             }
-
-            requestSearchDto.take =
-                'take' in requestSearchDto
-                    ? this.validateTake(requestSearchDto.take, searchOptions.limitOfTake)
-                    : searchOptions.numberOfTake ?? CRUD_POLICY[method].default.numberOfTake;
 
             return requestSearchDto;
         }

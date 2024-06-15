@@ -105,12 +105,10 @@ export class CrudReadManyRequest<T> {
 
     setSort(sort: Sort): this {
         this._sort = sort;
-        this._findOptions.order = this.paginationKeys.reduce((order, paginationKey) => ({ ...order, [paginationKey]: sort }), {});
         return this;
     }
 
-    setOrder(order: FindOptionsOrder<T>, sort: Sort): this {
-        this._sort = sort;
+    setOrder(order: FindOptionsOrder<T>): this {
         this._findOptions.order = order;
         return this;
     }
@@ -126,14 +124,9 @@ export class CrudReadManyRequest<T> {
     }
 
     generate(): this {
-        if (this.pagination.type === PaginationType.OFFSET) {
-            if (this.pagination.limit != null) {
-                this._findOptions.take = this.pagination.limit;
-            }
-            if (Number.isFinite(this.pagination.offset)) {
-                this._findOptions.where = this._deserialize(this);
-                this._findOptions.skip = this.pagination.offset;
-            }
+        if (this.pagination.type === PaginationType.OFFSET && Number.isFinite(this.pagination.offset)) {
+            this._findOptions.where = this._deserialize(this);
+            this._findOptions.skip = this.pagination.offset;
         }
 
         if (this.pagination.type === PaginationType.CURSOR && this.pagination.nextCursor) {

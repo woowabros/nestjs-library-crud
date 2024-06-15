@@ -104,8 +104,36 @@ describe('Swagger for pagination', () => {
             const search = 'post /offset/search';
             expect(routeSet[search].root?.requestBody).toEqual(
                 expect.objectContaining({
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
-                    content: { 'application/json': { schema: { $ref: '#/components/schemas/RequestSearchOffsetDto' } } },
+                    content: {
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        'application/json': {
+                            schema: {
+                                oneOf: [
+                                    { $ref: '#/components/schemas/RequestSearchFirstOffsetDto' },
+                                    { $ref: '#/components/schemas/RequestSearchNextOffsetDto' },
+                                ],
+                            },
+                            examples: {
+                                FirstRequest: {
+                                    value: {
+                                        limit: 20,
+                                        offset: 0,
+                                        select: ['field1'],
+                                        where: [{ field: 'field1', operator: 'eq', operand: 'value', not: true }],
+                                        order: { field1: 'ASC' },
+                                        withDeleted: false,
+                                    },
+                                },
+                                NextRequest: {
+                                    value: {
+                                        limit: 20,
+                                        offset: 20,
+                                        nextCursor: 'next_cursor',
+                                    },
+                                },
+                            },
+                        },
+                    },
                 }),
             );
         });
@@ -141,8 +169,34 @@ describe('Swagger for pagination', () => {
             const search = 'post /cursor/search';
             expect(routeSet[search].root?.requestBody).toEqual(
                 expect.objectContaining({
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
-                    content: { 'application/json': { schema: { $ref: '#/components/schemas/RequestSearchDto' } } },
+                    content: {
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        'application/json': {
+                            schema: {
+                                oneOf: [
+                                    { $ref: '#/components/schemas/RequestSearchFirstCursorDto' },
+                                    { $ref: '#/components/schemas/RequestSearchNextCursorDto' },
+                                ],
+                            },
+                            examples: {
+                                FirstRequest: {
+                                    value: {
+                                        select: ['field1'],
+                                        where: [{ field: 'field1', operator: 'eq', operand: 'value', not: true }],
+                                        order: { field1: 'ASC' },
+                                        withDeleted: false,
+                                        take: 20,
+                                    },
+                                },
+                                NextRequest: {
+                                    value: {
+                                        nextCursor: 'next_cursor',
+                                        take: 20,
+                                    },
+                                },
+                            },
+                        },
+                    },
                 }),
             );
         });

@@ -31,7 +31,7 @@ export class RequestSearchDto<T> {
     })
     where?: Array<QueryFilter<T>>;
 
-    @ApiPropertyOptional({ description: 'order' })
+    @ApiPropertyOptional({ description: 'order', type: Object })
     order?: {
         [key in keyof Partial<T>]: Sort | `${Sort}`;
     };

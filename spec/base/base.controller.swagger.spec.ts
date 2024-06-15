@@ -253,7 +253,27 @@ describe('BaseController Swagger Decorator', () => {
             content: {
                 'application/json': {
                     schema: {
-                        $ref: '#/components/schemas/RequestSearchDto',
+                        oneOf: [
+                            { $ref: '#/components/schemas/RequestSearchFirstCursorDto' },
+                            { $ref: '#/components/schemas/RequestSearchNextCursorDto' },
+                        ],
+                    },
+                    examples: {
+                        FirstRequest: {
+                            value: {
+                                select: ['field1'],
+                                where: [{ field: 'field1', operator: 'eq', operand: 'value', not: true }],
+                                order: { field1: 'ASC' },
+                                withDeleted: false,
+                                take: 20,
+                            },
+                        },
+                        NextRequest: {
+                            value: {
+                                nextCursor: 'next_cursor',
+                                take: 20,
+                            },
+                        },
                     },
                 },
             },

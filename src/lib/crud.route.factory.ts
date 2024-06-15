@@ -16,8 +16,10 @@ import { MetadataUtils } from 'typeorm/metadata-builder/MetadataUtils';
 import { capitalizeFirstLetter } from './capitalize-first-letter';
 import { CRUD_ROUTE_ARGS } from './constants';
 import { CRUD_POLICY } from './crud.policy';
-import { RequestSearchDto } from './dto';
-import { RequestSearchOffsetDto } from './dto/request-search-offset.dto';
+import { RequestSearchFirstCursorDto } from './dto/request-search-first-cursor.dto';
+import { RequestSearchFirstOffsetDto } from './dto/request-search-first-offset.dto';
+import { RequestSearchNextCursorDto } from './dto/request-search-next-cursor.dto';
+import { RequestSearchNextOffsetDto } from './dto/request-search-next-offset.dto';
 import { CreateRequestDto, getPropertyNamesFromMetadata } from './dto/request.dto';
 import { Method, PaginationType, PAGINATION_SWAGGER_QUERY } from './interface';
 import { CrudLogger } from './provider/crud-logger';
@@ -55,6 +57,9 @@ type ParameterDecorators =
           type: unknown;
           schema: {
               [type: string]: unknown;
+          };
+          examples?: {
+              [type: string]: { value: unknown };
           };
       };
 
@@ -347,42 +352,66 @@ export class CrudRouteFactory {
             });
         }
         if (CRUD_POLICY[method].useBody) {
-            const bodyType = (() => {
-                const customBody = this.crudOptions.routes?.[method]?.swagger?.body;
-                if (customBody) {
-                    return this.generalTypeGuard(customBody, method, 'body');
-                }
-                if (method === Method.SEARCH) {
-                    return paginationType === PaginationType.OFFSET ? RequestSearchOffsetDto : RequestSearchDto;
-                }
-                return CreateRequestDto(this.crudOptions.entity, method);
-            })();
-
-            parameterDecorators.push(
-                method === Method.CREATE
-                    ? {
-                          description: [capitalizeFirstLetter(method), capitalizeFirstLetter(this.tableName), 'Dto'].join(''),
-                          required: true,
-                          in: 'body',
-                          type: bodyType,
-                          schema: {
-                              type: 'object',
-                              anyOf: [
-                                  {
-                                      $ref: `#/components/schemas/${bodyType.name}`,
-                                  },
-                                  { type: 'array', items: { $ref: `#/components/schemas/${bodyType.name}` } },
-                              ],
+            if (method === Method.SEARCH) {
+                const firstRequestType =
+                    paginationType === PaginationType.OFFSET ? RequestSearchFirstOffsetDto : RequestSearchFirstCursorDto;
+                const secondRequestType =
+                    paginationType === PaginationType.OFFSET ? RequestSearchNextOffsetDto : RequestSearchNextCursorDto;
+                Reflect.defineMetadata(DECORATORS.API_EXTRA_MODELS, [firstRequestType, secondRequestType], target);
+                parameterDecorators.push({
+                    description: [capitalizeFirstLetter(method), capitalizeFirstLetter(this.tableName), 'Dto'].join(''),
+                    required: true,
+                    in: 'body',
+                    type: String,
+                    schema: {
+                        oneOf: [
+                            {
+                                $ref: `#/components/schemas/${firstRequestType.name}`,
+                            },
+                            {
+                                $ref: `#/components/schemas/${secondRequestType.name}`,
+                            },
+                        ],
+                    },
+                    examples: {
+                        FirstRequest: { value: firstRequestType.getExample() },
+                        NextRequest: { value: secondRequestType.getExample() },
+                    },
+                });
+            } else {
+                const bodyType = (() => {
+                    const customBody = this.crudOptions.routes?.[method]?.swagger?.body;
+                    if (customBody) {
+                        return this.generalTypeGuard(customBody, method, 'body');
+                    }
+                    return CreateRequestDto(this.crudOptions.entity, method);
+                })();
+                parameterDecorators.push(
+                    method === Method.CREATE
+                        ? {
+                              description: [capitalizeFirstLetter(method), capitalizeFirstLetter(this.tableName), 'Dto'].join(''),
+                              required: true,
+                              in: 'body',
+                              type: bodyType,
+                              schema: {
+                                  type: 'object',
+                                  anyOf: [
+                                      {
+                                          $ref: `#/components/schemas/${bodyType.name}`,
+                                      },
+                                      { type: 'array', items: { $ref: `#/components/schemas/${bodyType.name}` } },
+                                  ],
+                              },
+                          }
+                        : {
+                              description: [capitalizeFirstLetter(method), capitalizeFirstLetter(this.tableName), 'Dto'].join(''),
+                              required: true,
+                              in: 'body',
+                              type: bodyType,
+                              isArray: false,
                           },
-                      }
-                    : {
-                          description: [capitalizeFirstLetter(method), capitalizeFirstLetter(this.tableName), 'Dto'].join(''),
-                          required: true,
-                          in: 'body',
-                          type: bodyType,
-                          isArray: false,
-                      },
-            );
+                );
+            }
         }
         Reflect.defineMetadata(DECORATORS.API_PARAMETERS, parameterDecorators, target);
     }

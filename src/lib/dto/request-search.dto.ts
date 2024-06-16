@@ -31,7 +31,7 @@ export class RequestSearchDto<T> {
     })
     where?: Array<QueryFilter<T>>;
 
-    @ApiPropertyOptional({ description: 'order' })
+    @ApiPropertyOptional({ description: 'order', type: Object })
     order?: {
         [key in keyof Partial<T>]: Sort | `${Sort}`;
     };
@@ -44,4 +44,10 @@ export class RequestSearchDto<T> {
 
     @ApiPropertyOptional({ description: 'Use to search the next page', type: String })
     nextCursor?: string;
+
+    @ApiPropertyOptional({ description: 'limit', type: Number, default: 20 })
+    limit?: number;
+
+    @ApiPropertyOptional({ description: 'offset', type: Number, default: 0 })
+    offset?: number;
 }

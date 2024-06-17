@@ -91,7 +91,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 .setExcludeColumn(searchOptions.exclude)
                 .setWhere(where)
                 .setTake(numberOfTake)
-                .setSort(CRUD_POLICY[method].default.sort)
+                .setSort(sort)
                 .setOrder(order as FindOptionsOrder<typeof crudOptions.entity>)
                 .setWithDeleted(withDeleted)
                 .setRelations(this.getRelations(customSearchRequestOptions))

@@ -57,7 +57,11 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     }
                 }
                 const searchBody = await this.validateBody(req.body);
-                pagination.setWhere(PaginationHelper.serialize((searchBody ?? {}) as FindOptionsWhere<typeof crudOptions.entity>));
+                pagination.setWhere(
+                    PaginationHelper.serialize(
+                        (_.omit(searchBody, ['limit', 'offset']) ?? {}) as FindOptionsWhere<typeof crudOptions.entity>,
+                    ),
+                );
                 return searchBody;
             })();
 

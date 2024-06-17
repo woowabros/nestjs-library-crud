@@ -27,11 +27,16 @@ export abstract class AbstractPaginationRequest {
     @IsOptional()
     query?: string;
 
-    /**
-     * Check if the request is requesting the next page.
-     */
-    isNextPage(): this is { query: string } {
+    hasQuery(): this is { query: string } {
         return this.query != null;
+    }
+
+    isOffsetType(): this is { type: PaginationType.OFFSET } {
+        return this.type === PaginationType.OFFSET;
+    }
+
+    isCursorType(): this is { type: PaginationType.CURSOR } {
+        return this.type === PaginationType.CURSOR;
     }
 
     setWhere(where: string | undefined): void {

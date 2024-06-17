@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import { CRUD_POLICY } from '../crud.policy';
-import { Method, PaginationType } from '../interface';
+import { Method } from '../interface';
 import { PaginationHelper } from '../provider';
 
 import type { PaginationRequest, PaginationResponse, Sort } from '../interface';
@@ -124,12 +124,12 @@ export class CrudReadManyRequest<T> {
     }
 
     generate(): this {
-        if (this.pagination.type === PaginationType.OFFSET && Number.isFinite(this.pagination.offset)) {
+        if (this.pagination.isOffsetType() && Number.isFinite(this.pagination.offset)) {
             this._findOptions.where = this._deserialize(this);
             this._findOptions.skip = this.pagination.offset;
         }
 
-        if (this.pagination.type === PaginationType.CURSOR && this.pagination.nextCursor) {
+        if (this.pagination.isCursorType() && this.pagination.nextCursor) {
             this._findOptions.where = this._deserialize(this);
         }
 
@@ -146,7 +146,7 @@ export class CrudReadManyRequest<T> {
         const orderKeys = Object.keys(this._findOptions.order);
         const nextCursor = PaginationHelper.serialize(_.pick(data.at(-1), orderKeys) as FindOptionsWhere<T>);
 
-        if (this.pagination.type === PaginationType.OFFSET) {
+        if (this.pagination.isOffsetType()) {
             return {
                 data,
                 metadata: this.pagination.metadata(take, dataLength, total, nextCursor),

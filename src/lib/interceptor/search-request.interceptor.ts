@@ -9,13 +9,13 @@ import { CRUD_ROUTE_ARGS, CUSTOM_REQUEST_OPTIONS } from '../constants';
 import { CRUD_POLICY } from '../crud.policy';
 import { CreateParamsDto } from '../dto/params.dto';
 import { RequestSearchDto } from '../dto/request-search.dto';
-import { GROUP, Method, PaginationType, Sort } from '../interface';
+import { GROUP, Method, Sort } from '../interface';
 import { operatorBetween, operatorIn, operatorNull, operatorList } from '../interface/query-operation.interface';
 import { PaginationHelper, TypeOrmQueryBuilderHelper } from '../provider';
 import { CrudReadManyRequest } from '../request';
 
 import type { CustomSearchRequestOptions } from './custom-request.interceptor';
-import type { CrudOptions, EntityType, FactoryOption } from '../interface';
+import type { CrudOptions, EntityType, FactoryOption, PaginationType } from '../interface';
 import type { OperatorUnion } from '../interface/query-operation.interface';
 import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
 import type { Request } from 'express';
@@ -49,7 +49,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const pagination = PaginationHelper.getPaginationRequest(paginationType, req.body);
 
             const requestSearchDto = await (async () => {
-                if (pagination.isNextPage()) {
+                if (pagination.hasQuery()) {
                     const isQueryValid = pagination.setQuery(pagination.query);
                     if (isQueryValid) {
                         return PaginationHelper.deserialize<RequestSearchDto<EntityType>>(pagination.where);
@@ -78,7 +78,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const sort = CRUD_POLICY[method].default.sort;
             const order = requestSearchDto.order ?? paginationKeys.reduce((acc, key) => ({ ...acc, [key]: sort }), {});
             const numberOfTake =
-                (pagination.type === PaginationType.CURSOR ? requestSearchDto.take : pagination.limit) ??
+                (pagination.isCursorType() ? requestSearchDto.take : pagination.limit) ??
                 searchOptions.numberOfTake ??
                 CRUD_POLICY[method].default.numberOfTake;
             const withDeleted =
@@ -288,7 +288,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
 
         deserialize<T>({ pagination, findOptions, sort }: CrudReadManyRequest<T>): Array<FindOptionsWhere<T>> {
             const where = findOptions.where as Array<FindOptionsWhere<EntityType>>;
-            if (pagination.type === PaginationType.OFFSET) {
+            if (pagination.isOffsetType()) {
                 return where;
             }
             const lastObject: Record<string, unknown> = PaginationHelper.deserialize(pagination.nextCursor);

@@ -52,6 +52,9 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 return query;
             })();
             const paginationKeys = readManyOptions.paginationKeys ?? factoryOption.primaryKeys.map(({ name }) => name);
+            const numberOfTake =
+                (pagination.type === 'cursor' ? readManyOptions.numberOfTake : pagination.limit ?? readManyOptions.numberOfTake) ??
+                CRUD_POLICY[method].default.numberOfTake;
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
                 .setPaginationKeys(paginationKeys)
                 .setExcludeColumn(readManyOptions.exclude)
@@ -62,7 +65,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                         : crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted,
                 )
                 .setWhere(query)
-                .setTake(readManyOptions.numberOfTake ?? CRUD_POLICY[method].default.numberOfTake)
+                .setTake(numberOfTake)
                 .setSort(readManyOptions.sort ? Sort[readManyOptions.sort] : CRUD_POLICY[method].default.sort)
                 .setRelations(this.getRelations(customReadManyRequestOptions))
                 .setDeserialize(this.deserialize)

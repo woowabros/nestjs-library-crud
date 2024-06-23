@@ -126,14 +126,9 @@ export class CrudReadManyRequest<T> {
     }
 
     generate(): this {
-        if (this.pagination.type === PaginationType.OFFSET) {
-            if (this.pagination.limit != null) {
-                this._findOptions.take = this.pagination.limit;
-            }
-            if (Number.isFinite(this.pagination.offset)) {
-                this._findOptions.where = this._deserialize(this);
-                this._findOptions.skip = this.pagination.offset;
-            }
+        if (this.pagination.type === PaginationType.OFFSET && Number.isFinite(this.pagination.offset)) {
+            this._findOptions.where = this._deserialize(this);
+            this._findOptions.skip = this.pagination.offset;
         }
 
         if (this.pagination.type === PaginationType.CURSOR && this.pagination.nextCursor) {

@@ -78,6 +78,10 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     : [];
 
             const paginationKeys = searchOptions.paginationKeys ?? factoryOption.primaryKeys.map(({ name }) => name);
+            const numberOfTake =
+                (pagination.type === 'cursor' ? requestSearchDto.take : pagination.limit) ??
+                searchOptions.numberOfTake ??
+                CRUD_POLICY[method].default.numberOfTake;
             requestSearchDto.order ??= paginationKeys.reduce((acc, key) => ({ ...acc, [key]: CRUD_POLICY[method].default.sort }), {});
 
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
@@ -86,7 +90,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 .setSelectColumn(requestSearchDto.select)
                 .setExcludeColumn(searchOptions.exclude)
                 .setWhere(where)
-                .setTake(requestSearchDto.take ?? CRUD_POLICY[method].default.numberOfTake)
+                .setTake(numberOfTake)
                 .setOrder(requestSearchDto.order as FindOptionsOrder<typeof crudOptions.entity>, CRUD_POLICY[method].default.sort)
                 .setWithDeleted(
                     requestSearchDto.withDeleted ?? crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted,
@@ -131,11 +135,6 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             if ('take' in requestSearchDto) {
                 this.validateTake(requestSearchDto.take, searchOptions.limitOfTake);
             }
-
-            requestSearchDto.take =
-                'take' in requestSearchDto
-                    ? this.validateTake(requestSearchDto.take, searchOptions.limitOfTake)
-                    : searchOptions.numberOfTake ?? CRUD_POLICY[method].default.numberOfTake;
 
             return requestSearchDto;
         }

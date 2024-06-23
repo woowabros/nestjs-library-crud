@@ -66,7 +66,6 @@ describe('SearchRequestInterceptor', () => {
         it('return search request dto when input is valid', async () => {
             expect(await interceptor.validateBody({ select: ['col1', 'col2'] })).toEqual({
                 select: ['col1', 'col2'],
-                take: 20,
                 withDeleted: false,
             });
         });
@@ -96,7 +95,6 @@ describe('SearchRequestInterceptor', () => {
                         }),
                     ).toEqual({
                         where: [{ col3: { operator: 'BETWEEN', operand: [0, 5] } }],
-                        take: 20,
                         withDeleted: false,
                     });
                 });
@@ -108,7 +106,6 @@ describe('SearchRequestInterceptor', () => {
                         }),
                     ).toEqual({
                         where: [{ col4: { operator: 'BETWEEN', operand: ['2000-01-01', '2000-02-01'] } }],
-                        take: 20,
                         withDeleted: false,
                     });
                 });
@@ -120,7 +117,6 @@ describe('SearchRequestInterceptor', () => {
                     }),
                 ).toEqual({
                     where: [{ col3: { operator: 'IN', operand: [0, 1, 2] } }],
-                    take: 20,
                     withDeleted: false,
                 });
             });
@@ -128,7 +124,6 @@ describe('SearchRequestInterceptor', () => {
             it('NULL', async () => {
                 expect(await interceptor.validateBody({ where: [{ col3: { operator: 'NULL' } }] })).toEqual({
                     where: [{ col3: { operator: 'NULL' } }],
-                    take: 20,
                     withDeleted: false,
                 });
             });
@@ -140,7 +135,6 @@ describe('SearchRequestInterceptor', () => {
                     }),
                 ).toEqual({
                     where: [{ col2: { operator: '=', operand: 7 }, col3: { operator: '>', operand: 3 } }],
-                    take: 20,
                     withDeleted: false,
                 });
             });
@@ -151,7 +145,6 @@ describe('SearchRequestInterceptor', () => {
                         where: [{ col2: { operator: '=', operand: 7, not: false }, col3: { operator: '>', operand: 3, not: true } }],
                     }),
                 ).toEqual({
-                    take: 20,
                     where: [{ col2: { not: false, operand: 7, operator: '=' }, col3: { not: true, operand: 3, operator: '>' } }],
                     withDeleted: false,
                 });
@@ -261,7 +254,6 @@ describe('SearchRequestInterceptor', () => {
         it('return search request dto when input is valid', async () => {
             expect(await interceptor.validateBody({ order: { col2: Sort.ASC, col3: Sort.DESC } })).toEqual({
                 order: { col2: Sort.ASC, col3: Sort.DESC },
-                take: 20,
                 withDeleted: false,
             });
         });
@@ -290,7 +282,7 @@ describe('SearchRequestInterceptor', () => {
     describe('body.withDeleted', () => {
         describe('return search request dto when input is valid', () => {
             test.each([true, false])('withDeleted(%p)', async (withDeleted) => {
-                expect(await interceptor.validateBody({ withDeleted })).toEqual({ withDeleted, take: 20 });
+                expect(await interceptor.validateBody({ withDeleted })).toEqual({ withDeleted });
             });
         });
 

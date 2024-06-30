@@ -105,12 +105,10 @@ export class CrudReadManyRequest<T> {
 
     setSort(sort: Sort): this {
         this._sort = sort;
-        this._findOptions.order = this.paginationKeys.reduce((order, paginationKey) => ({ ...order, [paginationKey]: sort }), {});
         return this;
     }
 
-    setOrder(order: FindOptionsOrder<T>, sort: Sort): this {
-        this._sort = sort;
+    setOrder(order: FindOptionsOrder<T>): this {
         this._findOptions.order = order;
         return this;
     }

@@ -20,7 +20,7 @@ import type { OperatorUnion } from '../interface/query-operation.interface';
 import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
 import type { Request } from 'express';
 import type { Observable } from 'rxjs';
-import type { FindOptionsOrder, FindOptionsWhere, FindOperator } from 'typeorm';
+import type { FindOptionsWhere, FindOperator } from 'typeorm';
 
 const method = Method.SEARCH;
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -82,7 +82,8 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 (pagination.type === 'cursor' ? requestSearchDto.take : pagination.limit) ??
                 searchOptions.numberOfTake ??
                 CRUD_POLICY[method].default.numberOfTake;
-            requestSearchDto.order ??= paginationKeys.reduce((acc, key) => ({ ...acc, [key]: CRUD_POLICY[method].default.sort }), {});
+            const sort = CRUD_POLICY[method].default.sort;
+            const order = requestSearchDto.order ?? paginationKeys.reduce((acc, key) => ({ ...acc, [key]: sort }), {});
 
             const withDeleted =
                 requestSearchDto.withDeleted ?? crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted;
@@ -94,7 +95,8 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 .setExcludeColumn(searchOptions.exclude)
                 .setWhere(where)
                 .setTake(numberOfTake)
-                .setOrder(requestSearchDto.order as FindOptionsOrder<typeof crudOptions.entity>, CRUD_POLICY[method].default.sort)
+                .setSort(sort)
+                .setOrder(order)
                 .setWithDeleted(withDeleted)
                 .setRelations(this.getRelations(customSearchRequestOptions))
                 .setDeserialize(this.deserialize)

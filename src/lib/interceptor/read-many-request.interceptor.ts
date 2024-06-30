@@ -40,6 +40,10 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
 
             const pagination = PaginationHelper.getPaginationRequest(paginationType, req.query);
 
+            const withDeleted = _.isBoolean(customReadManyRequestOptions?.softDeleted)
+                ? customReadManyRequestOptions.softDeleted
+                : crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted;
+
             const query = await (async () => {
                 if (PaginationHelper.isNextPage(pagination)) {
                     const isQueryValid = pagination.setQuery(pagination.query);
@@ -59,11 +63,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 .setPaginationKeys(paginationKeys)
                 .setExcludeColumn(readManyOptions.exclude)
                 .setPagination(pagination)
-                .setWithDeleted(
-                    _.isBoolean(customReadManyRequestOptions?.softDeleted)
-                        ? customReadManyRequestOptions.softDeleted
-                        : crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted,
-                )
+                .setWithDeleted(withDeleted)
                 .setWhere(query)
                 .setTake(numberOfTake)
                 .setSort(readManyOptions.sort ? Sort[readManyOptions.sort] : CRUD_POLICY[method].default.sort)

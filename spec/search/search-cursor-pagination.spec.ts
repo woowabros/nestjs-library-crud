@@ -84,7 +84,6 @@ describe('Search Cursor Pagination', () => {
             ],
             order: { col1: 'DESC' },
             take: 10,
-            withDeleted: false,
         });
 
         const { body: secondResponse } = await request(app.getHttpServer())
@@ -109,7 +108,6 @@ describe('Search Cursor Pagination', () => {
         expect(nextLastEntity).toEqual({ col1: 'col1_1' });
         expect(PaginationHelper.deserialize(nextPreCondition.where as string)).toEqual({
             ...searchRequestBody,
-            withDeleted: false,
         });
     });
 
@@ -160,7 +158,6 @@ describe('Search Cursor Pagination', () => {
             ],
             order: { col1: 'DESC' },
             take: 10,
-            withDeleted: false,
         });
 
         const { body: secondResponse } = await request(app.getHttpServer())
@@ -185,7 +182,6 @@ describe('Search Cursor Pagination', () => {
         expect(nextLastEntity).toEqual({ col1: 'col1_1' });
         expect(PaginationHelper.deserialize(nextPreCondition.where as string)).toEqual({
             ...searchRequestBody,
-            withDeleted: false,
         });
     });
 

@@ -60,7 +60,6 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 (pagination.type === 'cursor' ? readManyOptions.numberOfTake : pagination.limit ?? readManyOptions.numberOfTake) ??
                 CRUD_POLICY[method].default.numberOfTake;
             const sort = readManyOptions.sort ? Sort[readManyOptions.sort] : CRUD_POLICY[method].default.sort;
-            const order = paginationKeys.reduce((order, paginationKey) => ({ ...order, [paginationKey]: sort }), {});
 
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
                 .setPaginationKeys(paginationKeys)
@@ -70,7 +69,6 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 .setWhere(query)
                 .setTake(numberOfTake)
                 .setSort(sort)
-                .setOrder(order)
                 .setRelations(this.getRelations(customReadManyRequestOptions))
                 .setDeserialize(this.deserialize)
                 .generate();

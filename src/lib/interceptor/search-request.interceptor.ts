@@ -82,8 +82,8 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 (pagination.type === 'cursor' ? requestSearchDto.take : pagination.limit) ??
                 searchOptions.numberOfTake ??
                 CRUD_POLICY[method].default.numberOfTake;
-            const sort = CRUD_POLICY[method].default.sort;
-            const order = requestSearchDto.order ?? paginationKeys.reduce((acc, key) => ({ ...acc, [key]: sort }), {});
+            const order =
+                requestSearchDto.order ?? paginationKeys.reduce((acc, key) => ({ ...acc, [key]: CRUD_POLICY[method].default.sort }), {});
 
             const withDeleted =
                 requestSearchDto.withDeleted ?? crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted;
@@ -95,7 +95,6 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 .setExcludeColumn(searchOptions.exclude)
                 .setWhere(where)
                 .setTake(numberOfTake)
-                .setSort(sort)
                 .setOrder(order)
                 .setWithDeleted(withDeleted)
                 .setRelations(this.getRelations(customSearchRequestOptions))
@@ -290,14 +289,15 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             return factoryOption.relations;
         }
 
-        deserialize<T>({ pagination, findOptions, sort }: CrudReadManyRequest<T>): Array<FindOptionsWhere<T>> {
+        deserialize<T>({ pagination, findOptions }: CrudReadManyRequest<T>): Array<FindOptionsWhere<T>> {
             const where = findOptions.where as Array<FindOptionsWhere<EntityType>>;
             if (pagination.type === PaginationType.OFFSET) {
                 return where;
             }
             const lastObject: Record<string, unknown> = PaginationHelper.deserialize(pagination.nextCursor);
 
-            const operator = (key: keyof T) => ((findOptions.order?.[key] ?? sort) === Sort.DESC ? LessThan : MoreThan);
+            const operator = (key: keyof T) =>
+                (findOptions.order?.[key] ?? CRUD_POLICY[method].default.sort) === Sort.DESC ? LessThan : MoreThan;
 
             const cursorCondition: Record<string, FindOperator<T>> = Object.entries(lastObject).reduce(
                 (queryFilter, [key, operand]) => ({

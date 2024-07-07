@@ -109,8 +109,7 @@ export class CrudReadManyRequest<T> {
         return this;
     }
 
-    setOrder(order: FindOptionsOrder<T>, sort: Sort): this {
-        this._sort = sort;
+    setOrder(order: FindOptionsOrder<T>): this {
         this._findOptions.order = order;
         return this;
     }

@@ -40,6 +40,10 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
 
             const pagination = PaginationHelper.getPaginationRequest(paginationType, req.query);
 
+            const withDeleted = _.isBoolean(customReadManyRequestOptions?.softDeleted)
+                ? customReadManyRequestOptions.softDeleted
+                : crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted;
+
             const query = await (async () => {
                 if (PaginationHelper.isNextPage(pagination)) {
                     const isQueryValid = pagination.setQuery(pagination.query);
@@ -52,18 +56,19 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                 return query;
             })();
             const paginationKeys = readManyOptions.paginationKeys ?? factoryOption.primaryKeys.map(({ name }) => name);
+            const numberOfTake =
+                (pagination.type === 'cursor' ? readManyOptions.numberOfTake : pagination.limit ?? readManyOptions.numberOfTake) ??
+                CRUD_POLICY[method].default.numberOfTake;
+            const sort = readManyOptions.sort ? Sort[readManyOptions.sort] : CRUD_POLICY[method].default.sort;
+
             const crudReadManyRequest: CrudReadManyRequest<typeof crudOptions.entity> = new CrudReadManyRequest<typeof crudOptions.entity>()
                 .setPaginationKeys(paginationKeys)
                 .setExcludeColumn(readManyOptions.exclude)
                 .setPagination(pagination)
-                .setWithDeleted(
-                    _.isBoolean(customReadManyRequestOptions?.softDeleted)
-                        ? customReadManyRequestOptions.softDeleted
-                        : crudOptions.routes?.[method]?.softDelete ?? CRUD_POLICY[method].default.softDeleted,
-                )
+                .setWithDeleted(withDeleted)
                 .setWhere(query)
-                .setTake(readManyOptions.numberOfTake ?? CRUD_POLICY[method].default.numberOfTake)
-                .setSort(readManyOptions.sort ? Sort[readManyOptions.sort] : CRUD_POLICY[method].default.sort)
+                .setTake(numberOfTake)
+                .setSort(sort)
                 .setRelations(this.getRelations(customReadManyRequestOptions))
                 .setDeserialize(this.deserialize)
                 .generate();

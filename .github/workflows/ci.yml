@@ -23,11 +23,15 @@ jobs:
                   node-version: ${{ matrix.node-version }}
                   #  https://stackoverflow.com/questions/61010294/how-to-cache-yarn-packages-in-github-actions
                   cache: 'yarn'
-
+            - name: Install docker-compose
+              run: |
+                  curl -L "https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-$(uname -s | tr '[A-Z]' '[a-z]')-$(uname -m)" -o /usr/local/bin/docker-compose
+                  chmod +x /usr/local/bin/docker-compose
             # https://github.com/kiranojhanp/fullstack-typescript-turborepo-starter/blob/main/.github/workflows/api.yaml
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
               run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+            
             - name: Cache node modules
               uses: actions/cache@v2
               env:
@@ -38,10 +42,8 @@ jobs:
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
-
             - name: Install Dependencies
               run: yarn install --frozen-lockfile --prefer-offline
-
             - name: Format Check
               run: yarn format-check
 

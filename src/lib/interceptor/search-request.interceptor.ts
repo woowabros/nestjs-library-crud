@@ -36,15 +36,21 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const searchOptions = crudOptions.routes?.[method] ?? {};
             const customSearchRequestOptions: CustomSearchRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
 
-            if (req.params && req.body?.where && Array.isArray(req.body.where)) {
+            if (req.params) {
                 const paramsCondition = Object.entries(req.params).reduce(
                     (queryFilter, [key, operand]) => ({ ...queryFilter, [key]: { operator: '=', operand } }),
                     {},
                 );
-                for (const queryFilter of req.body.where) {
-                    _.merge(queryFilter, paramsCondition);
+                if (req.body?.where && Array.isArray(req.body.where)) {
+                    for (const queryFilter of req.body.where) {
+                        _.merge(queryFilter, paramsCondition);
+                    }
+                } else {
+                    req.body ??= {};
+                    req.body.where = [paramsCondition];
                 }
             }
+
             const paginationType = (searchOptions.paginationType ?? CRUD_POLICY[method].default.paginationType) as PaginationType;
             const pagination = PaginationHelper.getPaginationRequest(paginationType, req.body);
             const isNextPage = PaginationHelper.isNextPage(pagination);

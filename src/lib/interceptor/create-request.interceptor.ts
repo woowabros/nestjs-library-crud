@@ -27,7 +27,7 @@ export function CreateRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const req = context.switchToHttp().getRequest<Request>();
             const createOptions = crudOptions.routes?.[method] ?? {};
 
-            if (req.params) {
+            if (Object.keys(req.params ?? {}).length > 0) {
                 Object.assign(req.body, req.params);
             }
             const body = await this.validateBody(req.body);

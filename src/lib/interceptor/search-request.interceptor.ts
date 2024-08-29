@@ -35,19 +35,24 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const searchOptions = crudOptions.routes?.[method] ?? {};
             const customSearchRequestOptions: CustomSearchRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
+            const paginationType = (searchOptions.paginationType ?? CRUD_POLICY[method].default.paginationType) as PaginationType;
+            const pagination = PaginationHelper.getPaginationRequest(paginationType, req.body);
+            const isNextPage = PaginationHelper.isNextPage(pagination);
 
-            if (req.params && req.body?.where && Array.isArray(req.body.where)) {
+            if (Object.keys(req.params ?? {}).length > 0 && !isNextPage) {
                 const paramsCondition = Object.entries(req.params).reduce(
                     (queryFilter, [key, operand]) => ({ ...queryFilter, [key]: { operator: '=', operand } }),
                     {},
                 );
-                for (const queryFilter of req.body.where) {
-                    _.merge(queryFilter, paramsCondition);
+                if (req.body?.where && Array.isArray(req.body.where)) {
+                    for (const queryFilter of req.body.where) {
+                        _.merge(queryFilter, paramsCondition);
+                    }
+                } else {
+                    req.body ??= {};
+                    req.body.where = [paramsCondition];
                 }
             }
-            const paginationType = (searchOptions.paginationType ?? CRUD_POLICY[method].default.paginationType) as PaginationType;
-            const pagination = PaginationHelper.getPaginationRequest(paginationType, req.body);
-            const isNextPage = PaginationHelper.isNextPage(pagination);
 
             const requestSearchDto = await (async () => {
                 if (isNextPage) {

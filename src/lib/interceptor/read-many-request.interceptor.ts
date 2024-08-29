@@ -34,7 +34,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             const customReadManyRequestOptions: CustomReadManyRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
             const paginationType = (readManyOptions.paginationType ?? CRUD_POLICY[method].default.paginationType) as PaginationType;
 
-            if (req.params) {
+            if (Object.keys(req.params ?? {}).length > 0) {
                 Object.assign(req.query, req.params);
             }
 

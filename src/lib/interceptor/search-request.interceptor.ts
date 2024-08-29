@@ -35,8 +35,11 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
             const req: Record<string, any> = context.switchToHttp().getRequest<Request>();
             const searchOptions = crudOptions.routes?.[method] ?? {};
             const customSearchRequestOptions: CustomSearchRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
+            const paginationType = (searchOptions.paginationType ?? CRUD_POLICY[method].default.paginationType) as PaginationType;
+            const pagination = PaginationHelper.getPaginationRequest(paginationType, req.body);
+            const isNextPage = PaginationHelper.isNextPage(pagination);
 
-            if (req.params) {
+            if (Object.keys(req.params ?? {}).length > 0 && !isNextPage) {
                 const paramsCondition = Object.entries(req.params).reduce(
                     (queryFilter, [key, operand]) => ({ ...queryFilter, [key]: { operator: '=', operand } }),
                     {},
@@ -50,10 +53,6 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                     req.body.where = [paramsCondition];
                 }
             }
-
-            const paginationType = (searchOptions.paginationType ?? CRUD_POLICY[method].default.paginationType) as PaginationType;
-            const pagination = PaginationHelper.getPaginationRequest(paginationType, req.body);
-            const isNextPage = PaginationHelper.isNextPage(pagination);
 
             const requestSearchDto = await (async () => {
                 if (isNextPage) {

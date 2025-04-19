@@ -23,7 +23,7 @@ export function UpdateRequestInterceptor(crudOptions: CrudOptions, factoryOption
         async intercept(context: ExecutionContext, next: CallHandler<unknown>): Promise<Observable<unknown>> {
             const req = context.switchToHttp().getRequest<Request>();
             const updatedOptions = crudOptions.routes?.[method] ?? {};
-            const body = await this.validateBody(req.body);
+            const body = await this.validateBody(req.body ?? {});
 
             const params = await this.checkParams(crudOptions.entity, req.params, factoryOption.columns);
             const crudUpdateOneRequest: CrudUpdateOneRequest<typeof crudOptions.entity> = {

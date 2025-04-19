@@ -88,19 +88,9 @@ describe('Exclude key of entity', () => {
         // exclude col4
         const { body: createdBody } = await request(app.getHttpServer())
             .post('/base')
-            .send({
-                col1: 1,
-                col2: 'col2',
-                col3: 'col3',
-                col4: 'col4',
-            })
+            .send({ col1: 1, col2: 'col2', col3: 'col3', col4: 'col4' })
             .expect(HttpStatus.CREATED);
-        expect(createdBody).toEqual({
-            col1: 1,
-            col2: 'col2',
-            col3: 'col3',
-            deletedAt: null,
-        });
+        expect(createdBody).toEqual({ col1: 1, col2: 'col2', col3: 'col3', deletedAt: null });
         expect(createdBody.col4).not.toBeDefined();
 
         // exclude col1

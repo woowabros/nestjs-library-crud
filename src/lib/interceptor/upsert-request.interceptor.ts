@@ -43,7 +43,7 @@ export function UpsertRequestInterceptor(crudOptions: CrudOptions, factoryOption
                 req.body[key] = value;
             }
 
-            const body = await this.validateBody(req.body);
+            const body = await this.validateBody(req.body ?? {});
 
             const crudUpsertRequest: CrudUpsertRequest<typeof crudOptions.entity> = {
                 params,

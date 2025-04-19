@@ -61,7 +61,7 @@ export function SearchRequestInterceptor(crudOptions: CrudOptions, factoryOption
                         return PaginationHelper.deserialize<RequestSearchDto<EntityType>>(pagination.where);
                     }
                 }
-                const searchBody = await this.validateBody(req.body);
+                const searchBody = await this.validateBody(req.body ?? {});
                 pagination.setWhere(
                     PaginationHelper.serialize(
                         (_.omit(searchBody, ['limit', 'offset']) ?? {}) as FindOptionsWhere<typeof crudOptions.entity>,

@@ -34,11 +34,12 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
             const customReadManyRequestOptions: CustomReadManyRequestOptions = req[CUSTOM_REQUEST_OPTIONS];
             const paginationType = (readManyOptions.paginationType ?? CRUD_POLICY[method].default.paginationType) as PaginationType;
 
+            const requestQuery = req.query;
             if (Object.keys(req.params ?? {}).length > 0) {
-                Object.assign(req.query, req.params);
+                Object.assign(requestQuery, req.params);
             }
 
-            const pagination = PaginationHelper.getPaginationRequest(paginationType, req.query);
+            const pagination = PaginationHelper.getPaginationRequest(paginationType, requestQuery);
 
             const withDeleted = _.isBoolean(customReadManyRequestOptions?.softDeleted)
                 ? customReadManyRequestOptions.softDeleted
@@ -51,7 +52,7 @@ export function ReadManyRequestInterceptor(crudOptions: CrudOptions, factoryOpti
                         return {};
                     }
                 }
-                const query = await this.validateQuery(req.query);
+                const query = await this.validateQuery(requestQuery);
                 pagination.setWhere(PaginationHelper.serialize(query));
                 return query;
             })();

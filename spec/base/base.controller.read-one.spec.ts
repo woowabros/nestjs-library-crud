@@ -2,16 +2,16 @@ import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
+import { TestHelper } from '../test.helper';
 import { BaseEntity } from './base.entity';
 import { BaseModule } from './base.module';
 import { BaseService } from './base.service';
-import { TestHelper } from '../test.helper';
 
-import type { INestApplication } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import type { TestingModule } from '@nestjs/testing';
 
 describe('BaseController', () => {
-    let app: INestApplication;
+    let app: NestExpressApplication;
     let service: BaseService;
 
     beforeAll(async () => {
@@ -19,6 +19,7 @@ describe('BaseController', () => {
             imports: [BaseModule, TestHelper.getTypeOrmMysqlModule([BaseEntity])],
         }).compile();
         app = moduleFixture.createNestApplication();
+        app.set('query parser', 'extended');
 
         service = moduleFixture.get<BaseService>(BaseService);
         await service.repository.save(['name1', 'name2'].map((name: string) => service.repository.create({ name })));
@@ -71,7 +72,6 @@ describe('BaseController', () => {
             });
 
             const responseCaseRepeatParam = await request(app.getHttpServer()).get(`/base/${id}`).query('fields=name&fields=id');
-
             expect(responseCaseRepeatParam.statusCode).toEqual(HttpStatus.OK);
             expect(responseCaseRepeatParam.body).toEqual({
                 id,

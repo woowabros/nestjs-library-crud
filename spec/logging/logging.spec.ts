@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsOptional } from 'class-validator';
 import request from 'supertest';
-import { Entity, BaseEntity, PrimaryColumn, Column, DeleteDateColumn } from 'typeorm';
+import { BaseEntity, Column, DeleteDateColumn, Entity, PrimaryColumn } from 'typeorm';
 
 import { Crud } from '../../src/lib/crud.decorator';
 import { CrudService } from '../../src/lib/crud.service';
@@ -72,9 +72,7 @@ describe('Logging', () => {
     });
 
     it('should be output debugging logs of all methods', async () => {
-        await request(app.getHttpServer()).post('/base').send({
-            col1: 1,
-        });
+        await request(app.getHttpServer()).post('/base').send({ col1: 1 });
         expect(loggerSpy).toHaveBeenNthCalledWith(1, { body: { col1: 1 }, exclude: new Set(), saveOptions: {} }, 'CRUD POST /base');
 
         await request(app.getHttpServer()).get('/base');
@@ -101,9 +99,7 @@ describe('Logging', () => {
         expect(loggerSpy).toHaveBeenNthCalledWith(
             3,
             {
-                params: {
-                    col1: '1',
-                },
+                params: { col1: '1' },
                 relations: [],
                 excludedColumns: undefined,
                 selectColumns: undefined,
@@ -116,12 +112,8 @@ describe('Logging', () => {
         expect(loggerSpy).toHaveBeenNthCalledWith(
             4,
             {
-                params: {
-                    col1: '1',
-                },
-                body: {
-                    col2: 'test',
-                },
+                params: { col1: '1' },
+                body: { col2: 'test' },
                 exclude: new Set(),
                 saveOptions: {},
             },
@@ -132,9 +124,7 @@ describe('Logging', () => {
         expect(loggerSpy).toHaveBeenNthCalledWith(
             5,
             {
-                params: {
-                    col1: '2',
-                },
+                params: { col1: '2' },
                 body: {},
                 exclude: new Set(),
                 saveOptions: {},
@@ -146,9 +136,7 @@ describe('Logging', () => {
         expect(loggerSpy).toHaveBeenNthCalledWith(
             6,
             {
-                params: {
-                    col1: '1',
-                },
+                params: { col1: '1' },
                 softDeleted: true,
                 exclude: new Set(),
                 saveOptions: {},
@@ -160,9 +148,7 @@ describe('Logging', () => {
         expect(loggerSpy).toHaveBeenNthCalledWith(
             7,
             {
-                params: {
-                    col1: '1',
-                },
+                params: { col1: '1' },
                 exclude: new Set(),
                 saveOptions: {},
             },

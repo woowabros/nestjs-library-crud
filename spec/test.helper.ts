@@ -13,7 +13,7 @@ import type { BaseEntity } from 'typeorm';
 
 export class TestHelper {
     static getRoutePath(httpServer: any): Record<string, string[]> {
-        return httpServer._events.request._router.stack.reduce(
+        return httpServer._events.request.router.stack.reduce(
             (list: Record<string, string[]>, r: { route: { path: string; methods: { method: unknown } } }) => {
                 if (r.route?.path) {
                     for (const method of Object.keys(r.route.methods)) {
@@ -60,6 +60,7 @@ export class TestHelper {
             synchronize: true,
             logging: true,
             logger: 'file',
+            dropSchema: true,
         });
     }
 
@@ -74,6 +75,7 @@ export class TestHelper {
             logging: true,
             logger: 'file',
             namingStrategy,
+            dropSchema: true,
         });
     }
 
@@ -84,6 +86,7 @@ export class TestHelper {
             entities,
             logging: true,
             logger: 'file',
+            dropSchema: true,
         });
     }
 

@@ -60,6 +60,7 @@ export class TestHelper {
             synchronize: true,
             logging: true,
             logger: 'file',
+            dropSchema: true,
         });
     }
 
@@ -74,6 +75,7 @@ export class TestHelper {
             logging: true,
             logger: 'file',
             namingStrategy,
+            dropSchema: true,
         });
     }
 
@@ -84,6 +86,7 @@ export class TestHelper {
             entities,
             logging: true,
             logger: 'file',
+            dropSchema: true,
         });
     }
 
